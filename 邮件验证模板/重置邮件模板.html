@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>重置密码 - Noddy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #f7f9ff, #e0f4ff);
+      color: #333;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 420px;
+      width: 100%;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 14px 35px rgba(15, 35, 95, 0.12);
+      padding: 28px 26px 24px;
+      text-align: center;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #eef3ff;
+      color: #3b5bff;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3b5bff;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 6px 0 10px;
+    }
+    .hi {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .highlight-name {
+      color: #3b5bff;
+      font-weight: 600;
+    }
+    p {
+      margin: 8px 0;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    .button-wrapper {
+      margin: 18px 0 8px;
+    }
+    .code-box {
+      display: inline-block;
+      padding: 11px 26px;
+      border-radius: 14px;
+      background: #eef3ff;
+      color: #3b5bff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin-top: 6px;
+      margin-bottom: 4px;
+    }
+    .tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .footer {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="tag">
+        <span class="tag-dot"></span>
+        <span>密码小助手 · Noddy</span>
+      </div>
+
+      <div class="hi">嗨，<span class="highlight-name">{{userName}}</span>！</div>
+      <h1>密码跟你玩起捉迷藏了吗？</h1>
+
+      <p>别紧张，交给我们就好～</p>
+      <p>这是你专属的一次性验证码，请在重置密码页面中输入它 🔐</p>
+
+      <div class="button-wrapper">
+        <div class="code-box">
+          {{resetCode}}
+        </div>
+      </div>
+
+      <p class="tip">
+        为了保护你的账号安全，验证码将在 {{expireTime}} 内失效，请尽快使用。<br />
+        如果这不是你的操作，可以放心忽略本邮件，你的密码不会有任何变化。
+      </p>
+
+      <p style="font-size: 12px; color: #999; margin-top: 10px;">
+        如果你并不打算重置密码，只要无视这封邮件就好，<br />
+        你的密码会乖乖保持原样～
+      </p>
+<p class="footer-text">
+        再次感谢你使用 {{productName}} ，祝你今天心情也像新密码一样「焕然一新」✨
+      </p>
+      <div class="footer">
+        来自 Noddy 守护团队 💫
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Noddy 账号验证</title>
+    <style>
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(255,107,149,0.1); }
+        .header { background: #FFEDF2; padding: 40px; text-align: center; }
+        .content { padding: 40px 30px; text-align: center; }
+        h1 { color: #FF6B95; font-size: 26px; margin-bottom: 20px; font-weight: 600; }
+        p { color: #555; font-size: 16px; line-height: 1.8; margin-bottom: 30px; }
+        .code-box { display: inline-block; margin: 20px 0 10px; padding: 14px 32px; border-radius: 16px; background: #FFF5F8; color: #FF3F7C; font-size: 24px; font-weight: 700; letter-spacing: 6px; }
+        .tip { font-size: 13px; color: #aaa; margin-top: 10px; }
+        .footer { background: #fafafa; padding: 20px; text-align: center; color: #bbb; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://your-domain.com/noddy-logo.png" alt="Noddy" width="100">
+        </div>
+
+        <div class="content">
+            <h1>你好呀！我是 Noddy</h1>
+            <p>
+                很高兴能和你成为好朋友！<br>
+                在开启我们的治愈之旅前，<br>
+                请在页面中输入下面的验证码，完成邮箱验证。
+            </p>
+
+            <!-- 将 {{verificationCode}} 替换为真实验证码 -->
+            <div class="code-box">
+                {{verificationCode}}
+            </div>
+
+            <p class="tip">
+                为了保障账号安全，验证码将在 24 小时后失效。<br>
+                如果不是你本人操作，可以忽略这封邮件。
+            </p>
+        </div>
+
+        <div class="footer">
+            本邮件由系统自动发出，请勿直接回复。<br>
+            如有疑问，请通过 App 内反馈或邮件联系：support@noddy.app<br>
+            &copy; 2026 Noddy Team. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
