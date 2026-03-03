@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Noddy - Login / Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: Pretendard, "Apple SD Gothic Neo", system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
+    }
+    .signup-password-hint .hint-icon { font-size: 0.7em; }
+    .signup-password-hint.passed { color: #22c55e; }
+    .signup-password-hint.passed .hint-icon { color: #22c55e; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-8">
+  <div
+    class="w-full max-w-md bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_45px_rgba(245,132,155,0.22)] px-6 py-8 sm:px-8 sm:py-10 space-y-8"
+  >
+    <!-- Language -->
+    <div class="flex justify-end">
+      <label for="lang-select" class="sr-only">Language</label>
+      <div class="relative">
+        <select
+          id="lang-select"
+          class="rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+        >
+          <option value="ko">한국어</option>
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Logo + 标题 -->
+    <header class="text-center space-y-3">
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-pink-300 via-rose-300 to-amber-200 shadow-md"
+      >
+        <!-- 可爱笑脸 Logo -->
+        <div class="relative w-9 h-9 rounded-3xl bg-white flex items-center justify-center">
+          <div class="absolute top-[28%] left-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+          <div class="absolute top-[28%] right-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+          <div
+            class="absolute bottom-[22%] left-[22%] right-[22%] h-[7px] rounded-full border-[3px] border-rose-300 border-t-transparent border-l-transparent border-r-transparent"
+          ></div>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <h1 class="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+          Noddy
+        </h1>
+        <p
+          class="text-xs sm:text-sm text-slate-500 leading-relaxed"
+          data-i18n="tagline"
+        ></p>
+      </div>
+    </header>
+
+    <!-- 主容器：不同页面状态 -->
+    <main class="space-y-6">
+      <!-- 登录首页 -->
+      <section id="view-home" class="space-y-5">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="home.title"></span>
+          </h2>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <!-- 邮箱登录 -->
+          <button
+            id="btn-email-login"
+            type="button"
+            onclick="handleEmailLoginClick()"
+            class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-3 text-sm sm:text-base font-medium text-rose-600 shadow-sm hover:bg-rose-100 active:scale-[0.99] transition"
+          >
+            <span
+              id="email-login-spinner"
+              class="hidden h-4 w-4 border-2 border-rose-300/80 border-t-transparent rounded-full animate-spin"
+            ></span>
+            <span id="email-login-text" data-i18n="home.emailLogin"></span>
+          </button>
+
+          <!-- 手机验证码登录 -->
+          <button
+            id="btn-phone-entry"
+            type="button"
+            onclick="switchView('phone-login')"
+            class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-3 text-sm sm:text-base font-medium text-amber-700 shadow-sm hover:bg-amber-100 active:scale-[0.99] transition"
+          >
+            <span data-i18n="home.phoneLogin"></span>
+          </button>
+        </div>
+
+        <div class="pt-3 text-center text-xs sm:text-sm text-slate-500 space-y-1">
+          <p>
+            <span data-i18n="home.noAccount"></span>
+            <button
+              type="button"
+              onclick="switchView('signup')"
+              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
+            >
+              <span data-i18n="home.signup"></span>
+            </button>
+          </p>
+        </div>
+      </section>
+
+      <!-- 邮箱登录页（真正输入邮箱+密码） -->
+      <section id="view-email-login" class="hidden space-y-6">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="emailLogin.title"></span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500" data-i18n="emailLogin.desc"></p>
+        </div>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.email"></span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="email-input"
+                type="email"
+                data-email-autocomplete="true"
+                data-i18n-placeholder="emailLogin.emailPlaceholder"
+                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              />
+              <button
+                id="btn-send-email-code"
+                type="button"
+                onclick="handleSendCode()"
+                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
+              >
+                <span data-i18n="emailLogin.sendCode"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.password"></span>
+            </label>
+            <input
+              id="password-input"
+              type="password"
+              data-i18n-placeholder="common.passwordPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+            <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
+            <div class="flex justify-end">
+              <button
+                type="button"
+                onclick="switchView('forgot')"
+                class="text-[11px] sm:text-xs text-rose-500 underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
+              >
+                <span data-i18n="emailLogin.forgot"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.captcha"></span>
+            </label>
+            <input
+              id="captcha-input"
+              type="text"
+              data-i18n-placeholder="common.captchaPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+            <p class="text-[11px] sm:text-xs text-slate-400">
+            </p>
+          </div>
+
+          <button
+            id="btn-email-submit"
+            type="button"
+            onclick="handleEmailLoginSubmit()"
+            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
+          >
+            <span
+              id="email-submit-spinner"
+              class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"
+            ></span>
+            <span id="email-submit-text" data-i18n="emailLogin.submit"></span>
+          </button>
+        </form>
+
+        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+          <button
+            type="button"
+            onclick="switchView('signup')"
+            class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
+          >
+            <span data-i18n="emailLogin.toSignup"></span>
+          </button>
+          <button
+            type="button"
+            onclick="switchView('home')"
+            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
+          >
+            <span data-i18n="common.backHome"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 手机验证码登录页 -->
+      <section id="view-phone-login" class="hidden space-y-6">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="phoneLogin.title"></span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="phoneLogin.desc"></p>
+        </div>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.phone"></span>
+            </label>
+            <div class="flex gap-2">
+              <select
+                class="w-[34%] rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              >
+                <option data-i18n="phoneLogin.country82"></option>
+                <option data-i18n="phoneLogin.country86"></option>
+              </select>
+              <input
+                id="phone-input"
+                type="tel"
+                data-i18n-placeholder="phoneLogin.phonePlaceholder"
+                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.code"></span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="code-input"
+                type="text"
+                data-i18n-placeholder="phoneLogin.codePlaceholder"
+                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              />
+              <button
+                id="btn-send-code"
+                type="button"
+                onclick="handleSendCode()"
+                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
+              >
+                <span data-i18n="phoneLogin.sendCode"></span>
+              </button>
+            </div>
+            <p class="text-[11px] sm:text-xs text-slate-400">
+              <span data-i18n="phoneLogin.codeHint"></span>
+            </p>
+          </div>
+
+          <button
+            id="btn-phone-submit"
+            type="button"
+            onclick="handlePhoneLoginSubmit()"
+            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
+          >
+            <span
+              id="phone-submit-spinner"
+              class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"
+            ></span>
+            <span id="phone-submit-text" data-i18n="phoneLogin.submit"></span>
+          </button>
+        </form>
+
+        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+          <button
+            type="button"
+            onclick="switchView('home')"
+            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
+          >
+            <span data-i18n="common.backHome"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 注册页 -->
+      <section id="view-signup" class="hidden space-y-6">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="signup.title"></span>
+          </h2>
+          <!-- 按你要求，这里去掉原来的那句“아이와 함께할 작은 순간들을…” -->
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="signup.desc"></p>
+        </div>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.email"></span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="signup-email-input"
+                type="email"
+                data-email-autocomplete="true"
+                data-i18n-placeholder="signup.emailPlaceholder"
+                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              />
+              <button
+                id="btn-signup-send-code"
+                type="button"
+                onclick="handleSignupSendCode(this)"
+                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
+              >
+                <span data-i18n="发送验证码"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.code"></span>
+            </label>
+            <input
+              id="signup-code-input"
+              type="text"
+              data-i18n-placeholder="signup.codePlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="signup.passwordSet"></span>
+            </label>
+            <input
+              id="signup-password"
+              type="password"
+              data-i18n-placeholder="signup.passwordPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+            <div id="signup-password-hints" class="flex flex-wrap gap-x-4 gap-y-1.5 mt-1.5">
+              <span id="hint-length" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                <span class="hint-icon">○</span><span data-i18n="signup.hintLength"></span>
+              </span>
+              <span id="hint-letter" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                <span class="hint-icon">○</span><span data-i18n="signup.hintLetter"></span>
+              </span>
+              <span id="hint-special" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                <span class="hint-icon">○</span><span data-i18n="signup.hintSpecial"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2 rounded-2xl bg-rose-50 px-3.5 py-3">
+            <input
+              id="agree"
+              type="checkbox"
+              class="mt-0.5 h-4 w-4 rounded border-rose-300 text-rose-400 focus:ring-rose-300"
+            />
+            <label for="agree" class="text-[11px] sm:text-xs text-slate-700 leading-relaxed">
+              <span data-i18n="signup.agree"></span>
+            </label>
+          </div>
+
+          <button
+            id="btn-signup-submit"
+            type="button"
+            onclick="handleSignupSubmit()"
+            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition disabled:bg-rose-200"
+          >
+            <span data-i18n="signup.submit"></span>
+          </button>
+        </form>
+
+        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+          <p>
+            <span data-i18n="signup.hasAccount"></span>
+            <button
+              type="button"
+              onclick="switchView('email-login')"
+              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
+            >
+              <span data-i18n="signup.toLogin"></span>
+            </button>
+          </p>
+          <button
+            type="button"
+            onclick="switchView('home')"
+            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
+          >
+            <span data-i18n="common.backHome"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 忘记密码页 -->
+      <section id="view-forgot" class="hidden space-y-6">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="forgot.title"></span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="forgot.desc"></p>
+        </div>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.password"></span>
+            </label>
+            <input
+              id="forgot-new-password"
+              type="password"
+              data-i18n-placeholder="common.passwordPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+            <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="forgot.confirmPasswordLabel"></span>
+            </label>
+            <input
+              id="forgot-confirm-password"
+              type="password"
+              data-i18n-placeholder="common.passwordPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
+          >
+            <span data-i18n="forgot.submit"></span>
+          </button>
+        </form>
+
+        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+          <button
+            type="button"
+            onclick="switchView('email-login')"
+            class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
+          >
+            <span data-i18n="forgot.backToLogin"></span>
+          </button>
+          <button
+            type="button"
+            onclick="switchView('home')"
+            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
+          >
+            <span data-i18n="common.backHome"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 首次登录补充资料页 -->
+      <section id="view-profile" class="hidden space-y-6">
+        <div class="space-y-2 text-center">
+          <h2 class="text-base sm:text-lg font-medium text-slate-900">
+            <span data-i18n="profile.title"></span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="profile.desc"></p>
+        </div>
+
+        <form class="space-y-4" onsubmit="return false;">
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="profile.nickname"></span>
+            </label>
+            <input
+              id="nickname-input"
+              type="text"
+              data-i18n-placeholder="profile.nicknamePlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="profile.birthday"></span>
+            </label>
+            <input
+              id="birthday-input"
+              type="date"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+            <p class="text-[11px] sm:text-xs text-slate-400">
+              <span data-i18n="profile.birthdayHint"></span>
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onclick="window.location.href='添加wifi提醒页面.html'"
+            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
+          >
+            <span data-i18n="profile.save"></span>
+          </button>
+
+          <button
+            type="button"
+            onclick="window.location.href='添加wifi提醒页面.html'"
+            class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-500 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition"
+          >
+            <span data-i18n="profile.later"></span>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- 首次启动家长控制引导 -->
+  <div
+    id="parental-guide-overlay"
+    class="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center px-4 hidden"
+  >
+    <div
+      class="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center">
+          <span class="text-lg">👶</span>
+        </div>
+        <p class="text-xs sm:text-sm font-medium text-rose-500">
+          부모 보호 설정 안내（家长保护设置提醒）
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
+          이 기기는 미성년자가 사용할 예정인가요?（此设备是否由未成年人使用？）
+        </p>
+        <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+          미성년자가 사용하는 경우, 기기에서 자녀 보호/스크린 타임 기능을 함께 켜두시면
+          더 안전하게 이용할 수 있어요.（如果是未成年人使用，请在系统中开启家长控制/屏幕使用时间等功能，以获得更安全的体验。）
+        </p>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <button
+          type="button"
+          onclick="handleParentalAnswer(true)"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
+        >
+          네, 미성년자가 사용할 거예요（是的，为未成年人使用）
+        </button>
+        <button
+          type="button"
+          onclick="handleParentalAnswer(false)"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-600 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition"
+        >
+          아니요, 모두 성인만 사용할게요（不是，仅由成年人使用）
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 组件 -->
+  <div id="toast" class="fixed inset-x-0 bottom-5 flex justify-center pointer-events-none hidden">
+    <div
+      class="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-slate-900/90 text-white text-xs sm:text-sm px-4 py-2 shadow-lg"
+    >
+      <span
+        class="inline-block h-2 w-2 rounded-full bg-rose-300 shadow-[0_0_8px_rgba(248,187,208,0.9)]"
+      ></span>
+      <span id="toast-message"></span>
+    </div>
+  </div>
+
+  <!-- Email domain suggestions -->
+  <div
+    id="email-suggestion-panel"
+    class="fixed z-40 bg-white border border-slate-200 rounded-2xl shadow-lg text-xs sm:text-sm text-slate-700 py-1 hidden"
+  ></div>
+
+  <!-- 状态切换 + Loading + Toast JS（仅模拟，不连后台） -->
+  <script>
+    // i18n
+    const I18N = {
+      ko: {
+        tagline: "함께 차분히 기록해요",
+        "home.title": "로그인 / 시작하기",
+        "home.emailLogin": "이메일로 로그인하기",
+        "home.phoneLogin": "휴대폰 번호 로그인",
+        "home.noAccount": "아직 계정이 없으신가요?",
+        "home.signup": "회원가입",
+
+        "common.email": "이메일 주소",
+        "common.password": "비밀번호",
+        "common.passwordPlaceholder": "••••••••",
+        "common.passwordRule": "8~14자 (대소문자, 특수문자 포함)",
+        "common.phone": "휴대폰 번호",
+        "common.code": "인증 코드",
+        "common.captcha": "보안 확인",
+        "common.captchaPlaceholder": "예: 1234",
+    
+        "common.backHome": "돌아가기",
+
+        "emailLogin.title": "이메일 로그인",
+        "emailLogin.desc": "자주 사용하는 이메일로 로그인해 주세요",
+        "emailLogin.emailPlaceholder": "예: hello@noddy.app",
+        "emailLogin.forgot": "비밀번호를 잊으셨나요?",
+        "emailLogin.submit": "로그인",
+        "emailLogin.toSignup": "새로 가입하기",
+        "emailLogin.sendCode": "이메일 코드 전송",
+
+        "phoneLogin.title": "휴대폰 번호 로그인",
+        "phoneLogin.desc": "자주 사용하는 휴대폰 번호를 입력해 주세요",
+        "phoneLogin.country82": "+82 (대한민국)",
+        "phoneLogin.country86": "+86 (중국)",
+        "phoneLogin.phonePlaceholder": "010-0000-0000",
+        "phoneLogin.codePlaceholder": "6자리 코드",
+        "phoneLogin.sendCode": "코드 전송",
+        "phoneLogin.codeHint": "최대 1분 내에 도착하지 않으면 다시 요청해 주세요",
+        "phoneLogin.submit": "코드로 로그인 / 가입",
+
+        "signup.title": "회원가입 / 새 계정 만들기",
+        "signup.desc": "Noddy에서 나만의 조용한 기록을 시작해 보세요",
+        "signup.emailPlaceholder": "예: mom@noddy.app",
+        "signup.codePlaceholder": "이메일로 받은 6자리 코드",
+        "signup.passwordSet": "비밀번호 설정",
+        "signup.passwordPlaceholder": "8-14자, 영문 대소문자·특수문자 포함",
+        "signup.hintLength": "8~14자",
+        "signup.hintLetter": "대소문자 포함",
+        "signup.hintSpecial": "특수문자(예: !@#$%&)",
+        "signup.agree": "서비스 이용약관 및 개인정보 처리방침에 동의합니다",
+        "signup.submit": "회원가입 완료하기",
+        "signup.hasAccount": "이미 계정이 있으신가요?",
+        "signup.toLogin": "로그인하러 가기",
+
+        "forgot.title": "비밀번호 재설정",
+        "forgot.desc": "새 비밀번호를 직접 입력하고 한 번 더 확인해 주세요.",
+        "forgot.confirmPasswordLabel": "새 비밀번호 확인",
+        "forgot.submit": "비밀번호 변경하기",
+        "forgot.backToLogin": "로그인 화면으로 돌아가기",
+
+        "profile.title": "프로필 마무리하기",
+        "profile.desc": "처음 방문해 주셔서 반가워요",
+        "profile.nickname": "닉네임 (필수)",
+        "profile.nicknamePlaceholder": "예: 민지맘",
+        "profile.birthday": "생일 (선택)",
+        "profile.birthdayHint": "생일을 입력하면 작은 기념 알림을 보내드려요",
+        "profile.save": "저장하고 시작하기",
+        "profile.later": "나중에 할게요",
+
+        "state.loggingIn": "로그인 중...",
+        "toast.activationEmail": "이메일로 전송된 활성화 링크를 확인해 주세요.",
+        "toast.tooFrequent": "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.",
+        "toast.codeSent": "인증 코드가 전송되었습니다.",
+        "toast.captchaError": "보안 코드가 올바르지 않습니다. 다시 입력해 주세요.",
+        "toast.codeInvalid": "인증 코드가 올바르지 않습니다. 다시 확인해 주세요.",
+        "toast.codeExpired": "인증 코드 유효 시간이 지났습니다. 다시 받아 주세요.",
+      },
+      en: {
+        tagline: "A calm place to record together",
+        "home.title": "Log in / Get started",
+        "home.emailLogin": "Continue with email",
+        "home.phoneLogin": "Continue with phone number",
+        "home.noAccount": "Don’t have an account yet?",
+        "home.signup": "Sign up",
+
+        "common.email": "Email",
+        "common.password": "Password",
+        "common.passwordPlaceholder": "••••••••",
+        "common.passwordRule": "8~14 characters (upper/lowercase and special characters)",
+        "common.phone": "Phone number",
+        "common.code": "Verification code",
+        "common.captcha": "Security check",
+      
+
+     
+
+
+        "common.backHome": "Back",
+
+        "emailLogin.title": "Email login",
+        "emailLogin.desc": "Log in with your commonly used email",
+        "emailLogin.emailPlaceholder": "e.g. hello@noddy.app",
+        "emailLogin.forgot": "Forgot password?",
+        "emailLogin.submit": "Log in",
+        "emailLogin.toSignup": "Create a new account",
+        "emailLogin.sendCode": "Send email code",
+
+        "phoneLogin.title": "Phone login",
+        "phoneLogin.desc": "Enter your phone number to continue",
+        "phoneLogin.country82": "+82 (Korea)",
+        "phoneLogin.country86": "+86 (China)",
+        "phoneLogin.phonePlaceholder": "010-0000-0000",
+        "phoneLogin.codePlaceholder": "6-digit code",
+        "phoneLogin.sendCode": "Send code",
+        "phoneLogin.codeHint": "If it doesn’t arrive within 1 minute, try again",
+        "phoneLogin.submit": "Continue",
+
+        "signup.title": "Sign up",
+        "signup.desc": "Start your quiet little record with Noddy",
+        "signup.emailPlaceholder": "e.g. mom@noddy.app",
+        "signup.codePlaceholder": "6-digit code sent to your email",
+        "signup.passwordSet": "Create a password",
+        "signup.passwordPlaceholder": "8-14 characters: upper/lowercase and special characters",
+        "signup.hintLength": "8~14 characters",
+        "signup.hintLetter": "Upper & lowercase letters",
+        "signup.hintSpecial": "Special characters (e.g. !@#$%&)",
+        "signup.agree": "I agree to the Terms of Service and Privacy Policy",
+        "signup.submit": "Create account",
+        "signup.hasAccount": "Already have an account?",
+        "signup.toLogin": "Go to login",
+
+        "forgot.title": "Reset password",
+        "forgot.desc": "Enter your new password directly and confirm it below.",
+        "forgot.confirmPasswordLabel": "Confirm new password",
+        "forgot.submit": "Update password",
+        "forgot.backToLogin": "Back to login",
+
+        "profile.title": "Finish your profile",
+        "profile.desc": "Nice to meet you for the first time",
+        "profile.nickname": "Nickname (required)",
+        "profile.nicknamePlaceholder": "e.g. Mia’s mom",
+        "profile.birthday": "Birthday (optional)",
+        "profile.birthdayHint": "Add your birthday for gentle reminders on special days",
+        "profile.save": "Save and continue",
+        "profile.later": "Not now",
+
+        "state.loggingIn": "Logging in...",
+        "toast.activationEmail": "Please check your email to activate your account.",
+        "toast.tooFrequent": "Too many requests. Please try again later.",
+        "toast.codeSent": "Verification code sent.",
+        "toast.captchaError": "The security code is incorrect. Please try again.",
+        "toast.codeInvalid": "The verification code is incorrect. Please check and try again.",
+        "toast.codeExpired": "The verification code has expired. Please request a new one.",
+      },
+      zh: {
+        tagline: "一起把日常温柔地记下来",
+        "home.title": "登录 / 开始使用",
+        "home.emailLogin": "使用邮箱登录",
+        "home.phoneLogin": "使用手机号登录",
+        "home.noAccount": "还没有账户？",
+        "home.signup": "注册",
+
+        "common.email": "邮箱地址",
+        "common.password": "密码",
+        "common.passwordPlaceholder": "••••••••",
+        "common.passwordRule": "8~14个字符（包含大小写字母、特殊字符）",
+        "common.phone": "手机号码",
+        "common.code": "验证码",
+        "common.captcha": "验证码",
+        "common.captchaPlaceholder": "例如：1234",
+     
+        "common.backHome": "返回",
+
+        "emailLogin.title": "邮箱登录",
+        "emailLogin.desc": "使用常用邮箱登录，方便找回账号",
+        "emailLogin.emailPlaceholder": "例如：hello@noddy.app",
+        "emailLogin.forgot": "忘记密码？",
+        "emailLogin.submit": "登录",
+        "emailLogin.toSignup": "注册新账号",
+        "emailLogin.sendCode": "发送邮箱验证码",
+
+        "phoneLogin.title": "手机号登录",
+        "phoneLogin.desc": "请输入常用手机号，通过验证码登录 / 注册",
+        "phoneLogin.country82": "+82（韩国）",
+        "phoneLogin.country86": "+86（中国）",
+        "phoneLogin.phonePlaceholder": "010-0000-0000 / 1XXXXXXXXXX",
+        "phoneLogin.codePlaceholder": "6 位验证码",
+        "phoneLogin.sendCode": "发送验证码",
+        "phoneLogin.codeHint": "1 分钟内未收到可重新获取",
+        "phoneLogin.submit": "验证并继续",
+
+        "signup.title": "注册新账户",
+        "signup.desc": "在 Noddy 开始一段安静的小记录",
+        "signup.emailPlaceholder": "例如：mom@noddy.app",
+        "signup.codePlaceholder": "请输入邮箱收到的 6 位验证码",
+        "signup.passwordSet": "设置密码",
+        "signup.passwordPlaceholder": "8~14位，含大小写字母、特殊字符",
+        "signup.hintLength": "8~14个字符",
+        "signup.hintLetter": "大小写字母",
+        "signup.hintSpecial": "特殊字符（例如!@#$%&）",
+        "signup.agree": "我已阅读并同意《服务协议》和《隐私政策》",
+        "signup.submit": "完成注册",
+        "signup.hasAccount": "已经有账户？",
+        "signup.toLogin": "去登录",
+
+        "forgot.title": "重置密码",
+        "forgot.desc": "直接输入新密码，并在下面再次确认一致后完成修改。",
+        "forgot.confirmPasswordLabel": "确认新密码",
+        "forgot.submit": "确认修改密码",
+        "forgot.backToLogin": "返回邮箱登录",
+
+        "profile.title": "补充资料",
+        "profile.desc": "第一次来 Noddy，很高兴见到你",
+        "profile.nickname": "昵称（必填）",
+        "profile.nicknamePlaceholder": "例如：小熊妈妈",
+        "profile.birthday": "生日（可选）",
+        "profile.birthdayHint": "填写生日后，我们会在特别的日子为你准备小小提醒",
+        "profile.save": "保存并继续",
+        "profile.later": "稍后再完善",
+
+        "state.loggingIn": "登录中...",
+        "toast.activationEmail": "请前往邮箱激活账号。",
+        "toast.tooFrequent": "发送太频繁，请稍后再试。",
+        "toast.codeSent": "验证码已发送。",
+        "toast.captchaError": "验证码不正确，请重新输入。",
+        "toast.codeInvalid": "验证码错误，请检查后重新输入。",
+        "toast.codeExpired": "验证码已过期，请重新获取。",
+      },
+    };
+
+    const EMAIL_DOMAINS = [
+      { label: "Gmail", domain: "gmail.com" },
+      { label: "Naver", domain: "naver.com" },
+      { label: "Kakao", domain: "kakao.com" },
+      { label: "Daum", domain: "hanmail.net" },
+      { label: "Outlook", domain: "outlook.com" },
+      { label: "QQ", domain: "qq.com" },
+      { label: "126", domain: "126.com" },
+      { label: "iCloud", domain: "icloud.com" },
+    ];
+
+    function detectLang() {
+      const saved = localStorage.getItem("noddy_lang");
+      if (saved && I18N[saved]) return saved;
+      const nav = (navigator.language || "").toLowerCase();
+      if (nav.startsWith("ko")) return "ko";
+      if (nav.startsWith("zh")) return "zh";
+      return "en";
+    }
+
+    let currentLang = detectLang();
+
+    function t(key) {
+      return (
+        (I18N[currentLang] && I18N[currentLang][key]) ||
+        (I18N.en && I18N.en[key]) ||
+        key
+      );
+    }
+
+    function applyLang(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      localStorage.setItem("noddy_lang", lang);
+
+      document.documentElement.lang =
+        lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const key = el.getAttribute("data-i18n");
+        if (!key) return;
+        el.textContent = t(key);
+      });
+
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (!key) return;
+        el.setAttribute("placeholder", t(key));
+      });
+    }
+
+    const views = {
+      home: document.getElementById("view-home"),
+      "email-login": document.getElementById("view-email-login"),
+      "phone-login": document.getElementById("view-phone-login"),
+      signup: document.getElementById("view-signup"),
+      forgot: document.getElementById("view-forgot"),
+      profile: document.getElementById("view-profile"),
+    };
+
+    function switchView(name) {
+      Object.keys(views).forEach((key) => {
+        if (!views[key]) return;
+        if (key === name) {
+          views[key].classList.remove("hidden");
+        } else {
+          views[key].classList.add("hidden");
+        }
+      });
+    }
+
+    // Toast
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toast-message");
+    let toastTimer = null;
+
+    function showToast(message, duration = 3000) {
+      if (!toast || !toastMessage) return;
+      toastMessage.textContent = message;
+      toast.classList.remove("hidden");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, duration);
+    }
+
+    // 首页“邮箱登录”入口：切换到邮箱登录页
+    function handleEmailLoginClick() {
+      switchView("email-login");
+    }
+
+    // 邮箱登录按钮 Loading + 验证码校验
+    const emailSubmitBtn = document.getElementById("btn-email-submit");
+    const emailSubmitSpinner = document.getElementById("email-submit-spinner");
+    const emailSubmitText = document.getElementById("email-submit-text");
+    const captchaInput = document.getElementById("captcha-input");
+
+    function setEmailLoading(isLoading) {
+      if (!emailSubmitBtn) return;
+      if (isLoading) {
+        emailSubmitBtn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
+        emailSubmitSpinner.classList.remove("hidden");
+        emailSubmitText.textContent = t("state.loggingIn");
+      } else {
+        emailSubmitBtn.classList.remove("opacity-70", "cursor-not-allowed", "pointer-events-none");
+        emailSubmitSpinner.classList.add("hidden");
+        emailSubmitText.textContent = t("emailLogin.submit");
+      }
+    }
+
+    function handleEmailLoginSubmit() {
+      // 简单验证码示例：要求输入 1234
+      if (captchaInput) {
+        const code = (captchaInput.value || "").trim();
+        if (code !== "1234") {
+          showToast(t("toast.captchaError"));
+          captchaInput.focus();
+          return;
+        }
+      }
+
+      // 这里仅做 Loading & 示例，不做真实账号校验
+      setEmailLoading(true);
+
+      setTimeout(() => {
+        setEmailLoading(false);
+        window.location.href = "添加wifi提醒页面.html";
+      }, 1500);
+    }
+
+    // 手机登录按钮 Loading
+    const phoneSubmitBtn = document.getElementById("btn-phone-submit");
+    const phoneSubmitSpinner = document.getElementById("phone-submit-spinner");
+    const phoneSubmitText = document.getElementById("phone-submit-text");
+
+    function setPhoneLoading(isLoading) {
+      if (!phoneSubmitBtn) return;
+      if (isLoading) {
+        phoneSubmitBtn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
+        phoneSubmitSpinner.classList.remove("hidden");
+        phoneSubmitText.textContent = t("state.loggingIn");
+      } else {
+        phoneSubmitBtn.classList.remove("opacity-70", "cursor-not-allowed", "pointer-events-none");
+        phoneSubmitSpinner.classList.add("hidden");
+        phoneSubmitText.textContent = t("phoneLogin.submit");
+      }
+    }
+
+    function handlePhoneLoginSubmit() {
+      setPhoneLoading(true);
+
+      setTimeout(() => {
+        setPhoneLoading(false);
+        window.location.href = "添加wifi提醒页面.html";
+      }, 1500);
+    }
+
+    // 首次启动家长控制引导
+    let hasShownParentalGuide =
+      localStorage.getItem("noddy_parental_guide_shown") === "1";
+
+    function showParentalGuideIfNeeded() {
+      if (hasShownParentalGuide) return;
+      const overlay = document.getElementById("parental-guide-overlay");
+      if (overlay) {
+        overlay.classList.remove("hidden");
+      }
+    }
+
+    function handleParentalAnswer(isMinor) {
+      hasShownParentalGuide = true;
+      localStorage.setItem("noddy_parental_guide_shown", "1");
+      localStorage.setItem("noddy_is_minor_device", isMinor ? "1" : "0");
+      const overlay = document.getElementById("parental-guide-overlay");
+      if (overlay) {
+        overlay.classList.add("hidden");
+      }
+    }
+
+    // 邮箱注册：增加验证码校验 + 提示前往邮箱激活账号
+    function handleSignupSubmit() {
+      const codeInput = document.getElementById("signup-code-input");
+      const now = Date.now();
+
+      if (codeInput) {
+        const val = (codeInput.value || "").trim();
+        if (!signupCodeSentAt || now - signupCodeSentAt > signupCodeTTL) {
+          showToast(t("toast.codeExpired"));
+          return;
+        }
+        if (!val || val !== "123456") {
+          // 示例：期望 6 位 123456
+          showToast(t("toast.codeInvalid"));
+          return;
+        }
+      }
+
+      showToast(t("toast.activationEmail"));
+      // 这里保持在当前页，让用户有时间查看提示文案
+      // 若需要也可在后续切回登录页：switchView('email-login');
+    }
+
+    // 手机验证码发送频率限制（保留原手机登录逻辑）
+    const sendCodeBtn = document.getElementById("btn-send-code");
+    let lastCodeSentAt = 0;
+
+    function handleSendCode() {
+      const now = Date.now();
+      const cooldown = 60000; // 60s 内重复点击视为太频繁
+
+      if (now - lastCodeSentAt < cooldown) {
+        showToast(t("toast.tooFrequent"));
+        return;
+      }
+
+      lastCodeSentAt = now;
+      showToast(t("toast.codeSent"));
+    }
+
+    // 注册页邮箱验证码发送 + 倒计时 & 校验
+    let signupCodeSentAt = 0;
+    let signupCodeTimer = null;
+    const signupCodeTTL = 60000; // 60s 有效期
+
+    function handleSignupSendCode(btn) {
+      const now = Date.now();
+
+      // 冷却：60 秒内不可重复发送
+      if (now - signupCodeSentAt < signupCodeTTL) {
+        showToast(t("toast.tooFrequent"));
+        return;
+      }
+
+      signupCodeSentAt = now;
+      showToast(t("toast.codeSent"));
+
+      if (!btn) btn = document.getElementById("btn-signup-send-code");
+      if (!btn) return;
+
+      let remaining = signupCodeTTL / 1000;
+
+      // 禁用按钮 & 开始倒计时
+      btn.disabled = true;
+      btn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
+
+      const baseText = t("signup.sendCode");
+      btn.textContent = `${baseText} (${remaining}s)`;
+
+      if (signupCodeTimer) clearInterval(signupCodeTimer);
+      signupCodeTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(signupCodeTimer);
+          signupCodeTimer = null;
+          btn.disabled = false;
+          btn.classList.remove("opacity-70", "cursor-not-allowed", "pointer-events-none");
+          btn.textContent = baseText;
+        } else {
+          btn.textContent = `${baseText} (${remaining}s)`;
+        }
+      }, 1000);
+    }
+
+    // 邮箱后缀自动补全
+    const emailSuggestionPanel = document.getElementById("email-suggestion-panel");
+    let activeEmailInput = null;
+
+    function hideEmailSuggestions() {
+      if (emailSuggestionPanel) {
+        emailSuggestionPanel.classList.add("hidden");
+      }
+    }
+
+    function updateEmailSuggestions() {
+      if (!activeEmailInput || !emailSuggestionPanel) return;
+      const raw = activeEmailInput.value.trim();
+      const parts = raw.split("@");
+      const localPart = parts[0] || "";
+      const domainPart = (parts[1] || "").toLowerCase();
+
+      if (!localPart) {
+        hideEmailSuggestions();
+        return;
+      }
+
+      const candidates = EMAIL_DOMAINS.filter((d) => {
+        if (!domainPart) return true;
+        return d.domain.startsWith(domainPart);
+      });
+
+      if (!candidates.length) {
+        hideEmailSuggestions();
+        return;
+      }
+
+      emailSuggestionPanel.innerHTML = "";
+      candidates.forEach((item) => {
+        const fullEmail = `${localPart}@${item.domain}`;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className =
+          "w-full flex items-center justify-between px-3 py-1.5 hover:bg-rose-50 text-left";
+        btn.innerHTML = `<span>${fullEmail}</span><span class="ml-2 text-[10px] text-slate-400">${item.label}</span>`;
+        btn.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          if (activeEmailInput) {
+            activeEmailInput.value = fullEmail;
+            activeEmailInput.focus();
+          }
+          hideEmailSuggestions();
+        });
+        emailSuggestionPanel.appendChild(btn);
+      });
+
+      const rect = activeEmailInput.getBoundingClientRect();
+      emailSuggestionPanel.style.left = rect.left + "px";
+      emailSuggestionPanel.style.top = rect.bottom + 4 + "px";
+      emailSuggestionPanel.style.width = rect.width + "px";
+      emailSuggestionPanel.classList.remove("hidden");
+    }
+
+    function attachEmailAutocomplete() {
+      const inputs = document.querySelectorAll(
+        'input[type="email"][data-email-autocomplete="true"]'
+      );
+      inputs.forEach((input) => {
+        input.addEventListener("focus", () => {
+          activeEmailInput = input;
+          updateEmailSuggestions();
+        });
+        input.addEventListener("input", () => {
+          activeEmailInput = input;
+          updateEmailSuggestions();
+        });
+        input.addEventListener("blur", () => {
+          // 延迟隐藏，允许点击选项
+          setTimeout(hideEmailSuggestions, 120);
+        });
+      });
+    }
+
+    // Language selector
+    const langSelect = document.getElementById("lang-select");
+    if (langSelect) {
+      langSelect.value = currentLang;
+      langSelect.addEventListener("change", (e) => {
+        applyLang(e.target.value);
+      });
+    }
+
+    // 注册页密码规则实时校验：8~14 位、大小写字母、特殊字符
+    const signupPasswordInput = document.getElementById("signup-password");
+    const hintLength = document.getElementById("hint-length");
+    const hintLetter = document.getElementById("hint-letter");
+    const hintSpecial = document.getElementById("hint-special");
+    const specialCharRe = /[!@#$%&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+
+    function updateSignupPasswordHints() {
+      const val = (signupPasswordInput && signupPasswordInput.value) || "";
+      const len = val.length;
+      const hasLetter = /[a-zA-Z]/.test(val);
+      const hasSpecial = specialCharRe.test(val);
+      const lengthOk = len >= 8 && len <= 14;
+
+      function setHint(el, ok) {
+        if (!el) return;
+        const icon = el.querySelector(".hint-icon");
+        if (ok) {
+          el.classList.add("passed");
+          if (icon) icon.textContent = "✓";
+        } else {
+          el.classList.remove("passed");
+          if (icon) icon.textContent = "○";
+        }
+      }
+      setHint(hintLength, lengthOk);
+      setHint(hintLetter, hasLetter);
+      setHint(hintSpecial, hasSpecial);
+    }
+
+    if (signupPasswordInput) {
+      signupPasswordInput.addEventListener("input", updateSignupPasswordHints);
+      signupPasswordInput.addEventListener("paste", updateSignupPasswordHints);
+    }
+
+    // Initial apply
+    applyLang(currentLang);
+    attachEmailAutocomplete();
+  </script>
+</body>
+</html>

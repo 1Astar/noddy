@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>取名 / 이름 지어주기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Pretendard, "Apple SD Gothic Neo", -apple-system, BlinkMacSystemFont,
+        "Segoe UI", system-ui, sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
+    }
+    .shell {
+      width: 100%;
+      max-width: 440px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow:
+        0 22px 45px rgba(248, 187, 208, 0.5),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+      padding: 22px 20px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fb7185, #fb923c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      box-shadow: 0 10px 26px rgba(248, 113, 113, 0.65);
+    }
+    .title-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .title-text h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .title-text span {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(248, 187, 208, 0.2);
+      color: #fb7185;
+      border: 1px solid rgba(248, 187, 208, 0.7);
+    }
+    .body {
+      margin-top: 8px;
+      padding: 16px 14px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fefce8, #fff7f0);
+    }
+    .body h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .body p {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 14px;
+      border: 1px solid #fecaca;
+      font-size: 13px;
+      outline: none;
+      background: #fff7f9;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    input[type="text"]:focus {
+      border-color: #fb7185;
+      box-shadow: 0 0 0 1px rgba(248, 187, 208, 0.5);
+      background: #ffffff;
+    }
+    .hint {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+    .btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #fb7185, #fb923c);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow:
+        0 12px 24px rgba(248, 113, 113, 0.45),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+    .btn:hover {
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow:
+        0 8px 18px rgba(248, 113, 113, 0.5),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+    }
+    .btn span {
+      font-size: 13px;
+    }
+    /* 未成年人使用确认弹窗 */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      z-index: 40;
+    }
+    .overlay.show {
+      display: flex;
+    }
+    .modal {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 24px;
+      background: #ffffff;
+      padding: 18px 18px 16px;
+      box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .modal-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 14px;
+      background: #fee2e2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .modal-text {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .modal-btn-primary,
+    .modal-btn-secondary {
+      width: 100%;
+      border-radius: 999px;
+      padding: 8px 0;
+      border: none;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .modal-btn-primary {
+      background: #fb7185;
+      color: #fff;
+    }
+    .modal-btn-secondary {
+      background: #f9fafb;
+      color: #4b5563;
+    }
+    .lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .lang-select { padding: 6px 12px; border-radius: 999px; border: 1px solid #e2e8f0; background: rgba(255,255,255,0.9); font-size: 12px; color: #334155; cursor: pointer; }
+    .lang-select:focus { outline: none; border-color: #fda4af; box-shadow: 0 0 0 2px rgba(253,164,175,0.3); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="lang-wrap">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="ko">한국어</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+    <div class="header">
+      <div class="title-row">
+        <div class="icon">✧</div>
+        <div class="title-text">
+          <h1 data-i18n="name.title"></h1>
+          <span data-i18n="name.subtitle"></span>
+        </div>
+      </div>
+      <div class="badge">Step 3 / 3</div>
+    </div>
+
+    <div class="body">
+      <h2 data-i18n="name.bodyTitle"></h2>
+      <p data-i18n="name.bodyDesc"></p>
+
+      <div class="form-group">
+        <label for="deviceName" data-i18n="name.label"></label>
+        <input type="text" id="deviceName" data-i18n-placeholder="name.placeholder" />
+        <div class="hint" data-i18n="name.hint"></div>
+      </div>
+
+      <button class="btn" type="button" onclick="handleFinish()">
+        <span data-i18n="name.submitBtn"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 未成年人使用确认弹窗 -->
+  <div id="minorOverlay" class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-icon">👶</div>
+        <div class="modal-title" data-i18n="name.minorTitle"></div>
+      </div>
+      <div class="modal-text" data-i18n="name.minorDesc"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-primary" type="button" onclick="handleMinorAnswer(true)" data-i18n="name.minorYes"></button>
+        <button class="modal-btn-secondary" type="button" onclick="handleMinorAnswer(false)" data-i18n="name.minorNo"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function() {
+  var I18N = {
+    ko: { "name.title": "이름 지어주기", "name.subtitle": "마지막 단계예요", "name.bodyTitle": "우리 집 작은 친구에게<br>어떤 이름을 붙여줄까요?", "name.bodyDesc": "아이가 직접 부르기 편한 이름이면 더 좋아요.", "name.label": "기기 이름", "name.placeholder": "예: 하늘이", "name.hint": "최대 12자 이내로 간단하게 적어 주세요.", "name.submitBtn": "완료하고 Noddy 시작하기", "name.minorTitle": "이 기기는 미성년자가 사용할 예정인가요?", "name.minorDesc": "미성년자가 사용하는 경우, 보호자 동의와 함께 기기에서 자녀 보호/스크린 타임 기능을 켜두시면 더 안전하게 이용할 수 있어요.", "name.minorYes": "네, 미성년자가 사용할 거예요", "name.minorNo": "아니요, 모두 성인만 사용할게요", "name.alertName": "기기 이름을 먼저 입력해 주세요." },
+    en: { "name.title": "Name your device", "name.subtitle": "Last step", "name.bodyTitle": "What shall we name<br>our little friend?", "name.bodyDesc": "A name that's easy for your child to say is best.", "name.label": "Device name", "name.placeholder": "e.g. Cloud", "name.hint": "Keep it under 12 characters.", "name.submitBtn": "Finish and start Noddy", "name.minorTitle": "Will this device be used by a minor?", "name.minorDesc": "If so, please enable parental controls / screen time on the device for a safer experience.", "name.minorYes": "Yes, for a minor", "name.minorNo": "No, adults only", "name.alertName": "Please enter a name for the device first." },
+    zh: { "name.title": "为设备取一个名字", "name.subtitle": "这是最后一步", "name.bodyTitle": "给家里的小伙伴<br>取个什么名字呢？", "name.bodyDesc": "孩子容易叫的名字更好，也可以使用对家庭有意义的小昵称。", "name.label": "设备昵称", "name.placeholder": "例如：小云朵", "name.hint": "建议在 12 个字符以内，更易识别。", "name.submitBtn": "完成，进入 Noddy", "name.minorTitle": "此设备是否由未成年人使用？", "name.minorDesc": "如果是未成年人使用，请在系统中开启家长控制/屏幕使用时间等功能，以获得更安全的体验。", "name.minorYes": "是的，为未成年人使用", "name.minorNo": "不是，仅由成年人使用", "name.alertName": "请先为设备取一个昵称。" }
+  };
+  function detectLang() {
+    var saved = localStorage.getItem("noddy_lang");
+    if (saved && I18N[saved]) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    if (nav.indexOf("ko") === 0) return "ko";
+    if (nav.indexOf("zh") === 0) return "zh";
+    return "en";
+  }
+  window._noddyLang = detectLang();
+  function t(key) { return (I18N[window._noddyLang] && I18N[window._noddyLang][key]) || (I18N.en && I18N.en[key]) || key; }
+  window.noddyT = t;
+  function applyLang(lang) {
+    if (!I18N[lang]) return;
+    window._noddyLang = lang;
+    localStorage.setItem("noddy_lang", lang);
+    document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+      var key = el.getAttribute("data-i18n");
+      if (!key) return;
+      el.innerHTML = (t(key) || "").replace(/\n/g, "<br>");
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el) {
+      var key = el.getAttribute("data-i18n-placeholder");
+      if (!key) return;
+      el.placeholder = t(key) || "";
+    });
+  }
+  var sel = document.getElementById("lang-select");
+  if (sel) { sel.value = window._noddyLang; sel.addEventListener("change", function(e) { applyLang(e.target.value); }); }
+  applyLang(window._noddyLang);
+})();
+    const overlay = document.getElementById("minorOverlay");
+    let hasAskedMinor = localStorage.getItem("noddy_minor_checked") === "1";
+    function showMinorDialogIfNeeded() {
+      if (hasAskedMinor) return;
+      if (overlay) overlay.classList.add("show");
+    }
+    function handleMinorAnswer(isMinor) {
+      hasAskedMinor = true;
+      localStorage.setItem("noddy_minor_checked", "1");
+      localStorage.setItem("noddy_is_minor_device", isMinor ? "1" : "0");
+      if (overlay) overlay.classList.remove("show");
+    }
+    function handleFinish() {
+      const nameInput = document.getElementById("deviceName");
+      const name = (nameInput && nameInput.value ? nameInput.value.trim() : "");
+      if (!name) {
+        alert(window.noddyT ? window.noddyT("name.alertName") : "请先为设备取一个昵称。");
+        return;
+      }
+      window.location.href = "主界面1.0.html";
+    }
+    showMinorDialogIfNeeded();
+  </script>
+</body>
+</html>
+
