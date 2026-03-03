@@ -1485,11 +1485,6 @@
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <select id="lang-select" aria-label="Language" style="padding:6px 10px;border-radius:999px;border:1px solid rgba(164,150,200,0.4);background:rgba(255,255,255,0.9);font-size:12px;color:#5a4a7a;cursor:pointer">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-      </select>
       <button class="settings-btn" onclick="openSettings()" aria-label="设置">
         ⚙️
       </button>
@@ -2039,19 +2034,19 @@
     let activeSkillPhaseIndex = 0;
     let activeSkillStageIndex = 0;
 
-    // 打开细分功能页（细分页面.html），新开窗口，不关闭当前主页
+    // 打开细分功能页（detail.html），新开窗口，不关闭当前主页
     function goToDetail(section) {
-      // 与细分页面.html 中的 hash 路由对应
+      // 与detail.html 中的 hash 路由对应
       // 可跳转到 #pomodoro / #diary / #social 等
-      window.open('细分页面.html#' + section, '_blank');
+      window.open('detail.html#' + section, '_blank');
     }
 
     function openMessages() {
-      window.open('细分页面.html#messages', '_blank');
+      window.open('detail.html#messages', '_blank');
     }
 
     function openSettings() {
-      window.open('细分页面.html#settings', '_blank');
+      window.open('detail.html#settings', '_blank');
     }
 
     function openUserPage() {

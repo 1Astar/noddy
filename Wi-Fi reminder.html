@@ -214,13 +214,6 @@
 </head>
 <body>
   <div class="card">
-    <div class="lang-wrap">
-      <select id="lang-select" class="lang-select" aria-label="Language">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-      </select>
-    </div>
     <div class="header">
       <div class="title-row">
         <div class="icon">+</div>
@@ -311,14 +304,14 @@
     function confirmDeviceAndGo() {
       localStorage.setItem(FIRST_ADD_KEY, '1');
       closeDeviceModal();
-      window.location.href = '添加设备进程页面.html';
+      window.location.href = 'add device.html';
     }
 
     document.getElementById('btnNext').addEventListener('click', function() {
       if (isFirstAdd()) {
         document.getElementById('overlayDevice').classList.add('show');
       } else {
-        window.location.href = '添加设备进程页面.html';
+        window.location.href = 'add device.html';
       }
     });
   </script>

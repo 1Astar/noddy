@@ -387,13 +387,7 @@
 <body>
   <div class="status-bar">
     <span>14:33</span>
-    <span>
-      <select id="lang-select" class="lang-select" aria-label="Language" style="border:none;background:transparent;font-size:14px;color:#666;cursor:pointer;margin-left:8px">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-      </select>
-    </span>
+    <span></span>
   </div>
 
   <div class="nav-row">
@@ -634,7 +628,7 @@
     }
 
     document.getElementById('btnNext').addEventListener('click', function() {
-      window.location.href = 'WiFi连接页面.html';
+      window.location.href = 'WiFi connect.html';
     });
 
     // 进入页面时先请求定位权限，再蓝牙，再扫描与设备选择

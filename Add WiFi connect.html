@@ -123,47 +123,35 @@
     .wifi-signal { font-size: 18px; color: #666; }
     .wifi-lock { font-size: 14px; color: #999; }
 
+    .wifi-form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    .wifi-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 2px solid #e5e7eb;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .wifi-input:focus {
+      outline: none;
+      border-color: var(--purple);
+      box-shadow: 0 0 0 1px rgba(196, 181, 224, 0.6);
+      background: #fff;
+    }
+
     .wifi-hint {
-      margin: 6px 0 12px;
+      margin-top: 6px;
       font-size: 12px;
       color: #fb7185;
     }
-
-    .scan-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0 8px;
-    }
-
-    .btn-scan {
-      flex: 1;
-      padding: 12px 14px;
-      border: none;
-      border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, rgba(255, 154, 196, 0.18), rgba(255, 195, 113, 0.18));
-      color: #5a4a7a;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-    }
-
-    .btn-scan:active { transform: scale(0.99); }
-
-    .scan-spinner {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 154, 196, 0.45);
-      border-top-color: rgba(255, 154, 196, 1);
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
-
-    .scan-spinner.show { display: inline-block; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* 成功状态页 */
     .success-view {
@@ -351,13 +339,7 @@
 <body>
   <div class="status-bar">
     <span>14:33</span>
-    <span>
-      <select id="lang-select" class="lang-select" aria-label="Language" style="border:none;background:transparent;font-size:14px;color:#666;cursor:pointer;margin-left:8px">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-      </select>
-    </span>
+    <span></span>
   </div>
 
   <div class="nav-row">
@@ -376,38 +358,33 @@
 
   <div class="select-view show" id="selectView">
     <div class="wifi-list">
-      <div class="wifi-item add-more" role="button" onclick="window.location.href='WiFi连接页面1.0.html'">
-        <span class="wifi-name" data-i18n="wifi.addHotspot"></span>
+      <div style="margin-bottom: 14px;">
+        <label for="ssidInput" class="wifi-form-label" data-i18n="wifi.ssidLabel"></label>
+        <input
+          id="ssidInput"
+          type="text"
+          class="wifi-input"
+          placeholder="Home_WiFi_2.4G"
+        />
+        <p class="wifi-hint" data-i18n="wifi.manualHint"></p>
       </div>
 
-      <div class="scan-row">
-        <button type="button" class="btn-scan" id="btnScanWifi" data-i18n="wifi.scanBtn"></button>
-        <span class="scan-spinner" id="scanSpinner" aria-hidden="true"></span>
+      <div style="margin-top: 10px; margin-bottom: 10px;">
+        <label for="inputPassword" class="wifi-form-label" data-i18n="wifi.pwdLabel"></label>
+        <div class="password-wrap">
+          <div class="input-wrap">
+            <input type="password" id="inputPassword" class="wifi-input" data-i18n-placeholder="wifi.pwdPlaceholder" />
+            <button type="button" class="toggle-pwd" onclick="togglePwd()">👁</button>
+          </div>
+        </div>
       </div>
-      <p class="wifi-hint" data-i18n="wifi.tip24g"></p>
 
-      <div id="wifi-results" style="display:none;">
-        <div class="wifi-item" data-ssid="GYZNKJG">
-          <span class="wifi-name">GYZNKJG</span>
-          <span class="wifi-signal">▂▄▆█</span>
-          <span class="wifi-lock">🔒</span>
-        </div>
-        <div class="wifi-item" data-ssid="TP-LINK_guodiqing">
-          <span class="wifi-name">TP-LINK_guodiqing</span>
-          <span class="wifi-signal">▂▄▆</span>
-          <span class="wifi-lock">🔒</span>
-        </div>
-        <div class="wifi-item" data-ssid="FAST_2.4G_891F">
-          <span class="wifi-name">FAST_2.4G_891F</span>
-          <span class="wifi-signal">▂▄</span>
-          <span class="wifi-lock">🔒</span>
-        </div>
-        <div class="wifi-item" data-ssid="DIRECT-d5-HP M254 LaserJet">
-          <span class="wifi-name">DIRECT-d5-HP M254 LaserJet</span>
-          <span class="wifi-signal">▂▄</span>
-          <span class="wifi-lock">🔒</span>
-        </div>
-      </div>
+      <label class="remember-row">
+        <input type="checkbox" id="rememberPwd" checked />
+        <span data-i18n="wifi.rememberPwd"></span>
+      </label>
+
+      <button type="button" class="btn-confirm-pwd" onclick="submitWifi()" data-i18n="wifi.confirm"></button>
     </div>
   </div>
 
@@ -424,33 +401,45 @@
     <button type="button" class="btn-done" onclick="goMain()" data-i18n="wifi.doneBtn"></button>
   </div>
 
-  <!-- 输入密码弹窗 -->
-  <div class="overlay" id="overlayPassword">
-    <div class="modal">
-      <div class="modal-header">
-        <span class="modal-title" id="modalPasswordTitle"></span>
-        <button type="button" class="modal-close" onclick="closePasswordModal()">×</button>
-      </div>
-      <div class="password-wrap">
-        <div class="input-wrap">
-          <input type="password" id="inputPassword" data-i18n-placeholder="wifi.pwdPlaceholder" />
-          <button type="button" class="toggle-pwd" onclick="togglePwd()">👁</button>
-        </div>
-      </div>
-      <label class="remember-row">
-        <input type="checkbox" id="rememberPwd" checked />
-        <span data-i18n="wifi.rememberPwd"></span>
-      </label>
-      <button type="button" class="btn-confirm-pwd" onclick="confirmPassword()" data-i18n="wifi.confirm"></button>
-    </div>
-  </div>
-
   <script>
 (function() {
   var I18N = {
-    ko: { "wifi.title": "기기에 네트워크 설정하기", "wifi.desc": "기기는 2.4GHz Wi‑Fi만 지원해요.", "wifi.addHotspot": "휴대폰 핫스팟/네트워크 추가…", "wifi.scanBtn": "Wi‑Fi 스캔", "wifi.tip24g": "안내: Noddy는 2.4GHz 대역 Wi‑Fi만 지원해요~", "wifi.configured": "설정된 네트워크", "wifi.doneBtn": "설정 완료", "wifi.pwdPlaceholder": "비밀번호 입력", "wifi.rememberPwd": "비밀번호 저장 허용", "wifi.confirm": "확인", "wifi.pwdTitleFormat": "{ssid} 비밀번호 입력" },
-    en: { "wifi.title": "Configure device network", "wifi.desc": "Device only supports 2.4GHz Wi‑Fi.", "wifi.addHotspot": "Add hotspot/network…", "wifi.scanBtn": "Scan Wi‑Fi", "wifi.tip24g": "Friendly reminder: Noddy only supports 2.4GHz Wi‑Fi.", "wifi.configured": "Configured network", "wifi.doneBtn": "Done", "wifi.pwdPlaceholder": "Enter password", "wifi.rememberPwd": "Allow saving password", "wifi.confirm": "OK", "wifi.pwdTitleFormat": "Enter password for {ssid}" },
-    zh: { "wifi.title": "为设备配置网络", "wifi.desc": "设备只支持使用 2.4GHz Wi‑Fi 连接。", "wifi.addHotspot": "添加手机热点/网络…", "wifi.scanBtn": "扫描 Wi‑Fi", "wifi.tip24g": "温馨提示：Noddy 仅支持 2.4GHz 频段的 Wi‑Fi 哦～", "wifi.configured": "已配置网络", "wifi.doneBtn": "完成配置", "wifi.pwdPlaceholder": "请输入密码", "wifi.rememberPwd": "允许记住密码", "wifi.confirm": "确定", "wifi.pwdTitleFormat": "输入 {ssid} 密码" }
+    ko: {
+      "wifi.title": "기기에 네트워크 설정하기",
+      "wifi.desc": "현재 연결 중인 Wi‑Fi 이름을 확인하고 비밀번호를 입력해 주세요.",
+      "wifi.ssidLabel": "현재 Wi‑Fi 이름",
+      "wifi.manualHint": "안내: Noddy는 2.4GHz 대역 Wi‑Fi만 지원해요~",
+      "wifi.pwdLabel": "Wi‑Fi 비밀번호",
+      "wifi.configured": "설정된 네트워크",
+      "wifi.doneBtn": "설정 완료",
+      "wifi.pwdPlaceholder": "비밀번호 입력",
+      "wifi.rememberPwd": "비밀번호 저장 허용",
+      "wifi.confirm": "확인"
+    },
+    en: {
+      "wifi.title": "Configure device network",
+      "wifi.desc": "Check the Wi‑Fi name you’re currently connected to and enter the password.",
+      "wifi.ssidLabel": "Current Wi‑Fi name",
+      "wifi.manualHint": "Friendly reminder: Noddy only supports 2.4GHz Wi‑Fi.",
+      "wifi.pwdLabel": "Wi‑Fi password",
+      "wifi.configured": "Configured network",
+      "wifi.doneBtn": "Done",
+      "wifi.pwdPlaceholder": "Enter password",
+      "wifi.rememberPwd": "Allow saving password",
+      "wifi.confirm": "OK"
+    },
+    zh: {
+      "wifi.title": "为设备配置网络",
+      "wifi.desc": "App 会自动读取当前连接的 Wi‑Fi 名称，也可以手动修改。",
+      "wifi.ssidLabel": "当前 Wi‑Fi 名称",
+      "wifi.manualHint": "温馨提示：Noddy 仅支持 2.4GHz 频段的 Wi‑Fi 哦～",
+      "wifi.pwdLabel": "Wi‑Fi 密码",
+      "wifi.configured": "已配置网络",
+      "wifi.doneBtn": "完成配置",
+      "wifi.pwdPlaceholder": "请输入密码",
+      "wifi.rememberPwd": "允许记住密码",
+      "wifi.confirm": "确定"
+    }
   };
   function detectLang() {
     var saved = localStorage.getItem("noddy_lang");
@@ -484,96 +473,38 @@
   window._wifiT = t;
   window._wifiApplyLang = applyLang;
 })();
-    var currentSsid = '';
-    var resultsWrap = document.getElementById('wifi-results');
-    var scanBtn = document.getElementById('btnScanWifi');
-    var scanSpinner = document.getElementById('scanSpinner');
+    var currentSsid = window.__CURRENT_WIFI_SSID__ || '';
+    var ssidInput = document.getElementById('ssidInput');
+    var pwdInput = document.getElementById('inputPassword');
 
-    function openPasswordModal(ssid) {
-      currentSsid = ssid;
-      var titleEl = document.getElementById('modalPasswordTitle');
-      titleEl.textContent = (window._wifiT ? window._wifiT('wifi.pwdTitleFormat') : ('输入 ' + currentSsid + ' 密码')).replace('{ssid}', currentSsid);
-      document.getElementById('inputPassword').value = '';
-      document.getElementById('overlayPassword').classList.add('show');
-    }
-
-    if (resultsWrap) {
-      resultsWrap.addEventListener('click', function(e) {
-        var item = e.target && e.target.closest ? e.target.closest('.wifi-item[data-ssid]') : null;
-        if (!item) return;
-        openPasswordModal(item.getAttribute('data-ssid'));
-      });
-    }
-
-    function renderScanResults(ssids) {
-      if (!resultsWrap) return;
-      resultsWrap.innerHTML = '';
-      (ssids || []).forEach(function(s) {
-        var ssid = typeof s === 'string' ? s : (s && s.ssid) || '';
-        if (!ssid) return;
-        var el = document.createElement('div');
-        el.className = 'wifi-item';
-        el.setAttribute('data-ssid', ssid);
-        el.innerHTML = '<span class="wifi-name"></span><span class="wifi-signal">▂▄▆</span><span class="wifi-lock">🔒</span>';
-        el.querySelector('.wifi-name').textContent = ssid;
-        resultsWrap.appendChild(el);
-      });
-      resultsWrap.style.display = (ssids && ssids.length) ? 'block' : 'none';
-    }
-
-    // 给 uni/原生注入用：扫描到结果后直接调用
-    window.noddyWifiSetScanResults = function(list) {
-      if (scanSpinner) scanSpinner.classList.remove('show');
-      renderScanResults(list);
-    };
-
-    function simulateScan() {
-      // 原型演示：这里用模拟数据。uni 环境下请调用 window.noddyWifiSetScanResults([...])
-      renderScanResults(['GYZNKJG', 'TP-LINK_guodiqing', 'FAST_2.4G_891F', 'DIRECT-d5-HP M254 LaserJet']);
-    }
-
-    function startScan() {
-      if (scanSpinner) scanSpinner.classList.add('show');
-      // 如果宿主环境提供扫描能力，可在这里接入并最终调用 window.noddyWifiSetScanResults(results)
-      setTimeout(function() {
-        if (scanSpinner) scanSpinner.classList.remove('show');
-        simulateScan();
-      }, 600);
-    }
-
-    if (scanBtn) {
-      scanBtn.addEventListener('click', function() {
-        startScan();
-      });
+    // 如果宿主环境（uni）注入了当前 Wi‑Fi 名称，则自动填入；否则留空让用户手动填
+    if (ssidInput && currentSsid) {
+      ssidInput.value = currentSsid;
     }
 
     function togglePwd() {
-      var inp = document.getElementById('inputPassword');
       var btn = document.querySelector('.toggle-pwd');
-      if (inp.type === 'password') {
-        inp.type = 'text';
+      if (!pwdInput || !btn) return;
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
         btn.textContent = '🙈';
       } else {
-        inp.type = 'password';
+        pwdInput.type = 'password';
         btn.textContent = '👁';
       }
     }
 
-    function closePasswordModal() {
-      document.getElementById('overlayPassword').classList.remove('show');
-    }
-
-    function confirmPassword() {
-      var pwd = document.getElementById('inputPassword').value;
-      if (!pwd.trim()) return;
-      closePasswordModal();
+    function submitWifi() {
+      var ssid = ssidInput ? ssidInput.value.trim() : '';
+      var pwd = pwdInput ? pwdInput.value.trim() : '';
+      if (!ssid || !pwd) return;
+      document.getElementById('successSsid').textContent = ssid;
       document.getElementById('selectView').classList.remove('show');
-      document.getElementById('successSsid').textContent = currentSsid;
       document.getElementById('successView').classList.add('show');
     }
 
     function goMain() {
-      window.location.href = '欢迎页面.html';
+      window.location.href = 'welcome.html';
     }
   </script>
 </body>

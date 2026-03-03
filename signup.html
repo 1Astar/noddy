@@ -26,21 +26,6 @@
   <div
     class="w-full max-w-md bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_45px_rgba(245,132,155,0.22)] px-6 py-8 sm:px-8 sm:py-10 space-y-8"
   >
-    <!-- Language -->
-    <div class="flex justify-end">
-      <label for="lang-select" class="sr-only">Language</label>
-      <div class="relative">
-        <select
-          id="lang-select"
-          class="rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-        >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="zh">中文</option>
-        </select>
-      </div>
-    </div>
-
     <!-- Logo + 标题 -->
     <header class="text-center space-y-3">
       <div
@@ -421,6 +406,41 @@
         <form class="space-y-4" onsubmit="return false;">
           <div class="space-y-1.5">
             <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.email"></span>
+            </label>
+            <input
+              id="forgot-email"
+              type="email"
+              data-email-autocomplete="true"
+              data-i18n-placeholder="forgot.emailPlaceholder"
+              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
+              <span data-i18n="common.code"></span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="forgot-code-input"
+                type="text"
+                data-i18n-placeholder="forgot.codePlaceholder"
+                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+              />
+              <button
+                id="btn-forgot-send-code"
+                type="button"
+                onclick="handleForgotSendCode(this)"
+                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
+              >
+                <span data-i18n="forgot.sendCode"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-slate-700">
               <span data-i18n="common.password"></span>
             </label>
             <input
@@ -446,6 +466,7 @@
 
           <button
             type="button"
+            onclick="handleForgotSubmit()"
             class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
           >
             <span data-i18n="forgot.submit"></span>
@@ -508,7 +529,7 @@
 
           <button
             type="button"
-            onclick="window.location.href='添加wifi提醒页面.html'"
+            onclick="window.location.href='Wi-Fi reminder.html'"
             class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
           >
             <span data-i18n="profile.save"></span>
@@ -516,7 +537,7 @@
 
           <button
             type="button"
-            onclick="window.location.href='添加wifi提醒页面.html'"
+            onclick="window.location.href='Wi-Fi reminder.html'"
             class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-500 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition"
           >
             <span data-i18n="profile.later"></span>
@@ -646,7 +667,10 @@
         "signup.toLogin": "로그인하러 가기",
 
         "forgot.title": "비밀번호 재설정",
-        "forgot.desc": "새 비밀번호를 직접 입력하고 한 번 더 확인해 주세요.",
+        "forgot.desc": "가입하신 이메일로 6자리 코드를 보내드릴게요. 코드를 입력하고 새 비밀번호를 설정해 주세요.",
+        "forgot.emailPlaceholder": "예: you@example.com",
+        "forgot.codePlaceholder": "6자리 인증 코드",
+        "forgot.sendCode": "인증 코드 전송",
         "forgot.confirmPasswordLabel": "새 비밀번호 확인",
         "forgot.submit": "비밀번호 변경하기",
         "forgot.backToLogin": "로그인 화면으로 돌아가기",
@@ -723,7 +747,10 @@
         "signup.toLogin": "Go to login",
 
         "forgot.title": "Reset password",
-        "forgot.desc": "Enter your new password directly and confirm it below.",
+        "forgot.desc": "Enter the email you used to sign up, we’ll send you a 6-digit code so you can reset your password.",
+        "forgot.emailPlaceholder": "e.g. you@example.com",
+        "forgot.codePlaceholder": "6-digit code",
+        "forgot.sendCode": "Send code",
         "forgot.confirmPasswordLabel": "Confirm new password",
         "forgot.submit": "Update password",
         "forgot.backToLogin": "Back to login",
@@ -760,7 +787,7 @@
         "common.phone": "手机号码",
         "common.code": "验证码",
         "common.captcha": "验证码",
-        "common.captchaPlaceholder": "例如：1234",
+        "common.captchaPlaceholder": "例如：123456",
      
         "common.backHome": "返回",
 
@@ -797,7 +824,10 @@
         "signup.toLogin": "去登录",
 
         "forgot.title": "重置密码",
-        "forgot.desc": "直接输入新密码，并在下面再次确认一致后完成修改。",
+        "forgot.desc": "请输入注册时使用的邮箱，我们会发送 6 位验证码，验证通过后即可重置密码。",
+        "forgot.emailPlaceholder": "例如：you@example.com",
+        "forgot.codePlaceholder": "6 位验证码",
+        "forgot.sendCode": "发送验证码",
         "forgot.confirmPasswordLabel": "确认新密码",
         "forgot.submit": "确认修改密码",
         "forgot.backToLogin": "返回邮箱登录",
@@ -932,10 +962,10 @@
     }
 
     function handleEmailLoginSubmit() {
-      // 简单验证码示例：要求输入 1234
+      // 简单验证码示例：要求输入 6 位 123456
       if (captchaInput) {
         const code = (captchaInput.value || "").trim();
-        if (code !== "1234") {
+        if (code !== "123456") {
           showToast(t("toast.captchaError"));
           captchaInput.focus();
           return;
@@ -947,7 +977,7 @@
 
       setTimeout(() => {
         setEmailLoading(false);
-        window.location.href = "添加wifi提醒页面.html";
+        window.location.href = "Wi-Fi reminder.html";
       }, 1500);
     }
 
@@ -974,7 +1004,7 @@
 
       setTimeout(() => {
         setPhoneLoading(false);
-        window.location.href = "添加wifi提醒页面.html";
+        window.location.href = "Wi-Fi reminder.html";
       }, 1500);
     }
 
@@ -1082,6 +1112,77 @@
           btn.textContent = `${baseText} (${remaining}s)`;
         }
       }, 1000);
+    }
+
+    // 重置密码：邮箱验证码发送 + 校验
+    let forgotCodeSentAt = 0;
+    let forgotCodeTimer = null;
+    const forgotCodeTTL = 60000;
+
+    function handleForgotSendCode(btn) {
+      const now = Date.now();
+      if (now - forgotCodeSentAt < forgotCodeTTL) {
+        showToast(t("toast.tooFrequent"));
+        return;
+      }
+      forgotCodeSentAt = now;
+      showToast(t("toast.codeSent"));
+
+      if (!btn) btn = document.getElementById("btn-forgot-send-code");
+      if (!btn) return;
+
+      let remaining = forgotCodeTTL / 1000;
+      btn.disabled = true;
+      btn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
+
+      const baseText = t("forgot.sendCode");
+      btn.textContent = `${baseText} (${remaining}s)`;
+
+      if (forgotCodeTimer) clearInterval(forgotCodeTimer);
+      forgotCodeTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(forgotCodeTimer);
+          forgotCodeTimer = null;
+          btn.disabled = false;
+          btn.classList.remove("opacity-70", "cursor-not-allowed", "pointer-events-none");
+          btn.textContent = baseText;
+        } else {
+          btn.textContent = `${baseText} (${remaining}s)`;
+        }
+      }, 1000);
+    }
+
+    function handleForgotSubmit() {
+      const codeInput = document.getElementById("forgot-code-input");
+      const newPwdInput = document.getElementById("forgot-new-password");
+      const confirmPwdInput = document.getElementById("forgot-confirm-password");
+      const now = Date.now();
+
+      if (codeInput) {
+        const val = (codeInput.value || "").trim();
+        if (!forgotCodeSentAt || now - forgotCodeSentAt > forgotCodeTTL) {
+          showToast(t("toast.codeExpired"));
+          return;
+        }
+        if (!val || val !== "123456") {
+          showToast(t("toast.codeInvalid"));
+          return;
+        }
+      }
+
+      if (newPwdInput && confirmPwdInput) {
+        const p1 = (newPwdInput.value || "").trim();
+        const p2 = (confirmPwdInput.value || "").trim();
+        if (!p1 || p1 !== p2) {
+          // 简单处理：密码不一致直接提示
+          showToast(t("toast.captchaError"));
+          return;
+        }
+      }
+
+      showToast(t("forgot.submit"));
+      switchView("email-login");
     }
 
     // 邮箱后缀自动补全
