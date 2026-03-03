@@ -260,7 +260,7 @@
 (function() {
   var I18N = {
     ko: { "addDevice.title": "기기 추가하기", "addDevice.subtitle": "새로운 Noddy 기기를 연결해 볼까요?", "addDevice.bodyTitle": "먼저 기기를 전원에 연결해 주세요", "addDevice.bodyDesc": "전원이 켜진 뒤, 기기가 Wi‑Fi 연결 대기 상태인지 확인해 주세요.<br>이후 가정 Wi‑Fi를 선택하고 첫 설정을 완료할 수 있어요.", "addDevice.nextBtn": "다음: Wi‑Fi 연결", "addDevice.note": "나중에 추가해도 괜찮아요. 설정 > 기기 관리에서 다시 들어올 수 있어요.", "addDevice.modalTitle": "Noddy 기기를 선택해 주세요", "addDevice.modalTip": "잘못 선택하면 연결을 다시 시작해야 해요.", "addDevice.confirmBtn": "선택 완료" },
-    en: { "addDevice.title": "Add device", "addDevice.subtitle": "Connect a new Noddy device?", "addDevice.bodyTitle": "Please connect the device to power first", "addDevice.bodyDesc": "After power is on, make sure the device is in Wi‑Fi pairing mode.<br>Then we'll guide you to select your home Wi‑Fi and finish setup.", "addDevice.nextBtn": "Next: Connect Wi‑Fi", "addDevice.note": "You can add later. Go to Settings > Device management to enter again.", "addDevice.modalTitle": "Select your Noddy device", "addDevice.modalTip": "Wrong selection will require reconnecting.", "addDevice.confirmBtn": "Confirm" },
+    en: { "addDevice.title": "add-device", "addDevice.subtitle": "Connect a new Noddy device?", "addDevice.bodyTitle": "Please connect the device to power first", "addDevice.bodyDesc": "After power is on, make sure the device is in Wi‑Fi pairing mode.<br>Then we'll guide you to select your home Wi‑Fi and finish setup.", "addDevice.nextBtn": "Next: Connect Wi‑Fi", "addDevice.note": "You can add later. Go to Settings > Device management to enter again.", "addDevice.modalTitle": "Select your Noddy device", "addDevice.modalTip": "Wrong selection will require reconnecting.", "addDevice.confirmBtn": "Confirm" },
     zh: { "addDevice.title": "添加设备", "addDevice.subtitle": "要连接一台新的 Noddy 设备吗？", "addDevice.bodyTitle": "请先给设备接通电源", "addDevice.bodyDesc": "接通电源后，请确认设备处于 Wi‑Fi 配网等待状态。<br>之后我们会引导你选择家庭 Wi‑Fi 并完成首次配置。", "addDevice.nextBtn": "下一步：连接 Wi‑Fi", "addDevice.note": "也可以稍后添加。在「设置 > 设备管理」中可再次进入。", "addDevice.modalTitle": "选择你的 Noddy 设备", "addDevice.modalTip": "选择错误需要重新开启连接。", "addDevice.confirmBtn": "确定选择" }
   };
   function detectLang() {
@@ -304,14 +304,14 @@
     function confirmDeviceAndGo() {
       localStorage.setItem(FIRST_ADD_KEY, '1');
       closeDeviceModal();
-      window.location.href = 'add device.html';
+      window.location.href = 'add-device.html';
     }
 
     document.getElementById('btnNext').addEventListener('click', function() {
       if (isFirstAdd()) {
         document.getElementById('overlayDevice').classList.add('show');
       } else {
-        window.location.href = 'add device.html';
+        window.location.href = 'add-device.html';
       }
     });
   </script>
