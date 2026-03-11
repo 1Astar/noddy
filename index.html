@@ -75,6 +75,20 @@
         </button>
       </div>
     </main>
+
+    <!-- 当前服务区：极小灰字 + 可点击切换 -->
+    <div class="pt-2 text-[10px] sm:text-[11px] text-slate-400 text-center">
+      <button
+        type="button"
+        id="region-toggle-index"
+        onclick="toggleRegionIndex()"
+        class="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 transition"
+      >
+        <span>当前服务区：</span>
+        <span id="region-label-index"></span>
+        <span class="ml-1 opacity-70">· 点击切换</span>
+      </button>
+    </div>
   </div>
 
   <script>
@@ -141,6 +155,67 @@
       });
     }
     applyLang(currentLang);
+
+    // ------------------------
+    // Region indicator (index)
+    // ------------------------
+    const REGION_KEY = "noddy_region"; // 与 signup.html 保持一致
+
+    function isValidRegion(v) {
+      return v === "global" || v === "cn";
+    }
+
+    function getCurrentRegion() {
+      const v = localStorage.getItem(REGION_KEY);
+      return isValidRegion(v) ? v : "global";
+    }
+
+    function setCurrentRegion(region) {
+      if (!isValidRegion(region)) return;
+      localStorage.setItem(REGION_KEY, region);
+      updateRegionLabelIndex();
+    }
+
+    function getRegionLabel(region) {
+      // 这里直接用中文，方便在未加载 i18n 的情况下也一目了然
+      return region === "cn" ? "中国服务区" : "国际服务区";
+    }
+
+    function updateRegionLabelIndex() {
+      const el = document.getElementById("region-label-index");
+      if (!el) return;
+      el.textContent = getRegionLabel(getCurrentRegion());
+    }
+
+    function toggleRegionIndex() {
+      const next = getCurrentRegion() === "cn" ? "global" : "cn";
+      setCurrentRegion(next);
+    }
+
+    async function detectRegionByIPOnceIndex() {
+      // 如果用户已经切过，就不再打扰
+      if (localStorage.getItem(REGION_KEY)) {
+        updateRegionLabelIndex();
+        return;
+      }
+      try {
+        const resp = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+        if (!resp.ok) throw new Error("ip lookup failed");
+        const data = await resp.json();
+        const cc = String(data && (data.country_code || data.country)).toUpperCase();
+        if (cc === "CN") {
+          setCurrentRegion("cn");
+        } else {
+          setCurrentRegion("global");
+        }
+      } catch (e) {
+        // 失败则保持默认国际服
+        updateRegionLabelIndex();
+      }
+    }
+
+    updateRegionLabelIndex();
+    detectRegionByIPOnceIndex();
   </script>
 </body>
 </html>

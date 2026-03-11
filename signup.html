@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8" />
   <title>Noddy - Login / Sign Up</title>
@@ -7,554 +8,535 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    html, body {
-      height: 100%;
+    :root {
+      --primary-pink: #f5849b;
+      --secondary-amber: #fcd34d;
+      --bg-gradient: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
     }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
     body {
       font-family: Pretendard, "Apple SD Gothic Neo", system-ui, -apple-system,
         BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
+      background: var(--bg-gradient) !important;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
     }
-    .signup-password-hint .hint-icon { font-size: 0.7em; }
-    .signup-password-hint.passed { color: #22c55e; }
-    .signup-password-hint.passed .hint-icon { color: #22c55e; }
+
+    /* Adaptive container with glassmorphism */
+    .adaptive-card {
+      width: 100%;
+      max-width: 440px;
+      max-height: 92dvh;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 55px rgba(245, 132, 155, 0.18);
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .card-scroll-area {
+      overflow-y: auto;
+      padding: 2.5rem 2rem;
+      scrollbar-width: none;
+      /* Hide scrollbar for Firefox */
+    }
+
+    .card-scroll-area::-webkit-scrollbar {
+      display: none;
+      /* Hide scrollbar for Chrome/Safari */
+    }
+
+    .signup-password-hint .hint-icon {
+      font-size: 0.7em;
+    }
+
+    .signup-password-hint.passed {
+      color: #22c55e;
+    }
+
+    .signup-password-hint.passed .hint-icon {
+      color: #22c55e;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .btn-hover-effect:active {
+      transform: scale(0.98);
+      transition: transform 0.1s;
+    }
+
+    /* Region switcher (fallback entry, tiny & subtle) */
+    .region-footnote-link {
+      text-decoration: none;
+      color: rgba(100, 116, 139, 0.86);
+    }
+    .region-footnote-link:hover {
+      color: rgba(71, 85, 105, 0.9);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(148, 163, 184, 0.55);
+    }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center px-4 py-8">
-  <div
-    class="w-full max-w-md bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_45px_rgba(245,132,155,0.22)] px-6 py-8 sm:px-8 sm:py-10 space-y-8"
-  >
-    <!-- Logo + 标题 -->
-    <header class="text-center space-y-3">
-      <div
-        class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-pink-300 via-rose-300 to-amber-200 shadow-md"
-      >
-        <!-- 可爱笑脸 Logo -->
-        <div class="relative w-9 h-9 rounded-3xl bg-white flex items-center justify-center">
-          <div class="absolute top-[28%] left-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-          <div class="absolute top-[28%] right-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-          <div
-            class="absolute bottom-[22%] left-[22%] right-[22%] h-[7px] rounded-full border-[3px] border-rose-300 border-t-transparent border-l-transparent border-r-transparent"
-          ></div>
+
+<body>
+  <div class="adaptive-card">
+    <!-- Mobile Drag Handle -->
+    <div class="flex justify-center pt-4 sm:hidden">
+      <div class="w-12 h-1.5 rounded-full bg-slate-300/40"></div>
+    </div>
+
+    <div class="card-scroll-area space-y-8">
+      <!-- Logo + 标题 -->
+      <header class="text-center space-y-3">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-pink-300 via-rose-300 to-amber-200 shadow-md">
+          <!-- 可爱笑脸 Logo -->
+          <div class="relative w-9 h-9 rounded-3xl bg-white flex items-center justify-center">
+            <div class="absolute top-[28%] left-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+            <div class="absolute top-[28%] right-[24%] w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+            <div
+              class="absolute bottom-[22%] left-[22%] right-[22%] h-[7px] rounded-full border-[3px] border-rose-300 border-t-transparent border-l-transparent border-r-transparent">
+            </div>
+          </div>
         </div>
+
+        <div class="space-y-1">
+          <h1 class="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
+            Noddy
+          </h1>
+        </div>
+      </header>
+
+      <!-- 主容器：不同页面状态 -->
+      <main class="space-y-6">
+        <!-- 登录首页 -->
+        <section id="view-home" class="space-y-5">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="home.title"></span>
+            </h2>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <!-- 邮箱登录 -->
+            <button id="btn-email-login" type="button" onclick="handleEmailLoginClick()"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-3 text-sm sm:text-base font-medium text-rose-600 shadow-sm hover:bg-rose-100 active:scale-[0.99] transition">
+              <span id="email-login-spinner"
+                class="hidden h-4 w-4 border-2 border-rose-300/80 border-t-transparent rounded-full animate-spin"></span>
+              <span id="email-login-text" data-i18n="home.emailLogin"></span>
+            </button>
+
+            <!-- 手机验证码登录 -->
+            <button id="btn-phone-entry" type="button" onclick="switchView('phone-login')"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-3 text-sm sm:text-base font-medium text-amber-700 shadow-sm hover:bg-amber-100 active:scale-[0.99] transition">
+              <span data-i18n="home.phoneLogin"></span>
+            </button>
+          </div>
+
+          <div class="pt-3 text-center text-xs sm:text-sm text-slate-500 space-y-1">
+            <p>
+              <span data-i18n="home.noAccount"></span>
+              <button type="button" onclick="switchView('signup')"
+                class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+                <span data-i18n="home.signup"></span>
+              </button>
+            </p>
+          </div>
+        </section>
+
+        <!-- 邮箱登录页（真正输入邮箱+密码） -->
+        <section id="view-email-login" class="hidden space-y-6">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="emailLogin.title"></span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500" data-i18n="emailLogin.desc"></p>
+          </div>
+
+          <form class="space-y-4" onsubmit="return false;">
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.email"></span>
+              </label>
+              <div class="flex gap-2">
+                <input id="email-input" type="email" data-email-autocomplete="true"
+                  data-i18n-placeholder="emailLogin.emailPlaceholder"
+                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                <button id="btn-send-email-code" type="button" onclick="handleSendCode()"
+                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                  <span data-i18n="emailLogin.sendCode"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.password"></span>
+              </label>
+              <input id="password-input" type="password" data-i18n-placeholder="common.passwordPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
+              <div class="flex justify-end">
+                <button type="button" onclick="switchView('forgot')"
+                  class="text-[11px] sm:text-xs text-rose-500 underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+                  <span data-i18n="emailLogin.forgot"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.captcha"></span>
+              </label>
+              <input id="captcha-input" type="text" data-i18n-placeholder="common.captchaPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              <p class="text-[11px] sm:text-xs text-slate-400">
+              </p>
+            </div>
+
+            <button id="btn-email-submit" type="button" onclick="handleEmailLoginSubmit()"
+              class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+              <span id="email-submit-spinner"
+                class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              <span id="email-submit-text" data-i18n="emailLogin.submit"></span>
+            </button>
+          </form>
+
+          <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+            <button type="button" onclick="switchView('signup')"
+              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+              <span data-i18n="emailLogin.toSignup"></span>
+            </button>
+            <button type="button" onclick="switchView('home')"
+              class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600">
+              <span data-i18n="common.backHome"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 手机验证码登录页 -->
+        <section id="view-phone-login" class="hidden space-y-6">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="phoneLogin.title"></span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="phoneLogin.desc"></p>
+          </div>
+
+          <form class="space-y-4" onsubmit="return false;">
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.phone"></span>
+              </label>
+              <div class="flex gap-2">
+                <select
+                  class="w-[34%] rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300">
+                  <option data-i18n="phoneLogin.country82"></option>
+                  <option data-i18n="phoneLogin.country86"></option>
+                </select>
+                <input id="phone-input" type="tel" data-i18n-placeholder="phoneLogin.phonePlaceholder"
+                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.code"></span>
+              </label>
+              <div class="flex gap-2">
+                <input id="code-input" type="text" data-i18n-placeholder="phoneLogin.codePlaceholder"
+                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                <button id="btn-send-code" type="button" onclick="handleSendCode()"
+                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                  <span data-i18n="phoneLogin.sendCode"></span>
+                </button>
+              </div>
+              <p class="text-[11px] sm:text-xs text-slate-400">
+                <span data-i18n="phoneLogin.codeHint"></span>
+              </p>
+            </div>
+
+            <button id="btn-phone-submit" type="button" onclick="handlePhoneLoginSubmit()"
+              class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+              <span id="phone-submit-spinner"
+                class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"></span>
+              <span id="phone-submit-text" data-i18n="phoneLogin.submit"></span>
+            </button>
+          </form>
+
+          <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+            <button type="button" onclick="switchView('home')"
+              class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600">
+              <span data-i18n="common.backHome"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 注册页 -->
+        <section id="view-signup" class="hidden space-y-6">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="signup.title"></span>
+            </h2>
+            <!-- 按你要求，这里去掉原来的那句“아이와 함께할 작은 순간들을…” -->
+          </div>
+
+          <form class="space-y-4" onsubmit="return false;">
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.email"></span>
+              </label>
+              <div class="flex gap-2">
+                <input id="signup-email-input" type="email" data-email-autocomplete="true"
+                  data-i18n-placeholder="signup.emailPlaceholder"
+                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                <button id="btn-signup-send-code" type="button" onclick="handleSignupSendCode(this)"
+                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                  <span data-i18n="发送验证码"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.code"></span>
+              </label>
+              <input id="signup-code-input" type="text" data-i18n-placeholder="signup.codePlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="signup.passwordSet"></span>
+              </label>
+              <input id="signup-password" type="password" data-i18n-placeholder="signup.passwordPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              <div id="signup-password-hints" class="flex flex-wrap gap-x-4 gap-y-1.5 mt-1.5">
+                <span id="hint-length"
+                  class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                  <span class="hint-icon">○</span><span data-i18n="signup.hintLength"></span>
+                </span>
+                <span id="hint-letter"
+                  class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                  <span class="hint-icon">○</span><span data-i18n="signup.hintLetter"></span>
+                </span>
+                <span id="hint-special"
+                  class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
+                  <span class="hint-icon">○</span><span data-i18n="signup.hintSpecial"></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2 rounded-2xl bg-rose-50 px-3.5 py-3">
+              <input id="agree" type="checkbox"
+                class="mt-0.5 h-4 w-4 rounded border-rose-300 text-rose-400 focus:ring-rose-300" />
+              <label for="agree" class="text-[11px] sm:text-xs text-slate-700 leading-relaxed">
+                <span data-i18n="signup.agree"></span>
+              </label>
+            </div>
+
+            <button id="btn-signup-submit" type="button" onclick="handleSignupSubmit()"
+              class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition disabled:bg-rose-200">
+              <span data-i18n="signup.submit"></span>
+            </button>
+          </form>
+
+          <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+            <p>
+              <span data-i18n="signup.hasAccount"></span>
+              <button type="button" onclick="switchView('email-login')"
+                class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+                <span data-i18n="signup.toLogin"></span>
+              </button>
+            </p>
+            <button type="button" onclick="switchView('home')"
+              class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600">
+              <span data-i18n="common.backHome"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 忘记密码页 -->
+        <section id="view-forgot" class="hidden space-y-6">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="forgot.title"></span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="forgot.desc"></p>
+          </div>
+
+          <form class="space-y-4" onsubmit="return false;">
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.email"></span>
+              </label>
+              <input id="forgot-email" type="email" data-email-autocomplete="true"
+                data-i18n-placeholder="forgot.emailPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.code"></span>
+              </label>
+              <div class="flex gap-2">
+                <input id="forgot-code-input" type="text" data-i18n-placeholder="forgot.codePlaceholder"
+                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                <button id="btn-forgot-send-code" type="button" onclick="handleForgotSendCode(this)"
+                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                  <span data-i18n="forgot.sendCode"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="common.password"></span>
+              </label>
+              <input id="forgot-new-password" type="password" data-i18n-placeholder="common.passwordPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="forgot.confirmPasswordLabel"></span>
+              </label>
+              <input id="forgot-confirm-password" type="password" data-i18n-placeholder="common.passwordPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+            </div>
+
+            <button type="button" onclick="handleForgotSubmit()"
+              class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+              <span data-i18n="forgot.submit"></span>
+            </button>
+          </form>
+
+          <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
+            <button type="button" onclick="switchView('email-login')"
+              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+              <span data-i18n="forgot.backToLogin"></span>
+            </button>
+            <button type="button" onclick="switchView('home')"
+              class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600">
+              <span data-i18n="common.backHome"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 首次登录补充资料页 -->
+        <section id="view-profile" class="hidden space-y-6">
+          <div class="space-y-2 text-center">
+            <h2 class="text-base sm:text-lg font-medium text-slate-900">
+              <span data-i18n="profile.title"></span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="profile.desc"></p>
+          </div>
+
+          <form class="space-y-4" onsubmit="return false;">
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="profile.nickname"></span>
+              </label>
+              <input id="nickname-input" type="text" data-i18n-placeholder="profile.nicknamePlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                <span data-i18n="profile.birthday"></span>
+              </label>
+              <input id="birthday-input" type="date"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+              <p class="text-[11px] sm:text-xs text-slate-400">
+                <span data-i18n="profile.birthdayHint"></span>
+              </p>
+            </div>
+
+            <button type="button" onclick="window.location.href='WiFi-reminder.html'"
+              class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+              <span data-i18n="profile.save"></span>
+            </button>
+
+            <button type="button" onclick="window.location.href='WiFi-reminder.html'"
+              class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-500 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
+              <span data-i18n="profile.later"></span>
+            </button>
+          </form>
+        </section>
+      </main>
+
+      <!-- 服务区兜底入口（卡片内，确保可见） -->
+      <div class="pt-1 flex justify-center">
+        <button id="region-inline-toggle" type="button" onclick="toggleRegion()"
+          class="region-footnote-link pointer-events-auto text-[10px] sm:text-[11px]">
+          <span id="region-inline-prefix">当前服务区：</span><span id="region-inline-label" class="text-slate-500 font-medium">国际服务区</span>
+          <span class="ml-1 opacity-70">·</span>
+          <span id="region-inline-switch" class="ml-1 opacity-70">切换</span>
+        </button>
+      </div>
+    </div> <!-- end card-scroll-area -->
+  </div> <!-- end adaptive-card -->
+
+  <!-- “账号不存在(404)”引导切换弹窗 -->
+  <div id="region-mismatch-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed"
+            data-i18n="region.modal.title"></p>
+          <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed"
+            data-i18n="region.modal.desc"></p>
+        </div>
+        <button type="button" onclick="closeRegionMismatchModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
       </div>
 
-      <div class="space-y-1">
-        <h1 class="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">
-          Noddy
-        </h1>
-        <p
-          class="text-xs sm:text-sm text-slate-500 leading-relaxed"
-          data-i18n="tagline"
-        ></p>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="handleRegionMismatchSwitch()"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+          <span data-i18n="region.modal.switchBtn"></span>
+        </button>
+        <button type="button" onclick="handleRegionMismatchContinueSignup()"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-600 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
+          <span data-i18n="region.modal.signupBtn"></span>
+        </button>
       </div>
-    </header>
-
-    <!-- 主容器：不同页面状态 -->
-    <main class="space-y-6">
-      <!-- 登录首页 -->
-      <section id="view-home" class="space-y-5">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="home.title"></span>
-          </h2>
-        </div>
-
-        <div class="space-y-3 pt-2">
-          <!-- 邮箱登录 -->
-          <button
-            id="btn-email-login"
-            type="button"
-            onclick="handleEmailLoginClick()"
-            class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-3 text-sm sm:text-base font-medium text-rose-600 shadow-sm hover:bg-rose-100 active:scale-[0.99] transition"
-          >
-            <span
-              id="email-login-spinner"
-              class="hidden h-4 w-4 border-2 border-rose-300/80 border-t-transparent rounded-full animate-spin"
-            ></span>
-            <span id="email-login-text" data-i18n="home.emailLogin"></span>
-          </button>
-
-          <!-- 手机验证码登录 -->
-          <button
-            id="btn-phone-entry"
-            type="button"
-            onclick="switchView('phone-login')"
-            class="w-full inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-3 text-sm sm:text-base font-medium text-amber-700 shadow-sm hover:bg-amber-100 active:scale-[0.99] transition"
-          >
-            <span data-i18n="home.phoneLogin"></span>
-          </button>
-        </div>
-
-        <div class="pt-3 text-center text-xs sm:text-sm text-slate-500 space-y-1">
-          <p>
-            <span data-i18n="home.noAccount"></span>
-            <button
-              type="button"
-              onclick="switchView('signup')"
-              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
-            >
-              <span data-i18n="home.signup"></span>
-            </button>
-          </p>
-        </div>
-      </section>
-
-      <!-- 邮箱登录页（真正输入邮箱+密码） -->
-      <section id="view-email-login" class="hidden space-y-6">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="emailLogin.title"></span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500" data-i18n="emailLogin.desc"></p>
-        </div>
-
-        <form class="space-y-4" onsubmit="return false;">
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.email"></span>
-            </label>
-            <div class="flex gap-2">
-              <input
-                id="email-input"
-                type="email"
-                data-email-autocomplete="true"
-                data-i18n-placeholder="emailLogin.emailPlaceholder"
-                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              />
-              <button
-                id="btn-send-email-code"
-                type="button"
-                onclick="handleSendCode()"
-                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
-              >
-                <span data-i18n="emailLogin.sendCode"></span>
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.password"></span>
-            </label>
-            <input
-              id="password-input"
-              type="password"
-              data-i18n-placeholder="common.passwordPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-            <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
-            <div class="flex justify-end">
-              <button
-                type="button"
-                onclick="switchView('forgot')"
-                class="text-[11px] sm:text-xs text-rose-500 underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
-              >
-                <span data-i18n="emailLogin.forgot"></span>
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.captcha"></span>
-            </label>
-            <input
-              id="captcha-input"
-              type="text"
-              data-i18n-placeholder="common.captchaPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-            <p class="text-[11px] sm:text-xs text-slate-400">
-            </p>
-          </div>
-
-          <button
-            id="btn-email-submit"
-            type="button"
-            onclick="handleEmailLoginSubmit()"
-            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
-          >
-            <span
-              id="email-submit-spinner"
-              class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"
-            ></span>
-            <span id="email-submit-text" data-i18n="emailLogin.submit"></span>
-          </button>
-        </form>
-
-        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
-          <button
-            type="button"
-            onclick="switchView('signup')"
-            class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
-          >
-            <span data-i18n="emailLogin.toSignup"></span>
-          </button>
-          <button
-            type="button"
-            onclick="switchView('home')"
-            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
-          >
-            <span data-i18n="common.backHome"></span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 手机验证码登录页 -->
-      <section id="view-phone-login" class="hidden space-y-6">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="phoneLogin.title"></span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="phoneLogin.desc"></p>
-        </div>
-
-        <form class="space-y-4" onsubmit="return false;">
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.phone"></span>
-            </label>
-            <div class="flex gap-2">
-              <select
-                class="w-[34%] rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              >
-                <option data-i18n="phoneLogin.country82"></option>
-                <option data-i18n="phoneLogin.country86"></option>
-              </select>
-              <input
-                id="phone-input"
-                type="tel"
-                data-i18n-placeholder="phoneLogin.phonePlaceholder"
-                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              />
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.code"></span>
-            </label>
-            <div class="flex gap-2">
-              <input
-                id="code-input"
-                type="text"
-                data-i18n-placeholder="phoneLogin.codePlaceholder"
-                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              />
-              <button
-                id="btn-send-code"
-                type="button"
-                onclick="handleSendCode()"
-                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
-              >
-                <span data-i18n="phoneLogin.sendCode"></span>
-              </button>
-            </div>
-            <p class="text-[11px] sm:text-xs text-slate-400">
-              <span data-i18n="phoneLogin.codeHint"></span>
-            </p>
-          </div>
-
-          <button
-            id="btn-phone-submit"
-            type="button"
-            onclick="handlePhoneLoginSubmit()"
-            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
-          >
-            <span
-              id="phone-submit-spinner"
-              class="hidden h-4 w-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin mr-1.5"
-            ></span>
-            <span id="phone-submit-text" data-i18n="phoneLogin.submit"></span>
-          </button>
-        </form>
-
-        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
-          <button
-            type="button"
-            onclick="switchView('home')"
-            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
-          >
-            <span data-i18n="common.backHome"></span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 注册页 -->
-      <section id="view-signup" class="hidden space-y-6">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="signup.title"></span>
-          </h2>
-          <!-- 按你要求，这里去掉原来的那句“아이와 함께할 작은 순간들을…” -->
-          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="signup.desc"></p>
-        </div>
-
-        <form class="space-y-4" onsubmit="return false;">
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.email"></span>
-            </label>
-            <div class="flex gap-2">
-              <input
-                id="signup-email-input"
-                type="email"
-                data-email-autocomplete="true"
-                data-i18n-placeholder="signup.emailPlaceholder"
-                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              />
-              <button
-                id="btn-signup-send-code"
-                type="button"
-                onclick="handleSignupSendCode(this)"
-                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
-              >
-                <span data-i18n="发送验证码"></span>
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.code"></span>
-            </label>
-            <input
-              id="signup-code-input"
-              type="text"
-              data-i18n-placeholder="signup.codePlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="signup.passwordSet"></span>
-            </label>
-            <input
-              id="signup-password"
-              type="password"
-              data-i18n-placeholder="signup.passwordPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-            <div id="signup-password-hints" class="flex flex-wrap gap-x-4 gap-y-1.5 mt-1.5">
-              <span id="hint-length" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
-                <span class="hint-icon">○</span><span data-i18n="signup.hintLength"></span>
-              </span>
-              <span id="hint-letter" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
-                <span class="hint-icon">○</span><span data-i18n="signup.hintLetter"></span>
-              </span>
-              <span id="hint-special" class="signup-password-hint flex items-center gap-1 text-[11px] sm:text-xs text-slate-400">
-                <span class="hint-icon">○</span><span data-i18n="signup.hintSpecial"></span>
-              </span>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-2 rounded-2xl bg-rose-50 px-3.5 py-3">
-            <input
-              id="agree"
-              type="checkbox"
-              class="mt-0.5 h-4 w-4 rounded border-rose-300 text-rose-400 focus:ring-rose-300"
-            />
-            <label for="agree" class="text-[11px] sm:text-xs text-slate-700 leading-relaxed">
-              <span data-i18n="signup.agree"></span>
-            </label>
-          </div>
-
-          <button
-            id="btn-signup-submit"
-            type="button"
-            onclick="handleSignupSubmit()"
-            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition disabled:bg-rose-200"
-          >
-            <span data-i18n="signup.submit"></span>
-          </button>
-        </form>
-
-        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
-          <p>
-            <span data-i18n="signup.hasAccount"></span>
-            <button
-              type="button"
-              onclick="switchView('email-login')"
-              class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
-            >
-              <span data-i18n="signup.toLogin"></span>
-            </button>
-          </p>
-          <button
-            type="button"
-            onclick="switchView('home')"
-            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
-          >
-            <span data-i18n="common.backHome"></span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 忘记密码页 -->
-      <section id="view-forgot" class="hidden space-y-6">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="forgot.title"></span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="forgot.desc"></p>
-        </div>
-
-        <form class="space-y-4" onsubmit="return false;">
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.email"></span>
-            </label>
-            <input
-              id="forgot-email"
-              type="email"
-              data-email-autocomplete="true"
-              data-i18n-placeholder="forgot.emailPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.code"></span>
-            </label>
-            <div class="flex gap-2">
-              <input
-                id="forgot-code-input"
-                type="text"
-                data-i18n-placeholder="forgot.codePlaceholder"
-                class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-              />
-              <button
-                id="btn-forgot-send-code"
-                type="button"
-                onclick="handleForgotSendCode(this)"
-                class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition"
-              >
-                <span data-i18n="forgot.sendCode"></span>
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="common.password"></span>
-            </label>
-            <input
-              id="forgot-new-password"
-              type="password"
-              data-i18n-placeholder="common.passwordPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-            <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="forgot.confirmPasswordLabel"></span>
-            </label>
-            <input
-              id="forgot-confirm-password"
-              type="password"
-              data-i18n-placeholder="common.passwordPlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-          </div>
-
-          <button
-            type="button"
-            onclick="handleForgotSubmit()"
-            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
-          >
-            <span data-i18n="forgot.submit"></span>
-          </button>
-        </form>
-
-        <div class="pt-3 flex flex-col items-center gap-1 text-xs sm:text-sm text-slate-500">
-          <button
-            type="button"
-            onclick="switchView('email-login')"
-            class="text-rose-500 font-medium underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400"
-          >
-            <span data-i18n="forgot.backToLogin"></span>
-          </button>
-          <button
-            type="button"
-            onclick="switchView('home')"
-            class="text-[11px] sm:text-xs text-slate-400 hover:text-slate-600"
-          >
-            <span data-i18n="common.backHome"></span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 首次登录补充资料页 -->
-      <section id="view-profile" class="hidden space-y-6">
-        <div class="space-y-2 text-center">
-          <h2 class="text-base sm:text-lg font-medium text-slate-900">
-            <span data-i18n="profile.title"></span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="profile.desc"></p>
-        </div>
-
-        <form class="space-y-4" onsubmit="return false;">
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="profile.nickname"></span>
-            </label>
-            <input
-              id="nickname-input"
-              type="text"
-              data-i18n-placeholder="profile.nicknamePlaceholder"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-slate-700">
-              <span data-i18n="profile.birthday"></span>
-            </label>
-            <input
-              id="birthday-input"
-              type="date"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-            />
-            <p class="text-[11px] sm:text-xs text-slate-400">
-              <span data-i18n="profile.birthdayHint"></span>
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onclick="window.location.href='WiFi-reminder.html'"
-            class="w-full rounded-full bg-rose-400 text-white text-sm sm:text-base font-medium px-4 py-3 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
-          >
-            <span data-i18n="profile.save"></span>
-          </button>
-
-          <button
-            type="button"
-            onclick="window.location.href='WiFi-reminder.html'"
-            class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-500 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition"
-          >
-            <span data-i18n="profile.later"></span>
-          </button>
-        </form>
-      </section>
-    </main>
+    </div>
   </div>
 
   <!-- 首次启动家长控制引导 -->
-  <div
-    id="parental-guide-overlay"
-    class="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center px-4 hidden"
-  >
-    <div
-      class="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4"
-    >
+  <div id="parental-guide-overlay"
+    class="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center px-4 hidden">
+    <div class="w-full max-w-xs sm:max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center">
           <span class="text-lg">👶</span>
@@ -575,18 +557,12 @@
       </div>
 
       <div class="space-y-2 pt-2">
-        <button
-          type="button"
-          onclick="handleParentalAnswer(true)"
-          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition"
-        >
+        <button type="button" onclick="handleParentalAnswer(true)"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
           네, 미성년자가 사용할 거예요（是的，为未成年人使用）
         </button>
-        <button
-          type="button"
-          onclick="handleParentalAnswer(false)"
-          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-600 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition"
-        >
+        <button type="button" onclick="handleParentalAnswer(false)"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-600 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
           아니요, 모두 성인만 사용할게요（不是，仅由成年人使用）
         </button>
       </div>
@@ -596,27 +572,22 @@
   <!-- Toast 组件 -->
   <div id="toast" class="fixed inset-x-0 bottom-5 flex justify-center pointer-events-none hidden">
     <div
-      class="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-slate-900/90 text-white text-xs sm:text-sm px-4 py-2 shadow-lg"
-    >
-      <span
-        class="inline-block h-2 w-2 rounded-full bg-rose-300 shadow-[0_0_8px_rgba(248,187,208,0.9)]"
-      ></span>
+      class="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-slate-900/90 text-white text-xs sm:text-sm px-4 py-2 shadow-lg">
+      <span class="inline-block h-2 w-2 rounded-full bg-rose-300 shadow-[0_0_8px_rgba(248,187,208,0.9)]"></span>
       <span id="toast-message"></span>
     </div>
   </div>
 
   <!-- Email domain suggestions -->
-  <div
-    id="email-suggestion-panel"
-    class="fixed z-40 bg-white border border-slate-200 rounded-2xl shadow-lg text-xs sm:text-sm text-slate-700 py-1 hidden"
-  ></div>
+  <div id="email-suggestion-panel"
+    class="fixed z-40 bg-white border border-slate-200 rounded-2xl shadow-lg text-xs sm:text-sm text-slate-700 py-1 hidden">
+  </div>
 
   <!-- 状态切换 + Loading + Toast JS（仅模拟，不连后台） -->
   <script>
     // i18n
     const I18N = {
       ko: {
-        tagline: "함께 차분히 기록해요",
         "home.title": "로그인 / 시작하기",
         "home.emailLogin": "이메일로 로그인하기",
         "home.phoneLogin": "휴대폰 번호 로그인",
@@ -631,7 +602,7 @@
         "common.code": "인증 코드",
         "common.captcha": "보안 확인",
         "common.captchaPlaceholder": "예: 1234",
-    
+
         "common.backHome": "돌아가기",
 
         "emailLogin.title": "이메일 로그인",
@@ -653,7 +624,6 @@
         "phoneLogin.submit": "코드로 로그인 / 가입",
 
         "signup.title": "회원가입 / 새 계정 만들기",
-        "signup.desc": "Noddy에서 나만의 조용한 기록을 시작해 보세요",
         "signup.emailPlaceholder": "예: mom@noddy.app",
         "signup.codePlaceholder": "이메일로 받은 6자리 코드",
         "signup.passwordSet": "비밀번호 설정",
@@ -691,9 +661,17 @@
         "toast.captchaError": "보안 코드가 올바르지 않습니다. 다시 입력해 주세요.",
         "toast.codeInvalid": "인증 코드가 올바르지 않습니다. 다시 확인해 주세요.",
         "toast.codeExpired": "인증 코드 유효 시간이 지났습니다. 다시 받아 주세요.",
+
+        "region.footnotePrefix": "현재 서비스 구역: ",
+        "region.footnoteSwitch": "전환",
+        "region.globalLabel": "국제 서비스",
+        "region.cnLabel": "중국(대륙) 서비스",
+        "region.modal.title": "국제 서비스 구역에서 계정을 찾을 수 없습니다.",
+        "region.modal.desc": "중국(대륙) 서비스 구역에서 가입하셨나요?",
+        "region.modal.switchBtn": "전환하러 가기",
+        "region.modal.signupBtn": "계속 가입하기",
       },
       en: {
-        tagline: "A calm place to record together",
         "home.title": "Log in / Get started",
         "home.emailLogin": "Continue with email",
         "home.phoneLogin": "Continue with phone number",
@@ -707,9 +685,9 @@
         "common.phone": "Phone number",
         "common.code": "Verification code",
         "common.captcha": "Security check",
-      
 
-     
+
+
 
 
         "common.backHome": "Back",
@@ -733,7 +711,6 @@
         "phoneLogin.submit": "Continue",
 
         "signup.title": "Sign up",
-        "signup.desc": "Start your quiet little record with Noddy",
         "signup.emailPlaceholder": "e.g. mom@noddy.app",
         "signup.codePlaceholder": "6-digit code sent to your email",
         "signup.passwordSet": "Create a password",
@@ -771,9 +748,17 @@
         "toast.captchaError": "The security code is incorrect. Please try again.",
         "toast.codeInvalid": "The verification code is incorrect. Please check and try again.",
         "toast.codeExpired": "The verification code has expired. Please request a new one.",
+
+        "region.footnotePrefix": "Current region: ",
+        "region.footnoteSwitch": "Switch",
+        "region.globalLabel": "Global",
+        "region.cnLabel": "China (Mainland)",
+        "region.modal.title": "Account not found in Global region.",
+        "region.modal.desc": "Did you sign up in China (Mainland) region?",
+        "region.modal.switchBtn": "Switch now",
+        "region.modal.signupBtn": "Continue to sign up",
       },
       zh: {
-        tagline: "一起把日常温柔地记下来",
         "home.title": "登录 / 开始使用",
         "home.emailLogin": "使用邮箱登录",
         "home.phoneLogin": "使用手机号登录",
@@ -788,7 +773,7 @@
         "common.code": "验证码",
         "common.captcha": "验证码",
         "common.captchaPlaceholder": "例如：123456",
-     
+
         "common.backHome": "返回",
 
         "emailLogin.title": "邮箱登录",
@@ -810,7 +795,6 @@
         "phoneLogin.submit": "验证并继续",
 
         "signup.title": "注册新账户",
-        "signup.desc": "在 Noddy 开始一段安静的小记录",
         "signup.emailPlaceholder": "例如：mom@noddy.app",
         "signup.codePlaceholder": "请输入邮箱收到的 6 位验证码",
         "signup.passwordSet": "设置密码",
@@ -848,6 +832,15 @@
         "toast.captchaError": "验证码不正确，请重新输入。",
         "toast.codeInvalid": "验证码错误，请检查后重新输入。",
         "toast.codeExpired": "验证码已过期，请重新获取。",
+
+        "region.footnotePrefix": "当前服务区：",
+        "region.footnoteSwitch": "切换",
+        "region.globalLabel": "国际服务区",
+        "region.cnLabel": "中国服务区",
+        "region.modal.title": "在国际服务区未找到该账号。",
+        "region.modal.desc": "您是否是在中国大陆服务区注册的？",
+        "region.modal.switchBtn": "去切换",
+        "region.modal.signupBtn": "继续注册",
       },
     };
 
@@ -900,6 +893,11 @@
         if (!key) return;
         el.setAttribute("placeholder", t(key));
       });
+
+      // keep region labels in sync
+      if (typeof updateRegionUI === "function") {
+        updateRegionUI();
+      }
     }
 
     const views = {
@@ -962,23 +960,33 @@
     }
 
     function handleEmailLoginSubmit() {
-      // 简单验证码示例：要求输入 6 位 123456
+      // 简单验证码示例：若输入了则校验；为空则不拦截（方便原型快速演示登录）
       if (captchaInput) {
         const code = (captchaInput.value || "").trim();
-        if (code !== "123456") {
+        if (code && code !== "123456") {
           showToast(t("toast.captchaError"));
           captchaInput.focus();
           return;
         }
       }
 
-      // 这里仅做 Loading & 示例，不做真实账号校验
-      setEmailLoading(true);
+      const emailInput = document.getElementById("email-input");
+      const email = ((emailInput && emailInput.value) || "").trim().toLowerCase();
 
+      // 第二阶段：输入邮箱后（二次校验，模拟“账号不存在 404”引导切换）
+      // 规则：注册时记录该邮箱所属服务区；登录时若当前区找不到，但另一服务区存在，则弹窗引导一键切换
+      const accountRegion = getAccountRegionByEmail(email);
+      if (email && accountRegion && accountRegion !== getCurrentRegion()) {
+        openRegionMismatchModal(accountRegion, email);
+        return;
+      }
+
+      // 这里仅做 Loading & 示例
+      setEmailLoading(true);
       setTimeout(() => {
         setEmailLoading(false);
         window.location.href = "WiFi-reminder.html";
-      }, 1500);
+      }, 900);
     }
 
     // 手机登录按钮 Loading
@@ -1033,6 +1041,8 @@
     // 邮箱注册：增加验证码校验 + 提示前往邮箱激活账号
     function handleSignupSubmit() {
       const codeInput = document.getElementById("signup-code-input");
+      const emailEl = document.getElementById("signup-email-input");
+      const email = ((emailEl && emailEl.value) || "").trim().toLowerCase();
       const now = Date.now();
 
       if (codeInput) {
@@ -1049,6 +1059,10 @@
       }
 
       showToast(t("toast.activationEmail"));
+      // 记录此邮箱注册所在服务区（用于“账号不存在 404”引导切换的模拟）
+      if (email) {
+        upsertAccountRegion(email, getCurrentRegion());
+      }
       // 这里保持在当前页，让用户有时间查看提示文案
       // 若需要也可在后续切回登录页：switchView('email-login');
     }
@@ -1096,7 +1110,7 @@
       btn.disabled = true;
       btn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
 
-      const baseText = t("signup.sendCode");
+      const baseText = t("请检查邮箱");
       btn.textContent = `${baseText} (${remaining}s)`;
 
       if (signupCodeTimer) clearInterval(signupCodeTimer);
@@ -1310,6 +1324,11 @@
     // Initial apply
     applyLang(currentLang);
     attachEmailAutocomplete();
+
+    // Region runtime moved to ./region.js
   </script>
+
+  <script src="./region.js"></script>
 </body>
+
 </html>
