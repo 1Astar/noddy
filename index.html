@@ -18,18 +18,32 @@
     class="w-full max-w-md bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_45px_rgba(245,132,155,0.22)] px-6 py-8 sm:px-8 sm:py-10 space-y-8"
   >
     <!-- 语言切换 -->
-    <div class="flex justify-end">
-      <label for="lang-select" class="sr-only">Language</label>
-      <div class="relative">
-        <select
-          id="lang-select"
-          class="rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
-        >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="zh">中文</option>
-        </select>
+    <div class="flex flex-col items-end gap-2">
+      <div class="flex justify-end">
+        <label for="lang-select" class="sr-only">Language</label>
+        <div class="relative">
+          <select
+            id="lang-select"
+            class="rounded-full border border-slate-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm text-slate-700 shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300"
+          >
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+          </select>
+        </div>
       </div>
+
+      <!-- 当前服务区：极小灰字 + 可点击切换（放在语言切换下方） -->
+      <button
+        type="button"
+        id="region-toggle-index"
+        onclick="toggleRegionIndex()"
+        class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] text-slate-500/40 hover:text-slate-600/60 transition"
+        aria-label="region switcher"
+      >
+        <span aria-hidden="true">🌍</span>
+        <span id="region-label-index">国际服务区⌵</span>
+      </button>
     </div>
 
     <header class="space-y-4">
@@ -76,19 +90,6 @@
       </div>
     </main>
 
-    <!-- 当前服务区：极小灰字 + 可点击切换 -->
-    <div class="pt-2 text-[10px] sm:text-[11px] text-slate-400 text-center">
-      <button
-        type="button"
-        id="region-toggle-index"
-        onclick="toggleRegionIndex()"
-        class="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 transition"
-      >
-        <span>当前服务区：</span>
-        <span id="region-label-index"></span>
-        <span class="ml-1 opacity-70">· 点击切换</span>
-      </button>
-    </div>
   </div>
 
   <script>
@@ -216,6 +217,30 @@
 
     updateRegionLabelIndex();
     detectRegionByIPOnceIndex();
+
+    // 支持从其它页面发起“去切换”一键跳转：
+    // /index.html?setRegion=global|cn&redirect=./signup.html%23email-login
+    (function handleRegionRedirect() {
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        const setRegion = params.get("setRegion");
+        const redirect = params.get("redirect");
+        if (setRegion && isValidRegion(setRegion)) {
+          setCurrentRegion(setRegion);
+        }
+        if (redirect) {
+          // 可选：把 email 透传回去，方便自动填入
+          const email = params.get("email");
+          let target = redirect;
+          if (email) {
+            target += (target.includes("?") ? "&" : "?") + "email=" + encodeURIComponent(email);
+          }
+          window.location.replace(target);
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
   </script>
 </body>
 </html>

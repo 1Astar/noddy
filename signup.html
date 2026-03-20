@@ -91,17 +91,7 @@
       transition: transform 0.1s;
     }
 
-    /* Region switcher (fallback entry, tiny & subtle) */
-    .region-footnote-link {
-      text-decoration: none;
-      color: rgba(100, 116, 139, 0.86);
-    }
-    .region-footnote-link:hover {
-      color: rgba(71, 85, 105, 0.9);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      text-decoration-color: rgba(148, 163, 184, 0.55);
-    }
+    /* Region switcher: only in index.html */
   </style>
 </head>
 
@@ -180,45 +170,71 @@
             <p class="text-xs sm:text-sm text-slate-500" data-i18n="emailLogin.desc"></p>
           </div>
 
+          <!-- Tabs: 账号登录 / 验证码登录 -->
+          <div class="flex rounded-3xl bg-white/60 p-1 border border-slate-200">
+            <button id="tab-email-account" type="button" onclick="setEmailLoginTab('account')"
+              class="flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition">
+              <span data-i18n="login.tabAccount"></span>
+            </button>
+            <button id="tab-email-code" type="button" onclick="setEmailLoginTab('code')"
+              class="flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition">
+              <span data-i18n="login.tabCode"></span>
+            </button>
+          </div>
+
           <form class="space-y-4" onsubmit="return false;">
+            <!-- 邮箱（两种模式共用） -->
             <div class="space-y-1.5">
               <label class="block text-xs sm:text-sm font-medium text-slate-700">
                 <span data-i18n="common.email"></span>
               </label>
-              <div class="flex gap-2">
-                <input id="email-input" type="email" data-email-autocomplete="true"
-                  data-i18n-placeholder="emailLogin.emailPlaceholder"
-                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-                <button id="btn-send-email-code" type="button" onclick="handleSendCode()"
-                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
-                  <span data-i18n="emailLogin.sendCode"></span>
-                </button>
+              <input id="email-input" type="email" data-email-autocomplete="true"
+                data-i18n-placeholder="emailLogin.emailPlaceholder"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+            </div>
+
+            <!-- 账号登录 -->
+            <div id="email-panel-account" class="space-y-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                  <span data-i18n="common.password"></span>
+                </label>
+                <input id="password-input" type="password" data-i18n-placeholder="common.passwordPlaceholder"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
+                <div class="flex justify-end">
+                  <button type="button" onclick="switchView('forgot')"
+                    class="text-[11px] sm:text-xs text-rose-500 underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
+                    <span data-i18n="emailLogin.forgot"></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                  <span data-i18n="common.captcha"></span>
+                </label>
+                <input id="captcha-input" type="text" data-i18n-placeholder="common.captchaPlaceholder"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="block text-xs sm:text-sm font-medium text-slate-700">
-                <span data-i18n="common.password"></span>
-              </label>
-              <input id="password-input" type="password" data-i18n-placeholder="common.passwordPlaceholder"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-              <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
-              <div class="flex justify-end">
-                <button type="button" onclick="switchView('forgot')"
-                  class="text-[11px] sm:text-xs text-rose-500 underline underline-offset-4 decoration-rose-200 hover:decoration-rose-400">
-                  <span data-i18n="emailLogin.forgot"></span>
-                </button>
+            <!-- 验证码登录 -->
+            <div id="email-panel-code" class="hidden space-y-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                  <span data-i18n="common.code"></span>
+                </label>
+                <div class="flex gap-2">
+                  <input id="email-otp-input" type="text" data-i18n-placeholder="emailLogin.otpPlaceholder"
+                    class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                  <button id="btn-send-email-code" type="button" onclick="handleSendCode()"
+                    class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                    <span data-i18n="emailLogin.sendCode"></span>
+                  </button>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="emailLogin.otpHint"></p>
               </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="block text-xs sm:text-sm font-medium text-slate-700">
-                <span data-i18n="common.captcha"></span>
-              </label>
-              <input id="captcha-input" type="text" data-i18n-placeholder="common.captchaPlaceholder"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-              <p class="text-[11px] sm:text-xs text-slate-400">
-              </p>
             </div>
 
             <button id="btn-email-submit" type="button" onclick="handleEmailLoginSubmit()"
@@ -250,7 +266,20 @@
             <p class="text-xs sm:text-sm text-slate-500 leading-relaxed" data-i18n="phoneLogin.desc"></p>
           </div>
 
+          <!-- Tabs: 账号登录 / 验证码登录 -->
+          <div class="flex rounded-3xl bg-white/60 p-1 border border-slate-200">
+            <button id="tab-phone-account" type="button" onclick="setPhoneLoginTab('account')"
+              class="flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition">
+              <span data-i18n="login.tabAccount"></span>
+            </button>
+            <button id="tab-phone-code" type="button" onclick="setPhoneLoginTab('code')"
+              class="flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition">
+              <span data-i18n="login.tabCode"></span>
+            </button>
+          </div>
+
           <form class="space-y-4" onsubmit="return false;">
+            <!-- 手机号（两种模式共用） -->
             <div class="space-y-1.5">
               <label class="block text-xs sm:text-sm font-medium text-slate-700">
                 <span data-i18n="common.phone"></span>
@@ -266,21 +295,38 @@
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="block text-xs sm:text-sm font-medium text-slate-700">
-                <span data-i18n="common.code"></span>
-              </label>
-              <div class="flex gap-2">
-                <input id="code-input" type="text" data-i18n-placeholder="phoneLogin.codePlaceholder"
-                  class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-                <button id="btn-send-code" type="button" onclick="handleSendCode()"
-                  class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
-                  <span data-i18n="phoneLogin.sendCode"></span>
-                </button>
+            <!-- 账号登录 -->
+            <div id="phone-panel-account" class="space-y-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                  <span data-i18n="common.password"></span>
+                </label>
+                <div class="relative">
+                  <input id="phone-password-input" type="password" data-i18n-placeholder="common.passwordPlaceholder"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400" data-i18n="common.passwordRule"></p>
               </div>
-              <p class="text-[11px] sm:text-xs text-slate-400">
-                <span data-i18n="phoneLogin.codeHint"></span>
-              </p>
+            </div>
+
+            <!-- 验证码登录 -->
+            <div id="phone-panel-code" class="hidden space-y-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs sm:text-sm font-medium text-slate-700">
+                  <span data-i18n="common.code"></span>
+                </label>
+                <div class="flex gap-2">
+                  <input id="code-input" type="text" data-i18n-placeholder="phoneLogin.codePlaceholder"
+                    class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
+                  <button id="btn-send-code" type="button" onclick="handleSendCode()"
+                    class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
+                    <span data-i18n="phoneLogin.sendCode"></span>
+                  </button>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400">
+                  <span data-i18n="phoneLogin.codeHint"></span>
+                </p>
+              </div>
             </div>
 
             <button id="btn-phone-submit" type="button" onclick="handlePhoneLoginSubmit()"
@@ -493,15 +539,6 @@
         </section>
       </main>
 
-      <!-- 服务区兜底入口（卡片内，确保可见） -->
-      <div class="pt-1 flex justify-center">
-        <button id="region-inline-toggle" type="button" onclick="toggleRegion()"
-          class="region-footnote-link pointer-events-auto text-[10px] sm:text-[11px]">
-          <span id="region-inline-prefix">当前服务区：</span><span id="region-inline-label" class="text-slate-500 font-medium">国际服务区</span>
-          <span class="ml-1 opacity-70">·</span>
-          <span id="region-inline-switch" class="ml-1 opacity-70">切换</span>
-        </button>
-      </div>
     </div> <!-- end card-scroll-area -->
   </div> <!-- end adaptive-card -->
 
@@ -612,6 +649,8 @@
         "emailLogin.submit": "로그인",
         "emailLogin.toSignup": "새로 가입하기",
         "emailLogin.sendCode": "이메일 코드 전송",
+        "emailLogin.otpPlaceholder": "6자리 인증 코드",
+        "emailLogin.otpHint": "1분 내에 도착하지 않으면 다시 요청해 주세요",
 
         "phoneLogin.title": "휴대폰 번호 로그인",
         "phoneLogin.desc": "자주 사용하는 휴대폰 번호를 입력해 주세요",
@@ -662,6 +701,9 @@
         "toast.codeInvalid": "인증 코드가 올바르지 않습니다. 다시 확인해 주세요.",
         "toast.codeExpired": "인증 코드 유효 시간이 지났습니다. 다시 받아 주세요.",
 
+        "login.tabAccount": "계정 로그인",
+        "login.tabCode": "인증번호 로그인",
+
         "region.footnotePrefix": "현재 서비스 구역: ",
         "region.footnoteSwitch": "전환",
         "region.globalLabel": "국제 서비스",
@@ -699,6 +741,8 @@
         "emailLogin.submit": "Log in",
         "emailLogin.toSignup": "Create a new account",
         "emailLogin.sendCode": "Send email code",
+        "emailLogin.otpPlaceholder": "6-digit code",
+        "emailLogin.otpHint": "If it doesn’t arrive within 1 minute, try again",
 
         "phoneLogin.title": "Phone login",
         "phoneLogin.desc": "Enter your phone number to continue",
@@ -749,6 +793,9 @@
         "toast.codeInvalid": "The verification code is incorrect. Please check and try again.",
         "toast.codeExpired": "The verification code has expired. Please request a new one.",
 
+        "login.tabAccount": "Account login",
+        "login.tabCode": "Code login",
+
         "region.footnotePrefix": "Current region: ",
         "region.footnoteSwitch": "Switch",
         "region.globalLabel": "Global",
@@ -783,6 +830,8 @@
         "emailLogin.submit": "登录",
         "emailLogin.toSignup": "注册新账号",
         "emailLogin.sendCode": "发送邮箱验证码",
+        "emailLogin.otpPlaceholder": "请输入验证码",
+        "emailLogin.otpHint": "1 分钟内未收到可重新获取",
 
         "phoneLogin.title": "手机号登录",
         "phoneLogin.desc": "请输入常用手机号，通过验证码登录 / 注册",
@@ -832,6 +881,9 @@
         "toast.captchaError": "验证码不正确，请重新输入。",
         "toast.codeInvalid": "验证码错误，请检查后重新输入。",
         "toast.codeExpired": "验证码已过期，请重新获取。",
+
+        "login.tabAccount": "账号登录",
+        "login.tabCode": "验证码登录",
 
         "region.footnotePrefix": "当前服务区：",
         "region.footnoteSwitch": "切换",
@@ -938,6 +990,53 @@
     // 首页“邮箱登录”入口：切换到邮箱登录页
     function handleEmailLoginClick() {
       switchView("email-login");
+      setEmailLoginTab("account");
+    }
+
+    // Tabs state
+    let emailLoginTab = "account"; // "account" | "code"
+    let phoneLoginTab = "code"; // "account" | "code"
+
+    function setEmailLoginTab(tab) {
+      emailLoginTab = tab === "code" ? "code" : "account";
+      const tabAccount = document.getElementById("tab-email-account");
+      const tabCode = document.getElementById("tab-email-code");
+      const panelAccount = document.getElementById("email-panel-account");
+      const panelCode = document.getElementById("email-panel-code");
+
+      if (tabAccount && tabCode) {
+        const activeCls = ["bg-white", "text-slate-900", "shadow-sm", "border", "border-slate-200"];
+        const idleCls = ["text-slate-500", "hover:text-slate-700"];
+        tabAccount.className =
+          "flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition " +
+          (emailLoginTab === "account" ? activeCls.join(" ") : idleCls.join(" "));
+        tabCode.className =
+          "flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition " +
+          (emailLoginTab === "code" ? activeCls.join(" ") : idleCls.join(" "));
+      }
+      if (panelAccount) panelAccount.classList.toggle("hidden", emailLoginTab !== "account");
+      if (panelCode) panelCode.classList.toggle("hidden", emailLoginTab !== "code");
+    }
+
+    function setPhoneLoginTab(tab) {
+      phoneLoginTab = tab === "account" ? "account" : "code";
+      const tabAccount = document.getElementById("tab-phone-account");
+      const tabCode = document.getElementById("tab-phone-code");
+      const panelAccount = document.getElementById("phone-panel-account");
+      const panelCode = document.getElementById("phone-panel-code");
+
+      if (tabAccount && tabCode) {
+        const activeCls = ["bg-white", "text-slate-900", "shadow-sm", "border", "border-slate-200"];
+        const idleCls = ["text-slate-500", "hover:text-slate-700"];
+        tabAccount.className =
+          "flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition " +
+          (phoneLoginTab === "account" ? activeCls.join(" ") : idleCls.join(" "));
+        tabCode.className =
+          "flex-1 rounded-3xl px-3 py-2 text-xs sm:text-sm font-medium transition " +
+          (phoneLoginTab === "code" ? activeCls.join(" ") : idleCls.join(" "));
+      }
+      if (panelAccount) panelAccount.classList.toggle("hidden", phoneLoginTab !== "account");
+      if (panelCode) panelCode.classList.toggle("hidden", phoneLoginTab !== "code");
     }
 
     // 邮箱登录按钮 Loading + 验证码校验
@@ -960,12 +1059,22 @@
     }
 
     function handleEmailLoginSubmit() {
-      // 简单验证码示例：若输入了则校验；为空则不拦截（方便原型快速演示登录）
-      if (captchaInput) {
-        const code = (captchaInput.value || "").trim();
-        if (code && code !== "123456") {
-          showToast(t("toast.captchaError"));
-          captchaInput.focus();
+      // 账号登录：验证码输入了才校验；验证码登录：校验邮箱验证码
+      if (emailLoginTab === "account") {
+        if (captchaInput) {
+          const code = (captchaInput.value || "").trim();
+          if (code && code !== "123456") {
+            showToast(t("toast.captchaError"));
+            captchaInput.focus();
+            return;
+          }
+        }
+      } else {
+        const otpEl = document.getElementById("email-otp-input");
+        const otp = ((otpEl && otpEl.value) || "").trim();
+        if (!otp || otp !== "123456") {
+          showToast(t("toast.codeInvalid"));
+          if (otpEl) otpEl.focus();
           return;
         }
       }
@@ -974,9 +1083,9 @@
       const email = ((emailInput && emailInput.value) || "").trim().toLowerCase();
 
       // 第二阶段：输入邮箱后（二次校验，模拟“账号不存在 404”引导切换）
-      // 规则：注册时记录该邮箱所属服务区；登录时若当前区找不到，但另一服务区存在，则弹窗引导一键切换
-      const accountRegion = getAccountRegionByEmail(email);
-      if (email && accountRegion && accountRegion !== getCurrentRegion()) {
+      // 本页不提供切换入口；“去切换”会跳回 index.html 一键切换后再回到这里
+      const accountRegion = getAccountRegionByEmailLite(email);
+      if (email && accountRegion && accountRegion !== getCurrentRegionLite()) {
         openRegionMismatchModal(accountRegion, email);
         return;
       }
@@ -1008,6 +1117,16 @@
     }
 
     function handlePhoneLoginSubmit() {
+      // 账号登录：不校验；验证码登录：简单校验 123456
+      if (phoneLoginTab === "code") {
+        const codeEl = document.getElementById("code-input");
+        const code = ((codeEl && codeEl.value) || "").trim();
+        if (!code || code !== "123456") {
+          showToast(t("toast.codeInvalid"));
+          if (codeEl) codeEl.focus();
+          return;
+        }
+      }
       setPhoneLoading(true);
 
       setTimeout(() => {
@@ -1061,7 +1180,7 @@
       showToast(t("toast.activationEmail"));
       // 记录此邮箱注册所在服务区（用于“账号不存在 404”引导切换的模拟）
       if (email) {
-        upsertAccountRegion(email, getCurrentRegion());
+        upsertAccountRegionLite(email, getCurrentRegionLite());
       }
       // 这里保持在当前页，让用户有时间查看提示文案
       // 若需要也可在后续切回登录页：switchView('email-login');
@@ -1324,11 +1443,117 @@
     // Initial apply
     applyLang(currentLang);
     attachEmailAutocomplete();
+    setEmailLoginTab("account");
+    setPhoneLoginTab("code");
 
-    // Region runtime moved to ./region.js
+    // -------------------------
+    // Region mismatch (lite, no switch UI here)
+    // -------------------------
+    const REGION_KEY = "noddy_region"; // "global" | "cn"（由 index.html 负责切换）
+    const ACCOUNT_REGION_KEY = "noddy_account_region_map_v1"; // { [email]: "global" | "cn" }
+
+    function isValidRegionLite(v) {
+      return v === "global" || v === "cn";
+    }
+
+    function getCurrentRegionLite() {
+      const v = localStorage.getItem(REGION_KEY);
+      return isValidRegionLite(v) ? v : "global";
+    }
+
+    function getAccountRegionMapLite() {
+      try {
+        const raw = localStorage.getItem(ACCOUNT_REGION_KEY);
+        const obj = raw ? JSON.parse(raw) : {};
+        return obj && typeof obj === "object" ? obj : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function upsertAccountRegionLite(email, region) {
+      if (!email || !isValidRegionLite(region)) return;
+      const map = getAccountRegionMapLite();
+      map[email] = region;
+      localStorage.setItem(ACCOUNT_REGION_KEY, JSON.stringify(map));
+    }
+
+    function getAccountRegionByEmailLite(email) {
+      if (!email) return null;
+      const map = getAccountRegionMapLite();
+      const v = map[email];
+      return isValidRegionLite(v) ? v : null;
+    }
+
+    // 兜底演示账号：noddy@gmail.com 只在国际服存在（无需注册即可演示）
+    (function seedDemoAccountLite() {
+      const map = getAccountRegionMapLite();
+      if (!map["noddy@gmail.com"]) {
+        map["noddy@gmail.com"] = "global";
+        localStorage.setItem(ACCOUNT_REGION_KEY, JSON.stringify(map));
+      }
+    })();
+
+    let pendingMismatchTargetRegion = null;
+    let pendingMismatchEmail = "";
+
+    function openRegionMismatchModal(targetRegion, email) {
+      pendingMismatchTargetRegion = isValidRegionLite(targetRegion) ? targetRegion : null;
+      pendingMismatchEmail = email || "";
+      const modal = document.getElementById("region-mismatch-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeRegionMismatchModal() {
+      const modal = document.getElementById("region-mismatch-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      pendingMismatchTargetRegion = null;
+      pendingMismatchEmail = "";
+    }
+
+    function handleRegionMismatchSwitch() {
+      const target = pendingMismatchTargetRegion || "global";
+      const url =
+        "./index.html?setRegion=" +
+        encodeURIComponent(target) +
+        "&redirect=" +
+        encodeURIComponent("./signup.html#email-login") +
+        (pendingMismatchEmail ? "&email=" + encodeURIComponent(pendingMismatchEmail) : "");
+      closeRegionMismatchModal();
+      window.location.href = url;
+    }
+
+    function handleRegionMismatchContinueSignup() {
+      closeRegionMismatchModal();
+      switchView("signup");
+      const signupEmailEl = document.getElementById("signup-email-input");
+      if (signupEmailEl && pendingMismatchEmail) {
+        signupEmailEl.value = pendingMismatchEmail;
+        signupEmailEl.focus();
+      }
+    }
+
+    // 支持从 index.html 回跳：自动进入邮箱登录页并填入邮箱
+    (function restoreFromRedirect() {
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        const email = (params.get("email") || "").trim();
+        if (email) {
+          const emailInput = document.getElementById("email-input");
+          if (emailInput) emailInput.value = email;
+        }
+        if ((window.location.hash || "") === "#email-login") {
+          switchView("email-login");
+        }
+      } catch {
+        // ignore
+      }
+    })();
   </script>
-
-  <script src="./region.js"></script>
 </body>
 
 </html>
