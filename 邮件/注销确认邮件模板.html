@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Noddy 账号注销确认</title>
+    <style>
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(255,107,149,0.1); }
+        .header { background: #FFEDF2; padding: 40px; text-align: center; }
+        .content { padding: 40px 30px; text-align: center; }
+        h1 { color: #FF6B95; font-size: 26px; margin-bottom: 20px; font-weight: 600; }
+        p { color: #555; font-size: 16px; line-height: 1.8; margin-bottom: 20px; }
+        .info-box { display: inline-block; margin: 20px 0; padding: 16px 32px; border-radius: 16px; background: #FFF5F8; color: #FF3F7C; font-size: 15px; font-weight: 600; text-align: left; width: 80%; }
+        .tip { font-size: 13px; color: #aaa; margin-top: 10px; }
+        .divider { border: none; border-top: 1px solid #FFE0EA; margin: 20px 0; }
+        .footer { background: #fafafa; padding: 20px; text-align: center; color: #bbb; font-size: 12px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://your-domain.com/noddy-logo.png" alt="Noddy" width="100">
+        </div>
+
+        <div class="content">
+            <h1>账号注销申请已收到</h1>
+            <p>
+                你好，<br>
+                我们已收到你的账号注销申请。<br>
+                以下是本次申请的相关信息：
+            </p>
+
+            <!-- 将以下变量替换为真实数据 -->
+            <div class="info-box">
+                📧 申请邮箱：{{userEmail}}<br>
+                📅 申请时间：{{requestTime}}<br>
+                ⏳ 预计处理时间：7个工作日内
+            </div>
+
+            <hr class="divider">
+
+            <p>
+                注销完成后，以下数据将被永久删除：<br>
+                账号信息、聊天记录、个人设置及所有相关数据。<br>
+                <strong>此操作不可撤销，请确认是否继续。</strong>
+            </p>
+
+            <p class="tip">
+                如果这不是你本人的操作，请忽略这封邮件，<br>
+                并立即通过 App 内反馈联系我们。
+            </p>
+        </div>
+
+        <div class="footer">
+            本邮件由系统自动发出，请勿直接回复。<br>
+            如有疑问，请联系：noddy@guanyingis.com<br>
+            &copy; 2026 Noddy Team · 江西芯生万物科技发展有限公司
+        </div>
+    </div>
+</body>
+</html>
