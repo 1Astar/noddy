@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>手机正在连接设备</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --purple-light: #e8dff5;
+      --purple: #c4b5e0;
+      --blue-light: #d4e8f7;
+      --blue: #a8d4f0;
+      --pink: #ff9ac4;
+      --pink-light: #ffe6f2;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --shadow: 0 4px 20px rgba(164, 150, 200, 0.25);
+      --radius: 16px;
+      --radius-sm: 12px;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--purple-light) 0%, var(--blue-light) 35%, #fff 60%);
+      color: #333;
+    }
+
+    /* 顶部状态栏区域 */
+    .status-bar {
+      padding: 10px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 20px 16px;
+    }
+
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      transition: background 0.3s;
+    }
+
+    .step-dot.active {
+      background: var(--pink);
+    }
+
+    .page-header {
+      padding: 0 20px 20px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .page-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* 进程时间线 */
+    .progress-list {
+      padding: 0 20px 24px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .progress-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .progress-item:not(:last-child) .progress-item-content::after {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 28px;
+      bottom: -8px;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .progress-item.done .progress-item-content::after {
+      background: #4caf50;
+    }
+
+    .progress-icon-wrap {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      transition: background 0.3s;
+    }
+
+    .progress-item.done .progress-icon-wrap {
+      background: #4caf50;
+    }
+
+    .progress-item.done .progress-icon-wrap::before {
+      content: '✓';
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .progress-item.loading .progress-icon-wrap {
+      background: #4caf50;
+    }
+
+    .progress-item.loading .progress-icon-wrap::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(255,255,255,0.6);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .progress-item-content {
+      flex: 1;
+      position: relative;
+    }
+
+    .progress-item-label {
+      font-size: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .progress-item-sublabel {
+      font-size: 13px;
+      color: #999;
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+    .progress-item-sublabel:empty {
+      display: none;
+    }
+
+    /* 下一步按钮 */
+    .bottom-actions {
+      padding: 20px 20px 32px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .btn-next {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--pink), #ffc371);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(255, 154, 196, 0.4);
+      font-family: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(255, 154, 196, 0.5);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .scan-tip {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.6;
+      text-align: left;
+      white-space: pre-line;
+    }
+
+    /* 权限弹窗 / 设备选择弹窗 通用 */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 20px 20px 24px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #f0f0f0;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .modal-body.dual-lang {
+      margin-bottom: 8px;
+    }
+
+    .modal-body.dual-lang .primary { color: #333; font-weight: 500; }
+    .modal-body.dual-lang .secondary { color: #999; font-size: 13px; margin-top: 4px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, var(--pink), #ffc371);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 154, 196, 0.35);
+    }
+
+    /* 设备选择弹窗 */
+    .device-select-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #f8f8f8;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .device-select-row:hover,
+    .device-select-row.selected {
+      background: #fff;
+      border-color: var(--pink);
+    }
+
+    .device-radio {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .device-select-row.selected .device-radio {
+      border-color: var(--pink);
+      background: var(--pink);
+    }
+
+    .device-select-row.selected .device-radio::after {
+      content: '✓';
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .device-name { font-weight: 500; color: #333; }
+    .device-arrow { margin-left: auto; color: #999; font-size: 14px; }
+
+    .modal-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 12px;
+    }
+    .modal-tip:empty {
+      display: none;
+    }
+
+    .device-list-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .modal-link-btn {
+      margin-top: 10px;
+      border: none;
+      background: transparent;
+      color: #fb7185;
+      font-size: 12px;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .btn-choose-device {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+      background: #e0e0e0;
+      color: #999;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-choose-device.allow {
+      background: linear-gradient(135deg, var(--pink), #ffc371);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 154, 196, 0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="status-bar">
+    <span>14:33</span>
+    <span></span>
+  </div>
+
+  <div class="nav-row">
+    <button type="button" class="back-btn" onclick="history.back()">←</button>
+    <div class="step-dots">
+      <span class="step-dot active"></span>
+      <span class="step-dot active"></span>
+      <span class="step-dot"></span>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <h1 class="page-title" data-i18n="progress.title"></h1>
+    <p class="page-desc" data-i18n="progress.desc"></p>
+  </div>
+
+  <div class="progress-list">
+    <div class="progress-item done" data-step="wifi">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.wifi"></div>
+        <div class="progress-item-sublabel" data-i18n="progress.wifiSub"></div>
+      </div>
+    </div>
+    <div class="progress-item" data-step="location">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.location"></div>
+        <div class="progress-item-sublabel" data-i18n="progress.locationSub"></div>
+      </div>
+    </div>
+    <div class="progress-item" data-step="bluetooth">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.bluetooth"></div>
+        <div class="progress-item-sublabel" data-i18n="progress.bluetoothSub"></div>
+      </div>
+    </div>
+    <div class="progress-item" data-step="scan">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.scan"></div>
+        <div class="progress-item-sublabel" data-i18n="progress.scanSub"></div>
+      </div>
+    </div>
+    <div class="progress-item" data-step="select">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.select"></div>
+        <div class="progress-item-sublabel selected-device-name" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="progress-item" data-step="connect">
+      <div class="progress-icon-wrap"></div>
+      <div class="progress-item-content">
+        <div class="progress-item-label" data-i18n="progress.connect"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-actions">
+    <button type="button" class="btn-next" id="btnNext" disabled data-i18n="progress.scanBtnDisabled">继续扫描中...</button>
+    <p class="scan-tip" data-i18n="progress.scanHint"></p>
+  </div>
+
+  <!-- 蓝牙权限弹窗 -->
+  <div class="overlay" id="overlayBluetooth">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" data-i18n="progress.btTitle"></span>
+        <button type="button" class="modal-close" onclick="closeBluetoothModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div data-i18n="progress.btDesc"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeBluetoothModal()" data-i18n="progress.cancel"></button>
+        <button type="button" class="btn btn-confirm" onclick="grantBluetooth()" data-i18n="progress.open"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 定位权限弹窗 -->
+  <div class="overlay" id="overlayLocation">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" data-i18n="progress.locTitle"></span>
+        <button type="button" class="modal-close" onclick="closeLocationModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div data-i18n="progress.locDesc"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeLocationModal()" data-i18n="progress.cancel"></button>
+        <button type="button" class="btn btn-confirm" onclick="grantLocation()" data-i18n="progress.open"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 选择设备弹窗 -->
+  <div class="overlay" id="overlayDevice">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" data-i18n="progress.deviceTitle"></span>
+        <button type="button" class="modal-close" onclick="closeDeviceModal()">×</button>
+      </div>
+      <div class="device-list-label" data-i18n="progress.nearbyTitle"></div>
+      <div class="device-select-row selected" data-device="Noddy">
+        <span class="device-radio"></span>
+        <span class="device-name">Noddy</span>
+        <span class="device-arrow">▼</span>
+      </div>
+      <button type="button" class="btn-choose-device allow" id="btnConfirmDevice" onclick="confirmDevice()" data-i18n="progress.confirmBtn"></button>
+      <button type="button" class="modal-link-btn" onclick="showNotFoundHelp()" data-i18n="progress.notFound"></button>
+    </div>
+  </div>
+
+  <script>
+(function() {
+  var I18N = {
+    ko: { "progress.title": "휴대폰이 기기에 연결 중", "progress.desc": "휴대폰 권한을 확인하고 기기와 연결합니다. 기기를 배선 상태로 두세요.", "progress.wifi": "Wi‑Fi 켜짐", "progress.wifiSub": "", "progress.location": "위치 권한 켜짐", "progress.locationSub": "", "progress.bluetooth": "블루투스 켜짐", "progress.bluetoothSub": "", "progress.scan": "블루투스 기기 검색", "progress.scanSub": "", "progress.select": "배선할 기기 선택", "progress.connect": "휴대폰이 Noddy에 연결됨", "progress.nextBtn": "다음", "progress.scanBtnDisabled": "계속 스캔 중...", "progress.scanHint": "기기를 페어링 상태로 유지해 주세요(전원 연결 상태).\n💡 계속 찾지 못하면 휴대폰을 기기 가까이 가져가 보세요.", "progress.scanHintRetry": "기기에 전원만 연결되어 있으면 괜찮아요~ 2분 동안 기다릴게요. 시간이 지나면 전원을 다시 연결해 주세요 🧸", "progress.btTitle": "블루투스 권한 필요", "progress.btDesc": "주변 기기를 찾기 위해 블루투스 권한이 필요합니다.", "progress.locTitle": "위치 권한 필요", "progress.locDesc": "Wi‑Fi 검색을 위해 위치 권한이 필요합니다.", "progress.deviceTitle": "Noddy 기기를 선택해 주세요", "progress.nearbyTitle": "주변 기기:", "progress.deviceTip": "잘못 선택하면 연결을 다시 시작해야 해요.", "progress.cancel": "취소", "progress.open": "열기", "progress.confirmBtn": "선택 완료", "progress.notFound": "기기를 찾지 못했나요?" },
+    en: { "progress.title": "Connecting phone to device", "progress.desc": "Checking permissions and connecting to device. Keep the device in pairing mode.", "progress.wifi": "Wi‑Fi on", "progress.wifiSub": "", "progress.location": "Location on", "progress.locationSub": "", "progress.bluetooth": "Bluetooth on", "progress.bluetoothSub": "", "progress.scan": "Scan for Bluetooth devices", "progress.scanSub": "", "progress.select": "Select device to configure", "progress.connect": "Phone connected to Noddy", "progress.nextBtn": "Next", "progress.scanBtnDisabled": "Still scanning...", "progress.scanHint": "Keep the device in pairing mode (powered on).\n💡 If it still cannot be found, move your phone closer to the device.", "progress.scanHintRetry": "As long as the device is powered on, I will wait quietly for 2 minutes. If it times out, reconnect power and try again 🧸", "progress.btTitle": "Bluetooth permission needed", "progress.btDesc": "Bluetooth permission is needed to find nearby devices.", "progress.locTitle": "Location permission needed", "progress.locDesc": "Location permission is needed to search for Wi‑Fi.", "progress.deviceTitle": "Select your Noddy device", "progress.nearbyTitle": "Nearby devices:", "progress.deviceTip": "Wrong selection will require reconnecting.", "progress.cancel": "Cancel", "progress.open": "Open", "progress.confirmBtn": "Confirm", "progress.notFound": "Can't find my device?" },
+    zh: { "progress.title": "🔍 我在努力找到你～", "progress.desc": "小宝别急，我正在偷偷扫描周围……\n需要你帮我开几个小开关，我才能找到你家的信号 ✨", "progress.wifi": "✅ Wi‑Fi 已开（好棒！）", "progress.wifiSub": "", "progress.location": "✅ 定位已开（这是为了找设备，不会记你去哪～）", "progress.locationSub": "", "progress.bluetooth": "✅ 蓝牙已开（我靠这个闻到你）", "progress.bluetoothSub": "", "progress.scan": "⏳ 正在扫描附近的 Noddy……", "progress.scanSub": "⏳ 找到后就可以选我啦！", "progress.select": "📡 找到一群“我”？选那个真正的我～", "progress.connect": "手机连接到 Noddy", "progress.nextBtn": "下一步", "progress.scanBtnDisabled": "继续扫描中...", "progress.scanHint": "设备要保持在配网状态哦（插着电、没被你拿走就行～）\n💡 小提示：如果一直找不到，可以试试把手机靠近设备～",
+    "progress.scanHintRetry": "设备已通电就好～我会默默等你 2 分钟，超时的话重新插一下电就行 🧸", "progress.btTitle": "需要蓝牙权限", "progress.btDesc": "开一下蓝牙吧～我靠这个闻到你，才能找到附近设备。", "progress.locTitle": "需要定位权限", "progress.locDesc": "开一下定位吧～这是为了搜索 Wi‑Fi，不会记你去哪。", "progress.deviceTitle": "扫描完成！附近有 Noddy 在挥手 👋", "progress.nearbyTitle": "附近设备：", "progress.deviceTip": "点一下你的那只，别点错哦～\n如果选错了也没关系，退回来重新选就好，我不会生气的 🧸", "progress.cancel": "取消", "progress.open": "去开启", "progress.confirmBtn": "👆 确定选这个", "progress.notFound": "没找到我的设备？" }
+  };
+  function detectLang() {
+    var saved = localStorage.getItem("noddy_lang");
+    if (saved && I18N[saved]) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    if (nav.indexOf("ko") === 0) return "ko";
+    if (nav.indexOf("zh") === 0) return "zh";
+    return "en";
+  }
+  var currentLang = detectLang();
+  function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en && I18N.en[key]) || key; }
+  function applyLang(lang) {
+    if (!I18N[lang]) return;
+    currentLang = lang;
+    localStorage.setItem("noddy_lang", lang);
+    document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+      var key = el.getAttribute("data-i18n");
+      if (!key) return;
+      el.textContent = t(key) || "";
+    });
+  }
+  var sel = document.getElementById("lang-select");
+  if (sel) {
+    sel.value = currentLang;
+    sel.addEventListener("change", function(e) {
+      applyLang(e.target.value);
+      if (typeof window._refreshAddDeviceScanHint === "function") window._refreshAddDeviceScanHint();
+    });
+  }
+  applyLang(currentLang);
+  window._addDeviceT = t;
+})();
+  </script>
+  <script>
+    var stepOrder = ['wifi', 'location', 'bluetooth', 'scan', 'select', 'connect'];
+    var currentStepIndex = 0;
+    var locationGranted = false;
+    var bluetoothGranted = false;
+    var deviceSelected = false;
+    var selectedDeviceName = '';
+    var IS_CHILD_USER_KEY = 'noddy_is_child_user';
+    var isChildUser = localStorage.getItem(IS_CHILD_USER_KEY) === '1';
+    var NOT_FOUND_CLICKS_KEY = 'noddy_add_device_not_found_clicks';
+    function getUiLang() {
+      var lang = (localStorage.getItem('noddy_lang') || '').toLowerCase();
+      if (lang === 'ko' || lang === 'en' || lang === 'zh') return lang;
+      return 'zh';
+    }
+
+    function refreshScanHint() {
+      var scanHint = document.querySelector('.scan-tip');
+      if (!scanHint) return;
+      if ((localStorage.getItem('noddy_lang') || 'zh') !== 'zh') return;
+      var clicks = parseInt(sessionStorage.getItem(NOT_FOUND_CLICKS_KEY) || '0', 10);
+      var base;
+      if (isChildUser) {
+        base = (window._addDeviceT && window._addDeviceT('progress.scanHint')) || '';
+      } else {
+        base =
+          '设备要保持在配网状态哦（插着电、没被你拿走就行～）\n💡 小提示：如果一直找不到，可以试试把手机靠近设备～';
+      }
+      var text = base;
+      if (clicks >= 2) {
+        var extra = window._addDeviceT && window._addDeviceT('progress.scanHintRetry');
+        if (extra) text += '\n' + extra;
+      }
+      scanHint.textContent = text;
+    }
+    window._refreshAddDeviceScanHint = refreshScanHint;
+
+    function getItem(step) {
+      return document.querySelector('.progress-item[data-step="' + step + '"]');
+    }
+
+    function setStepDone(step) {
+      var el = getItem(step);
+      if (el) {
+        el.classList.remove('loading');
+        el.classList.add('done');
+      }
+    }
+
+    function setStepLoading(step) {
+      var el = getItem(step);
+      if (el) {
+        el.classList.remove('done');
+        el.classList.add('loading');
+      }
+    }
+
+    function showBluetoothModal() {
+      document.getElementById('overlayBluetooth').classList.add('show');
+    }
+
+    function closeBluetoothModal() {
+      document.getElementById('overlayBluetooth').classList.remove('show');
+    }
+
+    function showLocationModal() {
+      document.getElementById('overlayLocation').classList.add('show');
+    }
+
+    function closeLocationModal() {
+      document.getElementById('overlayLocation').classList.remove('show');
+    }
+
+    function grantBluetooth() {
+      closeBluetoothModal();
+      bluetoothGranted = true;
+      setStepDone('bluetooth');
+      setStepLoading('scan');
+      setTimeout(function() {
+        setStepDone('scan');
+        document.getElementById('overlayDevice').classList.add('show');
+      }, 1500);
+    }
+
+    function grantLocation() {
+      closeLocationModal();
+      locationGranted = true;
+      setStepDone('location');
+      showBluetoothModal();
+    }
+
+    function runNextStep() {
+      if (!locationGranted) {
+        showLocationModal();
+        return;
+      }
+      if (!bluetoothGranted) {
+        showBluetoothModal();
+        return;
+      }
+    }
+
+    function showDeviceModal() {
+      document.getElementById('overlayDevice').classList.add('show');
+    }
+
+    function closeDeviceModal() {
+      document.getElementById('overlayDevice').classList.remove('show');
+    }
+
+    function confirmDevice() {
+      sessionStorage.removeItem(NOT_FOUND_CLICKS_KEY);
+      selectedDeviceName = 'Noddy';
+      deviceSelected = true;
+      closeDeviceModal();
+      setStepDone('select');
+      var sub = document.querySelector('.progress-item[data-step="select"] .progress-item-sublabel');
+      if (sub) {
+        sub.textContent = selectedDeviceName;
+        sub.style.display = 'block';
+      }
+      setStepDone('connect');
+      document.getElementById('btnNext').disabled = false;
+      var btn = document.getElementById('btnNext');
+      if (btn) btn.textContent = (window._addDeviceT ? window._addDeviceT('progress.nextBtn') : '下一步');
+    }
+
+    document.getElementById('btnNext').addEventListener('click', function() {
+      window.location.href = 'WiFi-connect.html';
+    });
+
+    function showNotFoundHelp() {
+      var n = parseInt(sessionStorage.getItem(NOT_FOUND_CLICKS_KEY) || '0', 10) + 1;
+      sessionStorage.setItem(NOT_FOUND_CLICKS_KEY, String(n));
+      refreshScanHint();
+      var lang = getUiLang();
+      var msg = '试试把手机拿近一点，或者确认一下我的灯还在闪吗～';
+      if (lang === 'ko') msg = '휴대폰을 기기에 조금 더 가까이 가져가 보거나, 표시등이 깜빡이는지 확인해 주세요~';
+      if (lang === 'en') msg = 'Try moving your phone closer to the device, and check whether the indicator light is blinking.';
+      alert(msg);
+    }
+    window.showNotFoundHelp = showNotFoundHelp;
+
+    function applyYoungUserCopy() {
+      if (isChildUser) return;
+      var lang = getUiLang();
+      var copyByLang = {
+        zh: {
+          title: '🔍 我在找你……',
+          desc: '帮我开好：Wi-Fi · 定位 · 蓝牙\n（都是为了找到你，不会乱用～）',
+          wifi: 'Wi-Fi，启动！',
+          location: '定位，启动！',
+          bluetooth: '蓝牙，启动！',
+          scan: '⏳ 正在扫描附近的 Noddy……',
+          select: '找到后点一下你的那只就行～',
+          confirm: '找到我的设备了！'
+        },
+        ko: {
+          title: '🔍 널 찾고 있어……',
+          desc: 'Wi-Fi · 위치 · 블루투스를 켜줘!\n(기기를 찾기 위해서만 써요~)',
+          wifi: 'Wi-Fi, 시동!',
+          location: '위치, 시동!',
+          bluetooth: '블루투스, 시동!',
+          scan: '⏳ 주변 Noddy를 찾는 중……',
+          select: '찾으면 네 Noddy를 톡 눌러줘~',
+          confirm: '내 기기 찾았어요!'
+        },
+        en: {
+          title: '🔍 I am finding you...',
+          desc: 'Please turn on: Wi-Fi · Location · Bluetooth\n(Only used to find your device~)',
+          wifi: 'Wi-Fi, start!',
+          location: 'Location, start!',
+          bluetooth: 'Bluetooth, start!',
+          scan: '⏳ Scanning nearby Noddy...',
+          select: 'Tap your Noddy once it appears~',
+          confirm: 'Found my device!'
+        }
+      };
+      var copy = copyByLang[lang] || copyByLang.zh;
+      var titleEl = document.querySelector('.page-title');
+      var descEl = document.querySelector('.page-desc');
+      if (titleEl) titleEl.textContent = copy.title;
+      if (descEl) {
+        descEl.textContent = copy.desc;
+      }
+
+      var wifiLabel = document.querySelector('.progress-item[data-step="wifi"] .progress-item-label');
+      var wifiSub = document.querySelector('.progress-item[data-step="wifi"] .progress-item-sublabel');
+      var locLabel = document.querySelector('.progress-item[data-step="location"] .progress-item-label');
+      var locSub = document.querySelector('.progress-item[data-step="location"] .progress-item-sublabel');
+      var btLabel = document.querySelector('.progress-item[data-step="bluetooth"] .progress-item-label');
+      var btSub = document.querySelector('.progress-item[data-step="bluetooth"] .progress-item-sublabel');
+      var scanLabel = document.querySelector('.progress-item[data-step="scan"] .progress-item-label');
+      var scanSub = document.querySelector('.progress-item[data-step="scan"] .progress-item-sublabel');
+      var selectLabel = document.querySelector('.progress-item[data-step="select"] .progress-item-label');
+      var scanHint = document.querySelector('.scan-tip');
+      var confirmBtn = document.getElementById('btnConfirmDevice');
+
+      if (wifiLabel) wifiLabel.textContent = copy.wifi;
+      if (wifiSub) wifiSub.textContent = '';
+      if (locLabel) locLabel.textContent = copy.location;
+      if (locSub) locSub.textContent = '';
+      if (btLabel) btLabel.textContent = copy.bluetooth;
+      if (btSub) btSub.textContent = '';
+      if (scanLabel) scanLabel.textContent = copy.scan;
+      if (scanSub) scanSub.textContent = '';
+      if (selectLabel) selectLabel.textContent = copy.select;
+      if (confirmBtn) confirmBtn.textContent = copy.confirm;
+    }
+
+    applyYoungUserCopy();
+    refreshScanHint();
+
+    // 进入页面时先请求定位权限，再蓝牙，再扫描与设备选择
+    setTimeout(function() {
+      showLocationModal();
+    }, 400);
+  </script>
+</body>
+</html>

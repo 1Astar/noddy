@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>添加设备 / 기기 추가하기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Pretendard, "Apple SD Gothic Neo", -apple-system, BlinkMacSystemFont,
+        "Segoe UI", system-ui, sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 26px;
+      padding: 22px 20px 20px;
+      box-shadow:
+        0 20px 40px rgba(248, 187, 208, 0.45),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+      backdrop-filter: blur(14px);
+    }
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .title-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fb7185, #fb923c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      box-shadow: 0 10px 26px rgba(248, 113, 113, 0.65);
+    }
+    .title-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .title-text h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+    .title-text span {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(248, 187, 208, 0.2);
+      color: #fb7185;
+      border: 1px solid rgba(248, 187, 208, 0.7);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .header-note {
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .body {
+      margin-top: 8px;
+      padding: 16px 14px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fefce8, #fff7f0);
+    }
+    .body h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    .body p {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.75;
+    }
+    .btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #fb7185, #fb923c);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow:
+        0 12px 24px rgba(248, 113, 113, 0.45),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+    .btn:hover {
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow:
+        0 8px 18px rgba(248, 113, 113, 0.5),
+        0 0 0 1px rgba(248, 187, 208, 0.7);
+    }
+    .btn span {
+      font-size: 13px;
+    }
+    .note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px 20px 24px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .modal-title { font-size: 17px; font-weight: 600; color: #333; }
+    .modal-close {
+      width: 28px; height: 28px;
+      border: none; background: #f0f0f0;
+      border-radius: 50%;
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #666;
+    }
+    .device-select-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #f8f8f8;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .device-select-row.selected { border-color: #fb7185; background: #fff; }
+    .device-radio {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .device-select-row.selected .device-radio {
+      border-color: #fb7185;
+      background: #fb7185;
+      color: #fff;
+    }
+    .device-name { font-weight: 500; color: #333; }
+    .device-arrow { margin-left: auto; color: #999; }
+    .modal-tip { font-size: 12px; color: #999; margin-top: 12px; }
+    .btn-choose-device {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #fb7185, #fb923c);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(248, 113, 113, 0.35);
+    }
+    .lang-wrap { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .lang-select { padding: 6px 12px; border-radius: 999px; border: 1px solid #e2e8f0; background: rgba(255,255,255,0.9); font-size: 12px; color: #334155; cursor: pointer; }
+    .lang-select:focus { outline: none; border-color: #fda4af; box-shadow: 0 0 0 2px rgba(253,164,175,0.3); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="title-row">
+        <div class="icon">+</div>
+        <div class="title-text">
+          <h1 id="reminder-title" data-i18n="addDevice.title"></h1>
+          <span id="reminder-subtitle" data-i18n="addDevice.subtitle"></span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="badge">Step 1 / 3</span>
+        <span class="header-note">慢慢来，我等你</span>
+      </div>
+    </div>
+
+    <div class="body">
+      <h2 id="reminder-body-title" data-i18n="addDevice.bodyTitle"></h2>
+      <p id="reminder-body-desc" data-i18n="addDevice.bodyDesc"></p>
+      <button
+        class="btn"
+        type="button"
+        id="btnNext"
+      >
+        <span id="reminder-next-label" data-i18n="addDevice.nextBtn"></span>
+      </button>
+      <div id="reminder-note" class="note" data-i18n="addDevice.note"></div>
+    </div>
+  </div>
+
+  <!-- 第一次添加设备时显示：选择你的 Noddy 设备 -->
+  <div class="overlay" id="overlayDevice">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" data-i18n="addDevice.modalTitle"></span>
+        <button type="button" class="modal-close" onclick="closeDeviceModal()">×</button>
+      </div>
+      <div class="device-select-row selected" data-device="Noddy">
+        <span class="device-radio">✓</span>
+        <span class="device-name">Noddy</span>
+        <span class="device-arrow">▼</span>
+      </div>
+      <p class="modal-tip" data-i18n="addDevice.modalTip"></p>
+      <button type="button" class="btn-choose-device" onclick="confirmDeviceAndGo()" data-i18n="addDevice.confirmBtn"></button>
+    </div>
+  </div>
+
+  <script>
+(function() {
+  var I18N = {
+    ko: { "addDevice.title": "기기 추가하기", "addDevice.subtitle": "새로운 Noddy 기기를 연결해 볼까요?", "addDevice.bodyTitle": "먼저 기기를 전원에 연결해 주세요", "addDevice.bodyDesc": "전원이 켜진 뒤, 기기가 Wi‑Fi 연결 대기 상태인지 확인해 주세요.<br>이후 가정 Wi‑Fi를 선택하고 첫 설정을 완료할 수 있어요.", "addDevice.nextBtn": "다음: Wi‑Fi 연결", "addDevice.note": "나중에 추가해도 괜찮아요. 설정 > 기기 관리에서 다시 들어올 수 있어요.", "addDevice.modalTitle": "Noddy 기기를 선택해 주세요", "addDevice.modalTip": "잘못 선택하면 연결을 다시 시작해야 해요.", "addDevice.confirmBtn": "선택 완료" },
+    en: { "addDevice.title": "add-device", "addDevice.subtitle": "Connect a new Noddy device?", "addDevice.bodyTitle": "Please connect the device to power first", "addDevice.bodyDesc": "After power is on, make sure the device is in Wi‑Fi pairing mode.<br>Then we'll guide you to select your home Wi‑Fi and finish setup.", "addDevice.nextBtn": "Next: Connect Wi‑Fi", "addDevice.note": "You can add later. Go to Settings > Device management to enter again.", "addDevice.modalTitle": "Select your Noddy device", "addDevice.modalTip": "Wrong selection will require reconnecting.", "addDevice.confirmBtn": "Confirm" },
+    zh: { "addDevice.title": "把你的 Noddy 叫醒", "addDevice.subtitle": "发现一只野生的Noddy！要现在把我接回家吗～", "addDevice.bodyTitle": "第一步：帮我插上电，让我醒过来 🔌", "addDevice.bodyDesc": "插电后，我会乖乖进入‘找网模式’，指示灯会闪哦 ✨<br>然后你选一下家里的 Wi‑Fi，我就能正式住进去啦～", "addDevice.nextBtn": "下一步：连接 Wi‑Fi", "addDevice.note": "现在不想连也没关系～去「设置」里随时能找到我 🧸", "addDevice.modalTitle": "选择你的 Noddy 设备", "addDevice.modalTip": "选择错误需要重新开启连接。", "addDevice.confirmBtn": "确定选择" }
+  };
+  function detectLang() {
+    var saved = localStorage.getItem("noddy_lang");
+    if (saved && I18N[saved]) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    if (nav.indexOf("ko") === 0) return "ko";
+    if (nav.indexOf("zh") === 0) return "zh";
+    return "en";
+  }
+  var currentLang = detectLang();
+  function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en && I18N.en[key]) || key; }
+  function applyLang(lang) {
+    if (!I18N[lang]) return;
+    currentLang = lang;
+    localStorage.setItem("noddy_lang", lang);
+    document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(function(el) {
+      var key = el.getAttribute("data-i18n");
+      if (!key) return;
+      var val = t(key);
+      el.innerHTML = (val || "").replace(/\n/g, "<br>");
+    });
+  }
+  var sel = document.getElementById("lang-select");
+  if (sel) { sel.value = currentLang; sel.addEventListener("change", function(e) { applyLang(e.target.value); applyYoungWiFiReminderCopy(); }); }
+  applyLang(currentLang);
+  function applyYoungWiFiReminderCopy() {
+    var subtitle = document.getElementById("reminder-subtitle");
+    if (subtitle) subtitle.style.display = "";
+    var isChild = localStorage.getItem("noddy_is_child_user") === "1";
+    if (currentLang !== "zh" || isChild) return;
+    var title = document.getElementById("reminder-title");
+    var bodyTitle = document.getElementById("reminder-body-title");
+    var bodyDesc = document.getElementById("reminder-body-desc");
+    var nextLabel = document.getElementById("reminder-next-label");
+    var note = document.getElementById("reminder-note");
+    if (title) title.textContent = "🐾 让我醒过来";
+    if (subtitle) {
+      subtitle.textContent = "";
+      subtitle.style.display = "none";
+    }
+    if (bodyTitle) bodyTitle.textContent = "插上电 → 我闪灯找网 → 你选 Wi-Fi";
+    if (bodyDesc) bodyDesc.innerHTML = "三小步，我们就住在一起啦 ❤️";
+    if (nextLabel) nextLabel.textContent = "开始连 Wi-Fi";
+    if (note) note.textContent = "稍后去「设置」也能找到我～";
+  }
+  applyYoungWiFiReminderCopy();
+})();
+  </script>
+  <script>
+    var FIRST_ADD_KEY = 'noddy_first_add_device_done';
+
+    function isFirstAdd() {
+      return !localStorage.getItem(FIRST_ADD_KEY);
+    }
+
+    function closeDeviceModal() {
+      document.getElementById('overlayDevice').classList.remove('show');
+    }
+
+    function confirmDeviceAndGo() {
+      localStorage.setItem(FIRST_ADD_KEY, '1');
+      closeDeviceModal();
+      window.location.href = 'add-device.html';
+    }
+
+    document.getElementById('btnNext').addEventListener('click', function() {
+      if (isFirstAdd()) {
+        document.getElementById('overlayDevice').classList.add('show');
+      } else {
+        window.location.href = 'add-device.html';
+      }
+    });
+
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI宠物成长</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: linear-gradient(165deg, #fff5f7 0%, #ffe8ec 35%, #ffd6e0 100%);
+      --card-bg: rgba(255,255,255,0.85);
+      --accent: #ff8fa3;
+      --accent-deep: #e75480;
+      --text: #4a3c42;
+      --text-muted: #8b7a80;
+      --success: #7dd3a0;
+      --gold: #f5c842;
+      --shadow: 0 4px 20px rgba(231,84,128,0.12);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --font-title: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+      --font-body: 'Noto Sans SC', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; font-family: var(--font-body); color: var(--text); background: var(--bg); }
+    h1,h2,h3 { font-family: var(--font-title); font-weight: 700; }
+    .app { min-height: 100%; padding-bottom: 72px; }
+    .page { display: none; padding: 16px 20px 24px; animation: fadeIn .3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+    .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 20px; margin-bottom: 12px; backdrop-filter: blur(8px); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-deep)); color: #fff; box-shadow: 0 4px 14px rgba(231,84,128,0.35); }
+    .btn-ghost { background: rgba(255,143,163,0.2); color: var(--accent-deep); }
+    .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: var(--card-bg); backdrop-filter: blur(12px); box-shadow: 0 -4px 20px rgba(0,0,0,.06); display: flex; align-items: center; justify-content: space-around; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; color: var(--text-muted); font-size: 11px; text-decoration: none; border-radius: var(--radius-sm); }
+    .nav-item:hover, .nav-item.active { color: var(--accent-deep); background: rgba(255,143,163,0.12); }
+    .nav-item .icon { font-size: 22px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div style="height:12px;"></div>
+    <!-- 首页 -->
+    <div id="page-home" class="page">
+      <header style="text-align:center;margin-bottom:20px">
+        <h1 style="font-size:22px">AI宠物成长</h1>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:4px">和<span id="pet-name-home">小团</span>一起变好</p>
+      </header>
+      <div class="card" style="text-align:center;padding:24px 20px">
+        <div id="mood-emoji" style="font-size:32px;margin-bottom:8px">😊</div>
+        <p style="font-size:15px;margin-bottom:16px"><span id="pet-name-card">小团</span> 当前心情不错</p>
+        <button type="button" class="btn btn-primary" id="btn-voice" style="min-width:140px">🎤 听我说</button>
+        <p style="margin-top:12px;font-size:14px;color:var(--text-muted);min-height:40px">「<span id="pet-speech">今天也要加油呀～</span>」</p>
+        <p id="reply-msg" style="margin-top:8px;color:var(--accent-deep);font-size:14px;display:none"></p>
+      </div>
+      <section style="margin-top:20px">
+        <h2 style="font-size:16px;margin-bottom:12px">🐾 行为请求</h2>
+        <a href="#pomodoro" style="text-decoration:none;display:block;margin-bottom:10px">
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between"><span>陪我去番茄钟学习吧 🍅</span><span style="color:var(--accent)">→</span></div>
+        </a>
+        <a href="#diary" style="text-decoration:none;display:block;margin-bottom:10px">
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between"><span>看看今天的成长任务～</span><span style="color:var(--accent)">→</span></div>
+        </a>
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" id="btn-play"><span>和我玩一会儿嘛</span><span style="color:var(--accent)">回应</span></div>
+      </section>
+      <div style="margin-top:24px;text-align:center"><a href="#identity" class="btn btn-ghost" style="text-decoration:none">查看宠物身份卡</a></div>
+    </div>
+
+    <!-- 番茄钟 -->
+    <div id="page-pomodoro" class="page">
+      <h1 style="font-size:22px;margin-bottom:8px">🍅 番茄钟</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:24px"><span id="pet-name-pomo">小团</span> 陪你专注</p>
+      <div class="card" style="text-align:center;padding:32px 20px">
+        <p style="font-size:14px;color:var(--text-muted);margin-bottom:8px" id="pomo-phase">选择时长</p>
+        <p style="font-size:48px;font-family:var(--font-title);letter-spacing:4px" id="pomo-time">25:00</p>
+        <div id="pomo-buttons" style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+          <button type="button" class="btn btn-primary" data-min="25">25 分钟</button>
+          <button type="button" class="btn btn-primary" data-min="50">50 分钟</button>
+        </div>
+        <button type="button" class="btn btn-ghost" id="pomo-stop" style="margin-top:24px;display:none">暂停</button>
+      </div>
+      <div class="card"><p style="font-size:14px;color:var(--text-muted)">🎧 专注期间宠物会安静陪伴，结束时会有语音提醒哦～</p></div>
+    </div>
+
+    <!-- 宠物身份 -->
+    <div id="page-identity" class="page">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h1 style="font-size:22px">🐾 宠物身份</h1>
+        <a href="#">返回首页</a>
+      </div>
+      <div class="card" style="text-align:center;padding:24px">
+        <div style="font-size:64px;margin-bottom:8px">🐱</div>
+        <h2 style="font-size:20px" id="pet-name-identity">小团</h2>
+        <p style="font-size:14px;color:var(--text-muted);margin-top:4px">你的AI成长伙伴</p>
+      </div>
+      <section style="margin-top:20px">
+        <h3 style="font-size:16px;margin-bottom:12px">性格养成</h3>
+        <div class="card"><div id="traits-list" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+      </section>
+      <section style="margin-top:20px">
+        <h3 style="font-size:16px;margin-bottom:12px">已解锁技能</h3>
+        <div class="card"><div id="skills-list" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+      </section>
+      <section style="margin-top:20px">
+        <button type="button" class="btn btn-ghost" style="width:100%;margin-bottom:12px" id="toggle-eval">查看用户评价（隐藏式）</button>
+        <div class="card" id="eval-box" style="display:none"><p style="font-size:14px;color:var(--text-muted)">这里可展示用户对宠物的匿名评价，仅自己可见。</p></div>
+      </section>
+    </div>
+
+    <!-- 成长日记（包含长期交互日志） -->
+    <div id="page-diary" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">📒 成长日记</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">🪙 金币：<strong style="color:var(--gold)" id="coins-display">128</strong></p>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button type="button" class="btn btn-primary tab-diary" data-tab="daily" style="padding:8px 14px;font-size:14px">日常任务</button>
+        <button type="button" class="btn btn-ghost tab-diary" data-tab="interact" style="padding:8px 14px;font-size:14px">互动任务</button>
+        <button type="button" class="btn btn-ghost tab-diary" data-tab="log" style="padding:8px 14px;font-size:14px">交互日志</button>
+        <button type="button" class="btn btn-ghost tab-diary" data-tab="checkin" style="padding:8px 14px;font-size:14px">签到</button>
+        <button type="button" class="btn btn-ghost tab-diary" data-tab="reward" style="padding:8px 14px;font-size:14px">奖励兑换</button>
+      </div>
+      <div id="diary-daily" class="card">
+        <p style="font-size:14px;margin-bottom:12px">完成日常任务获得金币</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <span id="d1-text">完成 1 个番茄钟</span><span style="color:var(--gold);margin-right:8px">+10 🪙</span><button type="button" class="btn btn-primary daily-btn" data-id="d1" data-coins="10" style="padding:6px 12px;font-size:13px">完成</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <span id="d2-text">和宠物说句话</span><span style="color:var(--gold);margin-right:8px">+5 🪙</span><button type="button" class="btn btn-primary daily-btn" data-id="d2" data-coins="5" style="padding:6px 12px;font-size:13px">完成</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+          <span id="d3-text">写一条今日小结</span><span style="color:var(--gold);margin-right:8px">+8 🪙</span><button type="button" class="btn btn-primary daily-btn" data-id="d3" data-coins="8" style="padding:6px 12px;font-size:13px">完成</button>
+        </div>
+      </div>
+      <div id="diary-interact" class="card" style="display:none">
+        <p style="font-size:14px;margin-bottom:8px">一起完成 100 件小事</p>
+        <div style="height:12px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden"><div id="interact-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:6px;width:7%"></div></div>
+        <p style="margin-top:8px;font-size:14px">已完成 <strong id="small-done">7</strong> / 100 件</p>
+      </div>
+      <div id="diary-log" class="card" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+          <p style="font-size:14px;margin:0">正在观察 <strong id="interact-pet-name">Noddy</strong> 的一天哦！</p>
+          <button type="button" class="btn btn-primary" id="btn-simulate-interaction" style="padding:6px 12px;font-size:13px">+ 模拟交互</button>
+        </div>
+        <div style="margin-top:12px;border:1px solid rgba(86,160,255,.4);border-radius:16px;padding:10px;background:rgba(255,255,255,.72)">
+          <div style="font-weight:700;color:#273746;margin-bottom:8px">情绪趋势</div>
+          <svg viewBox="0 0 320 90" width="100%" height="88" aria-label="互动趋势线">
+            <path d="M0 68 C40 20, 84 74, 124 44 C164 18, 220 18, 320 38" fill="none" stroke="#ff4eb8" stroke-width="4" />
+            <line x1="220" y1="0" x2="220" y2="90" stroke="rgba(255,78,184,.35)" stroke-width="1.5" />
+            <circle cx="220" cy="28" r="6" fill="#fff" stroke="#ff4eb8" stroke-width="3"></circle>
+          </svg>
+        </div>
+        <div style="margin-top:12px" id="interact-timeline-list"></div>
+      </div>
+      <div id="diary-checkin" class="card" style="display:none">
+        <p style="font-size:14px;margin-bottom:12px">每日签到 +15 金币，连续签到有额外奖励</p>
+        <p style="margin-bottom:12px">当前连续签到：<strong id="streak-days">3</strong> 天</p>
+        <button type="button" class="btn btn-primary" id="btn-checkin">签到</button>
+      </div>
+      <div id="diary-reward" class="card" style="display:none">
+        <p style="font-size:14px;margin-bottom:12px">用金币兑换实体装扮、文具或加入心愿单</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <div><span>实体装扮·小帽子</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">实体</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="200">200 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r1" data-cost="200" style="padding:6px 12px;font-size:13px">兑换</button></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <div><span>文具·贴纸包</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">文具</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="80">80 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r2" data-cost="80" style="padding:6px 12px;font-size:13px">兑换</button></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+          <div><span>心愿单·一本书</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">心愿</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="500">500 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r3" data-cost="500" style="padding:6px 12px;font-size:13px">兑换</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 成长唤醒地图 · 技能墙 -->
+    <div id="page-growth" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🌈 成长唤醒地图</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">按阶段解锁不同技能，越陪伴越丰富。</p>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:10px">技能墙</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#ffe0eb;color:#e75480;box-shadow:0 4px 14px rgba(231,84,128,0.25)">
+            <div style="font-size:10px;opacity:.85">阶段1</div>
+            <div style="margin-top:2px">认识名字</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#ffe0eb;color:#e75480;box-shadow:0 4px 14px rgba(231,84,128,0.25)">
+            <div style="font-size:10px;opacity:.85">阶段1</div>
+            <div style="margin-top:2px">回应问好</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段1</div>
+            <div style="margin-top:2px">模仿小动物叫声</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#ffe0eb;color:#e75480;box-shadow:0 4px 14px rgba(231,84,128,0.25)">
+            <div style="font-size:10px;opacity:.85">阶段2</div>
+            <div style="margin-top:2px">提醒喝水</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段2</div>
+            <div style="margin-top:2px">一起记日记</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段2</div>
+            <div style="margin-top:2px">任务打卡</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段3</div>
+            <div style="margin-top:2px">情绪陪伴</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段3</div>
+            <div style="margin-top:2px">出门提醒</div>
+          </div>
+          <div style="border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;line-height:1.4;background:#f3edf9;color:#999">
+            <div style="font-size:10px;opacity:.85">阶段3</div>
+            <div style="margin-top:2px">生日惊喜</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 食物图鉴（单独页面） -->
+    <div id="page-food" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🍎 食物图鉴</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">记录 noddy 喜欢的各种小零食和水果。</p>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:10px">喜欢的食物</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🥕<div style="font-size:12px;margin-top:2px">胡萝卜</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🍊<div style="font-size:12px;margin-top:2px">橘子</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🍩<div style="font-size:12px;margin-top:2px">甜甜圈</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🥪<div style="font-size:12px;margin-top:2px">三明治</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🎂<div style="font-size:12px;margin-top:2px">蛋糕</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🍌<div style="font-size:12px;margin-top:2px">香蕉</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🥦<div style="font-size:12px;margin-top:2px">花椰菜</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🍎<div style="font-size:12px;margin-top:2px">苹果</div>
+          </div>
+          <div class="card" style="padding:8px 4px;text-align:center;border-radius:12px;box-shadow:none">
+            🍕<div style="font-size:12px;margin-top:2px">披萨</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 喂食界面：用金币解锁食物 -->
+    <div id="page-feed" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🍖 喂食</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">🪙 当前金币：<strong style="color:var(--gold)" id="coins-display-feed">128</strong></p>
+      <div class="card">
+        <p style="font-size:14px;margin-bottom:10px">解锁食物后，就可以在主页给 noddy 喂食啦。</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span>🥕 胡萝卜</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--gold)">20 🪙</span>
+              <button type="button" class="btn btn-primary reward-btn" data-id="food1" data-cost="20" style="padding:6px 12px;font-size:13px">解锁</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span>🍎 苹果</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--gold)">30 🪙</span>
+              <button type="button" class="btn btn-primary reward-btn" data-id="food2" data-cost="30" style="padding:6px 12px;font-size:13px">解锁</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span>🎂 蛋糕</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--gold)">50 🪙</span>
+              <button type="button" class="btn btn-primary reward-btn" data-id="food3" data-cost="50" style="padding:6px 12px;font-size:13px">解锁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 小游戏页面 -->
+    <div id="page-games" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🎮 小游戏乐园</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">和 noddy 一起玩小游戏，既能消耗金币也能赚金币。</p>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:10px">抓娃娃机</h2>
+        <p style="font-size:14px;color:var(--text-muted);margin-bottom:6px">投币 10 🪙，有机会抓到限定玩偶或返还更多金币。</p>
+        <p style="font-size:12px;color:var(--text-muted)">（原型中不实现具体玩法，只展示结构）</p>
+      </div>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:10px">扫雷小游戏</h2>
+        <p style="font-size:14px;color:var(--text-muted);margin-bottom:6px">完成一局可获得 5 🪙，失败不扣金币。</p>
+      </div>
+      <div class="card">
+        <h2 style="font-size:16px;margin-bottom:10px">幸运抽奖</h2>
+        <p style="font-size:14px;color:var(--text-muted);margin-bottom:6px">每次消耗 5 🪙，有机会抽到额外金币或限定食物。</p>
+      </div>
+    </div>
+
+    <!-- 金币兑换独立页面 -->
+    <div id="page-reward" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🪙 金币兑换</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">使用金币兑换实体装扮、文具或加入心愿单。</p>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <div><span>实体装扮·小帽子</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">实体</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="200">200 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r1" data-cost="200" style="padding:6px 12px;font-size:13px">兑换</button></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+          <div><span>文具·贴纸包</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">文具</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="80">80 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r2" data-cost="80" style="padding:6px 12px;font-size:13px">兑换</button></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+          <div><span>心愿单·一本书</span><span style="margin-left:8px;font-size:12px;color:var(--text-muted)">心愿</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--gold)" class="reward-cost" data-cost="500">500 🪙</span><button type="button" class="btn btn-primary reward-btn" data-id="r3" data-cost="500" style="padding:6px 12px;font-size:13px">加入心愿单</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 宠物社交 -->
+    <div id="page-social" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">👥 宠物社交</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">看看其他小伙伴在做什么</p>
+      <section style="margin-bottom:24px">
+        <h2 style="font-size:16px;margin-bottom:12px">社区动态</h2>
+        <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:20px">🐱</span><span style="font-weight:600">小橘</span><span style="font-size:12px;color:var(--text-muted)">2分钟前</span></div><p style="font-size:14px;margin-bottom:8px">今天完成了 2 个番茄钟，开心～</p><span style="font-size:13px;color:var(--text-muted)">❤️ 12</span></div>
+        <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:20px">🐱</span><span style="font-weight:600">奶盖</span><span style="font-size:12px;color:var(--text-muted)">1小时前</span></div><p style="font-size:14px;margin-bottom:8px">和主人一起打卡了「一起看书」小事～</p><span style="font-size:13px;color:var(--text-muted)">❤️ 8</span></div>
+      </section>
+      <section><h2 style="font-size:16px;margin-bottom:12px">其他宠物主页</h2><div style="display:flex;gap:12px;flex-wrap:wrap"><div class="card" style="flex:1 1 120px;text-align:center;cursor:pointer"><div style="font-size:40px;margin-bottom:4px">🐱</div><p style="font-weight:600">小橘</p><p style="font-size:12px;color:var(--text-muted)">去串门 →</p></div><div class="card" style="flex:1 1 120px;text-align:center;cursor:pointer"><div style="font-size:40px;margin-bottom:4px">🐱</div><p style="font-weight:600">奶盖</p><p style="font-size:12px;color:var(--text-muted)">去串门 →</p></div></div></section>
+    </div>
+
+    <!-- 消息提醒 -->
+    <div id="page-messages" class="page">
+      <h1 style="font-size:22px;margin-bottom:4px">🔔 消息提醒</h1>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">日常提醒、纪念日、久未登录提醒</p>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><span style="font-size:13px;color:var(--accent-deep)">📌 日常</span><span style="font-size:12px;color:var(--text-muted)">10:30</span></div><p style="font-weight:600;margin-bottom:4px">日常提醒</p><p style="font-size:14px;color:var(--text-muted)">该休息一下啦，喝杯水吧～</p></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><span style="font-size:13px;color:var(--accent-deep)">🎂 纪念日</span><span style="font-size:12px;color:var(--text-muted)">昨天</span></div><p style="font-weight:600;margin-bottom:4px">纪念日</p><p style="font-size:14px;color:var(--text-muted)">和团子相遇 30 天啦 🎉</p></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><span style="font-size:13px;color:var(--accent-deep)">💤 久未登录</span><span style="font-size:12px;color:var(--text-muted)">3天前</span></div><p style="font-weight:600;margin-bottom:4px">久未登录</p><p style="font-size:14px;color:var(--text-muted)">团子想你了，快回来看看呀</p></div>
+      <div style="margin-top:24px"><a href="#settings" class="btn btn-ghost" style="text-decoration:none">提醒设置</a></div>
+    </div>
+
+    <!-- 设置 -->
+    <div id="page-settings" class="page">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h1 style="font-size:22px">⚙️ 设置</h1><a href="#">返回</a></div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:12px">账号与设备</h3><div style="display:flex;flex-direction:column;gap:12px"><div style="display:flex;justify-content:space-between;align-items:center"><span>多端登录</span><span style="font-size:13px;color:var(--text-muted)">管理已登录设备</span></div><div style="display:flex;justify-content:space-between;align-items:center"><span>后台读取</span><span style="font-size:13px;color:var(--text-muted)">提醒与番茄钟后台运行</span></div></div></div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:12px">通知</h3><div style="display:flex;justify-content:space-between;align-items:center"><span>消息提醒</span><span style="font-size:13px;color:var(--text-muted)">开</span></div></div>
+      <div class="card"><h3 style="font-size:15px;margin-bottom:12px">关于</h3><p style="font-size:14px;color:var(--text-muted)">AI宠物成长 v1.0.0</p></div>
+    </div>
+  </div>
+
+  <nav class="nav-bottom" id="nav-bottom">
+    <a href="#" class="nav-item active" data-page="home"><span class="icon">🏠</span><span>首页</span></a>
+    <a href="#pomodoro" class="nav-item" data-page="pomodoro"><span class="icon">🍅</span><span>番茄钟</span></a>
+    <a href="#diary" class="nav-item" data-page="diary"><span class="icon">📒</span><span>成长日记</span></a>
+    <a href="#social" class="nav-item" data-page="social"><span class="icon">👥</span><span>社区</span></a>
+    <a href="#messages" class="nav-item" data-page="messages"><span class="icon">🔔</span><span>消息</span></a>
+  </nav>
+
+  <!-- 保存宠物引导弹窗（匿名用户） -->
+  <div id="save-pet-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999;align-items:center;justify-content:center;padding:18px">
+    <div style="width:min(420px,100%);background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.18);padding:16px 16px 14px">
+      <div style="font-family:var(--font-title);font-size:18px;margin-bottom:10px;color:var(--text)">🧠 记忆快满啦</div>
+      <div style="font-size:14px;line-height:1.7;color:var(--text-muted);margin-bottom:14px">
+        再不登录，<span id="save-prompt-pet-name">小米</span> 就要快记不住我们的互动了 (இ﹏இ)
+      </div>
+      <div style="display:flex;justify-content:flex-end;flex-wrap:wrap">
+        <button type="button" class="btn btn-primary" style="padding:8px 16px" id="btn-save-now">去登录保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const MOOD_EMOJI = { happy: '😊', sleepy: '😴', hungry: '🍽️', playful: '🎈', focused: '🎯', sad: '😢' };
+      const KEY = 'ai-pet-state';
+      const defaultState = {
+        name: '小团', mood: 'happy', lastSpeech: '今天也要加油呀～', coins: 128, streakDays: 3,
+        lastCheckIn: new Date().toISOString().slice(0, 10), unlockedSkills: ['打招呼', '鼓励'],
+        personalityTraits: ['活泼'], smallThingsDone: 7, dailyDone: {}, checkedToday: false, redeemed: {},
+        interactionLogs: [
+          { time: '08:00', text: '过来让我蹭蹭你~这样就不会把我忘记啦~', tone: 'blue' },
+          { time: '09:00', text: 'Noddy 摇了摇头', tone: 'pink' },
+          { time: '10:00', text: '主人摸一摸', tone: 'blue' }
+        ]
+      };
+
+      function loadState() {
+        try {
+          var s = localStorage.getItem(KEY);
+          var st = s ? { ...defaultState, ...JSON.parse(s) } : { ...defaultState };
+          var today = new Date().toISOString().slice(0, 10);
+          if (st.lastCheckIn === today) st.checkedToday = true;
+          return st;
+        } catch (_) { return { ...defaultState }; }
+      }
+
+      function saveState(s) {
+        try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (_) {}
+      }
+
+      let state = loadState();
+
+      // ------------------------
+      // Anonymous save prompt + interaction counter (shared with home.html)
+      // ------------------------
+      const ANON_KEY = "noddy_is_anonymous"; // "1" | "0"
+      const INTERACTION_COUNT_KEY = "noddy_interaction_count";
+      const SAVE_PROMPT_SHOWN_SESSION_KEY = "noddy_save_prompt_shown_session";
+      const SAVE_PROMPT_DISMISSED_AT_KEY = "noddy_save_prompt_dismissed_at";
+      const SAVE_PROMPT_THRESHOLD_KEY = "noddy_save_prompt_threshold";
+      const SAVE_PROMPT_TIMELINE_THRESHOLD_KEY = "noddy_save_prompt_timeline_threshold_5_6";
+      const FORCE_LOGIN_LIMIT = 20;
+
+      function isAnonymous() {
+        try { return localStorage.getItem(ANON_KEY) !== "0"; } catch (_) { return true; }
+      }
+
+      function getThreshold() {
+        try {
+          const timelineCached = localStorage.getItem(SAVE_PROMPT_TIMELINE_THRESHOLD_KEY);
+          const timelineN = timelineCached ? parseInt(timelineCached, 10) : NaN;
+          if (!Number.isNaN(timelineN) && (timelineN === 5 || timelineN === 6)) return timelineN;
+          const legacy = localStorage.getItem(SAVE_PROMPT_THRESHOLD_KEY);
+          const legacyN = legacy ? parseInt(legacy, 10) : NaN;
+          if (!Number.isNaN(legacyN) && (legacyN === 5 || legacyN === 6)) {
+            localStorage.setItem(SAVE_PROMPT_TIMELINE_THRESHOLD_KEY, String(legacyN));
+            return legacyN;
+          }
+          const rolled = Math.random() < 0.5 ? 5 : 6;
+          localStorage.setItem(SAVE_PROMPT_TIMELINE_THRESHOLD_KEY, String(rolled));
+          return rolled;
+        } catch (_) {}
+        return 5;
+      }
+
+      function getInteractionCount() {
+        try {
+          const v = localStorage.getItem(INTERACTION_COUNT_KEY);
+          const n = v ? parseInt(v, 10) : 0;
+          return Number.isFinite(n) ? n : 0;
+        } catch (_) { return 0; }
+      }
+
+      function setInteractionCount(n) {
+        try { localStorage.setItem(INTERACTION_COUNT_KEY, String(Math.max(0, n | 0))); } catch (_) {}
+      }
+
+      function openSavePetPrompt() {
+        const el = document.getElementById('save-pet-overlay');
+        if (!el) return;
+        const nameEl = document.getElementById('save-prompt-pet-name');
+        if (nameEl) {
+          const petNameFromStorage = (localStorage.getItem('petName') || '').trim();
+          const petNameFromState = state && state.name ? String(state.name).trim() : '';
+          nameEl.textContent = petNameFromStorage || petNameFromState || 'noddy';
+        }
+        el.style.display = 'flex';
+      }
+
+      function closeSavePetPrompt() {
+        const el = document.getElementById('save-pet-overlay');
+        if (!el) return;
+        el.style.display = 'none';
+      }
+
+      function maybeShowSavePrompt() {
+        if (!isAnonymous()) return;
+        let shown = null;
+        try { shown = localStorage.getItem(SAVE_PROMPT_SHOWN_SESSION_KEY); } catch (_) {}
+        if (shown === "1") return;
+        const logs = Array.isArray(state.interactionLogs) ? state.interactionLogs : [];
+        if (logs.length < getThreshold()) return;
+        try { localStorage.setItem(SAVE_PROMPT_SHOWN_SESSION_KEY, "1"); } catch (_) {}
+        openSavePetPrompt();
+      }
+
+      function maybeForceLoginAtLimit(countValue) {
+        if (!isAnonymous()) return false;
+        if (countValue < FORCE_LOGIN_LIMIT) return false;
+        window.location.href = './signup.html?redirect=' + encodeURIComponent('./detail.html#diary');
+        return true;
+      }
+
+      function recordInteraction(source) {
+        if (!isAnonymous()) return;
+        const next = getInteractionCount() + 1;
+        setInteractionCount(next);
+        void source;
+        if (maybeForceLoginAtLimit(next)) return;
+        maybeShowSavePrompt();
+      }
+
+      function renderInteractionTimeline() {
+        const listEl = document.getElementById('interact-timeline-list');
+        if (!listEl) return;
+        const logs = Array.isArray(state.interactionLogs) ? state.interactionLogs : [];
+        if (!logs.length) {
+          listEl.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 2px">还没有记录，点「模拟交互」试试。</div>';
+          return;
+        }
+        listEl.innerHTML = logs.slice(0, 8).map(function (item) {
+          const isPink = item.tone === 'pink';
+          const borderColor = isPink ? 'rgba(255,140,170,.8)' : 'rgba(86,160,255,.75)';
+          const bgColor = isPink ? 'rgba(255,240,246,.95)' : 'rgba(240,248,255,.95)';
+          const timeColor = isPink ? '#f05b8d' : '#2b98f0';
+          return (
+            '<div style="margin-bottom:10px;border:1px solid ' + borderColor + ';background:' + bgColor + ';border-radius:14px;padding:10px 12px;">' +
+              '<div style="font-weight:700;color:' + timeColor + ';margin-bottom:2px">' + item.time + '</div>' +
+              '<div style="font-size:14px;color:var(--text)">' + item.text + '</div>' +
+            '</div>'
+          );
+        }).join('');
+      }
+
+      function addSimulatedInteraction() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const samples = [
+          'Noddy 开心地转了一圈',
+          '你和 noddy 完成了一次击掌',
+          'noddy 眨眨眼，靠近你蹭了蹭',
+          '你夸了 noddy 一句，它在偷笑'
+        ];
+        const idx = Math.floor(Math.random() * samples.length);
+        const tone = idx % 2 === 0 ? 'blue' : 'pink';
+        state.interactionLogs = Array.isArray(state.interactionLogs) ? state.interactionLogs : [];
+        state.interactionLogs.unshift({ time: hh + ':' + mm, text: samples[idx], tone: tone });
+        state.smallThingsDone = Math.min(100, Number(state.smallThingsDone || 0) + 1);
+        recordInteraction('detail_simulated_interaction');
+        if (isAnonymous() && getInteractionCount() >= FORCE_LOGIN_LIMIT) return;
+        saveState(state);
+        updateUI();
+        maybeShowSavePrompt();
+      }
+
+      (function bindSavePromptButtons() {
+        const now = document.getElementById('btn-save-now');
+        if (now) {
+          now.addEventListener('click', function () {
+            closeSavePetPrompt();
+            window.location.href = './signup.html?redirect=' + encodeURIComponent('./home.html');
+          });
+        }
+        const overlay = document.getElementById('save-pet-overlay');
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) {
+              try { localStorage.setItem(SAVE_PROMPT_DISMISSED_AT_KEY, String(Date.now())); } catch (_) {}
+              closeSavePetPrompt();
+            }
+          });
+        }
+      })();
+
+      function updateUI() {
+        document.querySelectorAll('[id^="pet-name-"]').forEach(el => { if (state.name) el.textContent = state.name; });
+        var moodEl = document.getElementById('mood-emoji'); if (moodEl) moodEl.textContent = MOOD_EMOJI[state.mood] || '😊';
+        var speechEl = document.getElementById('pet-speech'); if (speechEl) speechEl.textContent = state.lastSpeech;
+        var coinsEl = document.getElementById('coins-display'); if (coinsEl) coinsEl.textContent = state.coins;
+        var streakEl = document.getElementById('streak-days'); if (streakEl) streakEl.textContent = state.streakDays;
+        var smallEl = document.getElementById('small-done'); if (smallEl) smallEl.textContent = state.smallThingsDone;
+        var interactNameEl = document.getElementById('interact-pet-name'); if (interactNameEl) interactNameEl.textContent = state.name || 'Noddy';
+        var barEl = document.getElementById('interact-bar'); if (barEl) barEl.style.width = state.smallThingsDone + '%';
+        renderInteractionTimeline();
+        var traitsEl = document.getElementById('traits-list'); if (traitsEl) traitsEl.innerHTML = state.personalityTraits.map(t => '<span class="btn btn-ghost" style="padding:6px 12px;font-size:13px">' + t + '</span>').join('');
+        var skillsEl = document.getElementById('skills-list'); if (skillsEl) skillsEl.innerHTML = state.unlockedSkills.map(s => '<span style="background:var(--success);color:#fff;padding:6px 12px;border-radius:8px;font-size:13px">✓ ' + s + '</span>').join('');
+        ['d1','d2','d3'].forEach(id => {
+          var btn = document.querySelector('.daily-btn[data-id="' + id + '"]'); if (!btn) return;
+          if (state.dailyDone && state.dailyDone[id]) { btn.textContent = '已完成'; btn.disabled = true; var tx = document.getElementById(id + '-text'); if (tx) tx.style.textDecoration = 'line-through'; }
+        });
+        document.querySelectorAll('.reward-btn').forEach(btn => {
+          var id = btn.getAttribute('data-id'), cost = +btn.getAttribute('data-cost');
+          if (state.redeemed && state.redeemed[id]) { btn.textContent = '已兑换'; btn.disabled = true; }
+          else btn.disabled = state.coins < cost;
+        });
+        var checkinBtn = document.getElementById('btn-checkin'); if (checkinBtn) checkinBtn.disabled = state.checkedToday; if (checkinBtn && state.checkedToday) checkinBtn.textContent = '今日已签到';
+      }
+
+      function nav() {
+        var hash = (location.hash || '#').slice(1) || 'home';
+        var pageId = hash === 'identity' || hash === 'settings' ? hash : (hash === 'home' || hash === '' ? 'home' : hash);
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        var page = document.getElementById('page-' + pageId); if (page) page.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(a => { a.classList.toggle('active', a.getAttribute('data-page') === (pageId === 'home' ? 'home' : pageId)); });
+        var showNav = pageId !== 'settings'; document.getElementById('nav-bottom').style.display = showNav ? 'flex' : 'none';
+      }
+
+      window.addEventListener('hashchange', nav);
+      window.addEventListener('load', function() {
+        nav();
+        switchDiaryTab('daily');
+        updateUI();
+        maybeForceLoginAtLimit(getInteractionCount());
+      });
+
+      document.getElementById('btn-voice').addEventListener('click', function() {
+        if ('speechSynthesis' in window) {
+          var u = new SpeechSynthesisUtterance(state.lastSpeech); u.lang = 'zh-CN'; u.rate = 0.9;
+          speechSynthesis.speak(u);
+        }
+      });
+
+      document.getElementById('btn-play').addEventListener('click', function() {
+        recordInteraction('detail_reply_play');
+        state.lastSpeech = '嗯嗯，收到啦！'; if (!state.unlockedSkills.includes('玩耍')) state.unlockedSkills = state.unlockedSkills.concat('玩耍'); saveState(state); updateUI();
+        var el = document.getElementById('reply-msg'); if (el) { el.textContent = '好呀，陪你玩！'; el.style.display = 'block'; setTimeout(function() { el.style.display = 'none'; }, 1500); }
+      });
+
+      document.getElementById('toggle-eval').addEventListener('click', function() {
+        var box = document.getElementById('eval-box'); box.style.display = box.style.display === 'none' ? 'block' : 'none'; this.textContent = box.style.display === 'none' ? '查看用户评价（隐藏式）' : '收起';
+      });
+
+      document.querySelectorAll('#pomo-buttons button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          recordInteraction('detail_pomodoro_start');
+          var min = +this.getAttribute('data-min'); state.lastSpeech = '太棒啦！休息一下吧～'; saveState(state); updateUI();
+          startPomodoro(min);
+        });
+      });
+      document.getElementById('pomo-stop').addEventListener('click', stopPomodoro);
+
+      var pomoTimer = null;
+      function startPomodoro(minutes) {
+        var total = minutes * 60; var phaseEl = document.getElementById('pomo-phase'); var timeEl = document.getElementById('pomo-time'); var btns = document.getElementById('pomo-buttons'); var stopBtn = document.getElementById('pomo-stop');
+        phaseEl.textContent = '专注中'; btns.style.display = 'none'; stopBtn.style.display = 'inline-flex';
+        function tick() {
+          var m = Math.floor(total / 60), s = total % 60; timeEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+          if (total <= 0) { clearInterval(pomoTimer); pomoTimer = null; phaseEl.textContent = '选择时长'; btns.style.display = 'flex'; stopBtn.style.display = 'none'; timeEl.textContent = '25:00'; if ('speechSynthesis' in window) { var u = new SpeechSynthesisUtterance(state.lastSpeech); u.lang = 'zh-CN'; speechSynthesis.speak(u); } return; }
+          total--;
+        }
+        tick(); pomoTimer = setInterval(tick, 1000);
+      }
+      function stopPomodoro() {
+        if (pomoTimer) clearInterval(pomoTimer); pomoTimer = null; document.getElementById('pomo-phase').textContent = '选择时长'; document.getElementById('pomo-time').textContent = '25:00'; document.getElementById('pomo-buttons').style.display = 'flex'; document.getElementById('pomo-stop').style.display = 'none';
+      }
+
+      function switchDiaryTab(tabId) {
+        var t = tabId || 'daily';
+        document.querySelectorAll('.tab-diary').forEach(function (b) {
+          b.className = b.getAttribute('data-tab') === t ? 'btn btn-primary tab-diary' : 'btn btn-ghost tab-diary';
+        });
+        ['daily', 'interact', 'log', 'checkin', 'reward'].forEach(function (id) {
+          var el = document.getElementById('diary-' + id);
+          if (el) el.style.display = id === t ? 'block' : 'none';
+        });
+      }
+
+      document.querySelectorAll('.tab-diary').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          switchDiaryTab(this.getAttribute('data-tab'));
+        });
+      });
+
+      var simulateBtn = document.getElementById('btn-simulate-interaction');
+      if (simulateBtn) {
+        simulateBtn.addEventListener('click', addSimulatedInteraction);
+      }
+
+      document.querySelectorAll('.daily-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          recordInteraction('detail_daily_done');
+          var id = this.getAttribute('data-id'), coins = +this.getAttribute('data-coins'); if (state.dailyDone && state.dailyDone[id]) return;
+          state.dailyDone = state.dailyDone || {}; state.dailyDone[id] = true; state.coins += coins; saveState(state); updateUI();
+        });
+      });
+
+      document.getElementById('btn-checkin').addEventListener('click', function() {
+        recordInteraction('detail_checkin');
+        if (state.checkedToday) return;
+        var today = new Date().toISOString().slice(0, 10), yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+        state.streakDays = state.lastCheckIn === yesterday ? state.streakDays + 1 : (state.lastCheckIn === today ? state.streakDays : 1);
+        state.lastCheckIn = today; state.checkedToday = true; state.coins += 15;
+        saveState(state); updateUI();
+      });
+
+      document.querySelectorAll('.reward-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = this.getAttribute('data-id'), cost = +this.getAttribute('data-cost'); if (state.redeemed && state.redeemed[id] || state.coins < cost) return;
+          state.redeemed = state.redeemed || {}; state.redeemed[id] = true; state.coins -= cost; saveState(state); updateUI();
+        });
+      });
+    })();
+  </script>
+  <script>
+(function() {
+  var STATIC_TEXT_MAP = {
+    "AI宠物成长": { ko: "AI 반려 성장", en: "AI Pet Growth" },
+    "返回首页": { ko: "홈으로", en: "Back Home" },
+    "查看宠物身份卡": { ko: "반려 카드 보기", en: "View Pet Card" },
+    "🐾 行为请求": { ko: "🐾 행동 요청", en: "🐾 Action Requests" },
+    "陪我去番茄钟学习吧 🍅": { ko: "나와 함께 뽀모도로 공부하자 🍅", en: "Let's study with pomodoro 🍅" },
+    "看看今天的成长任务～": { ko: "오늘의 성장 미션 보기~", en: "Check today's growth tasks~" },
+    "和我玩一会儿嘛": { ko: "나랑 잠깐 놀아줘", en: "Play with me for a bit" },
+    "回应": { ko: "응답", en: "Reply" },
+    "番茄钟": { ko: "뽀모도로", en: "Pomodoro" },
+    "选择时长": { ko: "시간 선택", en: "Choose duration" },
+    "25 分钟": { ko: "25분", en: "25 min" },
+    "50 分钟": { ko: "50분", en: "50 min" },
+    "日常任务": { ko: "일상 미션", en: "Daily Tasks" },
+    "互动任务": { ko: "상호작용 미션", en: "Interaction Tasks" },
+    "交互日志": { ko: "상호작용 로그", en: "Interaction Log" },
+    "签到": { ko: "출석", en: "Check-in" },
+    "奖励兑换": { ko: "보상 교환", en: "Rewards" },
+    "完成日常任务获得金币": { ko: "일상 미션 완료 시 코인 획득", en: "Complete daily tasks to earn coins" },
+    "完成 1 个番茄钟": { ko: "뽀모도로 1회 완료", en: "Finish 1 pomodoro" },
+    "和宠物说句话": { ko: "반려와 한마디 대화", en: "Say a sentence to your pet" },
+    "写一条今日小结": { ko: "오늘의 한줄 요약 작성", en: "Write today's summary" },
+    "一起完成 100 件小事": { ko: "함께 100가지 작은 일 하기", en: "Complete 100 little things together" },
+    "正在观察": { ko: "관찰 중", en: "Observing" },
+    "情绪趋势": { ko: "감정 추세", en: "Mood Trend" },
+    "完成": { ko: "완료", en: "Done" },
+    "兑换": { ko: "교환", en: "Redeem" },
+    "加入心愿单": { ko: "위시리스트", en: "Add to wishlist" },
+    "解锁": { ko: "해제", en: "Unlock" },
+    "暂停": { ko: "일시정지", en: "Pause" },
+    "成长唤醒地图": { ko: "성장 각성 지도", en: "Growth Awakening Map" },
+    "技能墙": { ko: "스킬 월", en: "Skill Wall" },
+    "食物图鉴": { ko: "먹이 도감", en: "Food Gallery" },
+    "喂食": { ko: "먹이주기", en: "Feed" },
+    "小游戏乐园": { ko: "미니게임 파크", en: "Mini Game Park" },
+    "金币兑换": { ko: "코인 교환", en: "Coin Exchange" },
+    "宠物社交": { ko: "반려 커뮤니티", en: "Pet Social" },
+    "消息提醒": { ko: "알림", en: "Notifications" }
+  };
+  function applyStaticTextLang(lang) {
+    if (lang === "zh") return;
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (!node || !node.parentElement) continue;
+      var parentTag = node.parentElement.tagName;
+      if (parentTag === "SCRIPT" || parentTag === "STYLE") continue;
+      var raw = node.nodeValue;
+      if (!raw) continue;
+      var key = raw.trim();
+      if (!key || !STATIC_TEXT_MAP[key]) continue;
+      var translated = STATIC_TEXT_MAP[key][lang];
+      if (!translated) continue;
+      node.nodeValue = raw.replace(key, translated);
+    }
+  }
+  function detectLang() {
+    var saved = localStorage.getItem("noddy_lang");
+    if (saved && (saved === "ko" || saved === "en" || saved === "zh")) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    if (nav.indexOf("ko") === 0) return "ko";
+    if (nav.indexOf("zh") === 0) return "zh";
+    return "en";
+  }
+  var sel = document.getElementById("lang-select");
+  if (sel) {
+    sel.value = detectLang();
+    document.documentElement.lang = sel.value === "ko" ? "ko" : sel.value === "zh" ? "zh-CN" : "en";
+    applyStaticTextLang(sel.value);
+    sel.addEventListener("change", function() {
+      var lang = sel.value;
+      localStorage.setItem("noddy_lang", lang);
+      document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+      location.reload();
+    });
+  }
+})();
+  </script>
+</body>
+</html>
