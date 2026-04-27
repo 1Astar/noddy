@@ -659,6 +659,33 @@
     </div>
   </div>
 
+  <!-- Google 首次登录邮箱冲突提示 -->
+  <div id="google-existing-email-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">检测到邮箱已注册</p>
+          <p id="google-existing-email-desc" class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+            该邮箱已注册，请用原方式登录或绑定此Google账号。
+          </p>
+        </div>
+        <button type="button" onclick="closeGoogleExistingEmailModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="goLoginWithOriginalMethod()"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
+          用原方式登录
+        </button>
+        <button type="button" onclick="bindGoogleToExistingEmail()"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+          绑定此 Google 账号
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 首次启动家长控制引导 -->
   <div id="parental-guide-overlay"
     class="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center px-4 hidden">
@@ -1390,6 +1417,7 @@
       // 记录此邮箱注册所在服务区（用于“账号不存在 404”引导切换的模拟）
       if (email) {
         upsertAccountRegionLite(email, getCurrentRegionLite());
+        setAccountAuthSource(email, "email");
       }
       // 这里保持在当前页，让用户有时间查看提示文案
       // 若需要也可在后续切回登录页：switchView('email-login');
@@ -1683,7 +1711,10 @@
     const ANON_KEY = "noddy_is_anonymous"; // "1" | "0"
     const ACCOUNT_ID_KEY = "noddy_account_id";
     const MERGED_KEY = "noddy_merged_from_anonymous";
+    const ACCOUNT_AUTH_SOURCE_KEY = "noddy_account_auth_source_map_v1"; // { [email]: "email" | "google" | "email+google" }
+    const GOOGLE_BOUND_EMAILS_KEY = "noddy_google_bound_emails_v1"; // { [email]: true }
     let lastThirdPartyProvider = null;
+    let pendingGoogleConflictEmail = "";
 
     function getDefaultPostLoginTarget() {
       try {
@@ -1718,6 +1749,102 @@
       if (google) google.classList.toggle("hidden", isCN);
       if (phone) phone.classList.remove("hidden");
     }
+
+    function getAccountAuthSourceMap() {
+      try {
+        const raw = localStorage.getItem(ACCOUNT_AUTH_SOURCE_KEY);
+        const obj = raw ? JSON.parse(raw) : {};
+        return obj && typeof obj === "object" ? obj : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function setAccountAuthSource(email, source) {
+      if (!email || !source) return;
+      const key = String(email).toLowerCase();
+      const map = getAccountAuthSourceMap();
+      map[key] = source;
+      try { localStorage.setItem(ACCOUNT_AUTH_SOURCE_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+
+    function getAccountAuthSource(email) {
+      if (!email) return "";
+      const map = getAccountAuthSourceMap();
+      return map[String(email).toLowerCase()] || "";
+    }
+
+    function getGoogleBoundMap() {
+      try {
+        const raw = localStorage.getItem(GOOGLE_BOUND_EMAILS_KEY);
+        const obj = raw ? JSON.parse(raw) : {};
+        return obj && typeof obj === "object" ? obj : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function isGoogleBound(email) {
+      if (!email) return false;
+      const map = getGoogleBoundMap();
+      return !!map[String(email).toLowerCase()];
+    }
+
+    function markGoogleBound(email) {
+      if (!email) return;
+      const key = String(email).toLowerCase();
+      const map = getGoogleBoundMap();
+      map[key] = true;
+      try { localStorage.setItem(GOOGLE_BOUND_EMAILS_KEY, JSON.stringify(map)); } catch (_) {}
+
+      const source = getAccountAuthSource(key);
+      if (source === "email" || source === "google" || source === "email+google") {
+        setAccountAuthSource(key, "email+google");
+      } else {
+        setAccountAuthSource(key, "google");
+      }
+    }
+
+    function openGoogleExistingEmailModal(email) {
+      pendingGoogleConflictEmail = (email || "").toLowerCase();
+      const modal = document.getElementById("google-existing-email-modal");
+      const desc = document.getElementById("google-existing-email-desc");
+      if (desc && pendingGoogleConflictEmail) {
+        desc.textContent = `邮箱 ${pendingGoogleConflictEmail} 已注册，请用原方式登录或绑定此Google账号。`;
+      }
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeGoogleExistingEmailModal() {
+      const modal = document.getElementById("google-existing-email-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      pendingGoogleConflictEmail = "";
+    }
+
+    window.closeGoogleExistingEmailModal = closeGoogleExistingEmailModal;
+
+    window.goLoginWithOriginalMethod = function() {
+      const email = pendingGoogleConflictEmail;
+      closeGoogleExistingEmailModal();
+      switchView("email-login");
+      setEmailLoginTab("account");
+      const emailInput = document.getElementById("email-input");
+      if (emailInput && email) {
+        emailInput.value = email;
+        emailInput.focus();
+      }
+    };
+
+    window.bindGoogleToExistingEmail = function() {
+      const email = pendingGoogleConflictEmail;
+      if (email) markGoogleBound(email);
+      closeGoogleExistingEmailModal();
+      finalizeLoginAndRedirect("google");
+    };
 
     function openLoginFailedModal() {
       const modal = document.getElementById("login-failed-modal");
@@ -1806,6 +1933,18 @@
 
     window.simulateThirdPartyLogin = function(provider, ev) {
       lastThirdPartyProvider = provider;
+      if (provider === "google") {
+        // 原型模拟：Google 首次登录拿到邮箱
+        const googleEmail = "user@gmail.com";
+        const existingRegion = getAccountRegionByEmailLite(googleEmail);
+        const existingSource = getAccountAuthSource(googleEmail);
+        const isExistingEmailAccount = !!existingRegion && (existingSource === "email" || existingSource === "email+google" || !existingSource);
+        if (isExistingEmailAccount && !isGoogleBound(googleEmail)) {
+          openGoogleExistingEmailModal(googleEmail);
+          return;
+        }
+        markGoogleBound(googleEmail);
+      }
       // 原型：按住 Alt 点击 = 模拟失败
       const shouldFail = !!(ev && ev.altKey);
       if (shouldFail) {
@@ -1943,6 +2082,14 @@
       if (!map["noddy@gmail.com"]) {
         map["noddy@gmail.com"] = "global";
         localStorage.setItem(ACCOUNT_REGION_KEY, JSON.stringify(map));
+      }
+      // 用于演示“Google 首次登录邮箱冲突”
+      if (!map["user@gmail.com"]) {
+        map["user@gmail.com"] = "global";
+        localStorage.setItem(ACCOUNT_REGION_KEY, JSON.stringify(map));
+      }
+      if (!getAccountAuthSource("user@gmail.com")) {
+        setAccountAuthSource("user@gmail.com", "email");
       }
     })();
 

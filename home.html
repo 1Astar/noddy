@@ -1914,7 +1914,7 @@
     <!-- 宠物展示区 -->
     <section class="pet-display">
       <div class="pet-container">
-        <div class="bubble" id="battery-bubble" onclick="openBatteryQaModal()" role="button" aria-label="打开电量帮助">🔋 1</div>
+        <div class="bubble" id="battery-bubble" onclick="openBatteryOnlyQaModal()" role="button" aria-label="打开电量帮助">🔋 1</div>
         <div class="pet-avatar">
           <div class="pet-face">
             <div class="pet-eyes"><div class="pet-eye"></div><div class="pet-eye"></div></div>
@@ -1923,7 +1923,7 @@
         </div>
         <div class="pet-status-icons">
           <div class="status-icon">📶</div>
-          <div class="status-icon" id="battery-status-icon" onclick="openBatteryQaModal()" role="button" aria-label="打开电量帮助">🔋</div>
+          <div class="status-icon" id="battery-status-icon" onclick="openBatteryOnlyQaModal()" role="button" aria-label="打开电量帮助">🔋</div>
           <div class="status-icon">🔊</div>
         </div>
       </div>
@@ -2170,6 +2170,31 @@
         </section>
       </div>
       <button class="modal-close" onclick="closeBatteryQaModal()">知道啦</button>
+    </div>
+  </div>
+
+  <!-- 电池专属 Q&A 弹窗 -->
+  <div class="modal-overlay" id="battery-only-qa-modal">
+    <div class="modal">
+      <div class="modal-title">🔋 电量帮助 Q&A</div>
+      <div class="modal-content">
+        <p style="margin-bottom:8px;color:#666">这里仅展示电量相关问题；更多内容请在用户页点“帮助Q&A”。</p>
+        <div class="modal-qa-list">
+          <details class="modal-qa-item">
+            <summary>1. 为什么Noddy充不上电？</summary>
+            <p>A: 请确认底座电源指示灯常亮，设备已放置到底座正中，并使用 10W 及以上充电器。</p>
+          </details>
+          <details class="modal-qa-item">
+            <summary>2. 为什么刚开始充电没反应？</summary>
+            <p>A: 电量极低时会先回电，通常需要 1-3 分钟后才会重新启动，属于正常现象。</p>
+          </details>
+          <details class="modal-qa-item">
+            <summary>3. 为什么Noddy突然不动了？</summary>
+            <p>A: 可能进入休息状态或电量偏低。先尝试互动唤醒，若仍无响应请补电后再观察。</p>
+          </details>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeBatteryOnlyQaModal()">知道啦</button>
     </div>
   </div>
 
@@ -2768,6 +2793,23 @@
     if (batteryQaModal) {
       batteryQaModal.addEventListener('click', function(e) {
         if (e.target === this) closeBatteryQaModal();
+      });
+    }
+
+    function openBatteryOnlyQaModal() {
+      const modal = document.getElementById('battery-only-qa-modal');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeBatteryOnlyQaModal() {
+      const modal = document.getElementById('battery-only-qa-modal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    const batteryOnlyQaModal = document.getElementById('battery-only-qa-modal');
+    if (batteryOnlyQaModal) {
+      batteryOnlyQaModal.addEventListener('click', function(e) {
+        if (e.target === this) closeBatteryOnlyQaModal();
       });
     }
 
