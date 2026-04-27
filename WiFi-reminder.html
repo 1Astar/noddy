@@ -142,6 +142,23 @@
     .btn span {
       font-size: 13px;
     }
+    .btn-later {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 0;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: #fff;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-later:hover {
+      border-color: rgba(100, 116, 139, 0.55);
+      transform: translateY(-1px);
+    }
     .note {
       margin-top: 10px;
       font-size: 11px;
@@ -255,6 +272,7 @@
       >
         <span id="reminder-next-label" data-i18n="addDevice.nextBtn"></span>
       </button>
+      <button class="btn-later" type="button" id="btnLater" data-i18n="addDevice.laterBtn">稍后再说</button>
       <div id="reminder-note" class="note" data-i18n="addDevice.note"></div>
     </div>
   </div>
@@ -279,9 +297,9 @@
   <script>
 (function() {
   var I18N = {
-    ko: { "addDevice.title": "기기 추가하기", "addDevice.subtitle": "새로운 Noddy 기기를 연결해 볼까요?", "addDevice.bodyTitle": "먼저 기기를 전원에 연결해 주세요", "addDevice.bodyDesc": "전원이 켜진 뒤, 기기가 Wi‑Fi 연결 대기 상태인지 확인해 주세요.<br>이후 가정 Wi‑Fi를 선택하고 첫 설정을 완료할 수 있어요.", "addDevice.nextBtn": "다음: Wi‑Fi 연결", "addDevice.note": "나중에 추가해도 괜찮아요. 설정 > 기기 관리에서 다시 들어올 수 있어요.", "addDevice.modalTitle": "Noddy 기기를 선택해 주세요", "addDevice.modalTip": "잘못 선택하면 연결을 다시 시작해야 해요.", "addDevice.confirmBtn": "선택 완료" },
-    en: { "addDevice.title": "add-device", "addDevice.subtitle": "Connect a new Noddy device?", "addDevice.bodyTitle": "Please connect the device to power first", "addDevice.bodyDesc": "After power is on, make sure the device is in Wi‑Fi pairing mode.<br>Then we'll guide you to select your home Wi‑Fi and finish setup.", "addDevice.nextBtn": "Next: Connect Wi‑Fi", "addDevice.note": "You can add later. Go to Settings > Device management to enter again.", "addDevice.modalTitle": "Select your Noddy device", "addDevice.modalTip": "Wrong selection will require reconnecting.", "addDevice.confirmBtn": "Confirm" },
-    zh: { "addDevice.title": "把你的 Noddy 叫醒", "addDevice.subtitle": "发现一只野生的Noddy！要现在把我接回家吗～", "addDevice.bodyTitle": "第一步：帮我插上电，让我醒过来 🔌", "addDevice.bodyDesc": "插电后，我会乖乖进入‘找网模式’，指示灯会闪哦 ✨<br>然后你选一下家里的 Wi‑Fi，我就能正式住进去啦～", "addDevice.nextBtn": "下一步：连接 Wi‑Fi", "addDevice.note": "现在不想连也没关系～去「设置」里随时能找到我 🧸", "addDevice.modalTitle": "选择你的 Noddy 设备", "addDevice.modalTip": "选择错误需要重新开启连接。", "addDevice.confirmBtn": "确定选择" }
+    ko: { "addDevice.title": "기기 추가하기", "addDevice.subtitle": "새로운 Noddy 기기를 연결해 볼까요?", "addDevice.bodyTitle": "먼저 기기를 전원에 연결해 주세요", "addDevice.bodyDesc": "전원이 켜진 뒤, 기기가 Wi‑Fi 연결 대기 상태인지 확인해 주세요.<br>이후 가정 Wi‑Fi를 선택하고 첫 설정을 완료할 수 있어요.", "addDevice.nextBtn": "다음: Wi‑Fi 연결", "addDevice.laterBtn": "나중에 할래요", "addDevice.note": "나중에 추가해도 괜찮아요. 설정 > 기기 관리에서 다시 들어올 수 있어요.", "addDevice.modalTitle": "Noddy 기기를 선택해 주세요", "addDevice.modalTip": "잘못 선택하면 연결을 다시 시작해야 해요.", "addDevice.confirmBtn": "선택 완료" },
+    en: { "addDevice.title": "add-device", "addDevice.subtitle": "Connect a new Noddy device?", "addDevice.bodyTitle": "Please connect the device to power first", "addDevice.bodyDesc": "After power is on, make sure the device is in Wi‑Fi pairing mode.<br>Then we'll guide you to select your home Wi‑Fi and finish setup.", "addDevice.nextBtn": "Next: Connect Wi‑Fi", "addDevice.laterBtn": "Later", "addDevice.note": "You can add later. Go to Settings > Device management to enter again.", "addDevice.modalTitle": "Select your Noddy device", "addDevice.modalTip": "Wrong selection will require reconnecting.", "addDevice.confirmBtn": "Confirm" },
+    zh: { "addDevice.title": "把你的 Noddy 叫醒", "addDevice.subtitle": "发现一只野生的Noddy！要现在把我接回家吗～", "addDevice.bodyTitle": "第一步：帮我插上电，让我醒过来 🔌", "addDevice.bodyDesc": "插电后，我会乖乖进入‘找网模式’，指示灯会闪哦 ✨<br>然后你选一下家里的 Wi‑Fi，我就能正式住进去啦～", "addDevice.nextBtn": "下一步：连接 Wi‑Fi", "addDevice.laterBtn": "稍后再说", "addDevice.note": "现在不想连也没关系～去「设置」里随时能找到我 🧸", "addDevice.modalTitle": "选择你的 Noddy 设备", "addDevice.modalTip": "选择错误需要重新开启连接。", "addDevice.confirmBtn": "确定选择" }
   };
   function detectLang() {
     var saved = localStorage.getItem("noddy_lang");
@@ -317,6 +335,7 @@
     var bodyTitle = document.getElementById("reminder-body-title");
     var bodyDesc = document.getElementById("reminder-body-desc");
     var nextLabel = document.getElementById("reminder-next-label");
+    var laterBtn = document.getElementById("btnLater");
     var note = document.getElementById("reminder-note");
     if (title) title.textContent = "🐾 让我醒过来";
     if (subtitle) {
@@ -326,6 +345,7 @@
     if (bodyTitle) bodyTitle.textContent = "插上电 → 我闪灯找网 → 你选 Wi-Fi";
     if (bodyDesc) bodyDesc.innerHTML = "三小步，我们就住在一起啦 ❤️";
     if (nextLabel) nextLabel.textContent = "开始连 Wi-Fi";
+    if (laterBtn) laterBtn.textContent = "稍后再说";
     if (note) note.textContent = "稍后去「设置」也能找到我～";
   }
   applyYoungWiFiReminderCopy();
@@ -333,6 +353,8 @@
   </script>
   <script>
     var FIRST_ADD_KEY = 'noddy_first_add_device_done';
+    var WIFI_DONE_KEY = 'noddy_wifi_setup_done';
+    var OFFLINE_MODE_KEY = 'noddy_offline_mode';
 
     function isFirstAdd() {
       return !localStorage.getItem(FIRST_ADD_KEY);
@@ -354,6 +376,12 @@
       } else {
         window.location.href = 'add-device.html';
       }
+    });
+
+    document.getElementById('btnLater').addEventListener('click', function() {
+      localStorage.removeItem(WIFI_DONE_KEY);
+      localStorage.setItem(OFFLINE_MODE_KEY, '1');
+      window.location.href = 'home.html';
     });
 
   </script>

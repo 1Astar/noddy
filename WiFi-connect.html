@@ -410,6 +410,7 @@
         <span class="scan-spinner" id="scanSpinner" aria-hidden="true"></span>
       </div>
       <p class="wifi-hint" data-i18n="wifi.tip24g"></p>
+      <button type="button" class="btn-scan" style="margin-top:8px" onclick="simulateWifiFail()" data-i18n="wifi.simulateFailBtn"></button>
 
       <div id="wifi-empty" style="display:none;margin:14px 0 10px;" class="wifi-item add-more">
         <span class="wifi-name" data-i18n="wifi.emptyTitle"></span>
@@ -440,7 +441,6 @@
       </div>
 
       <button type="button" class="btn-scan" style="margin-top:12px" onclick="window.location.href='Add-WiFi-connect.html'" data-i18n="wifi.manualEntryBtn"></button>
-      <button type="button" class="btn-scan" style="margin-top:10px" onclick="enterOfflineMode()" data-i18n="wifi.offlineEntryBtn"></button>
     </div>
   </div>
 
@@ -476,24 +476,7 @@
         <button type="button" class="btn btn-cancel" onclick="closeFailModal()" data-i18n="wifi.failLater"></button>
         <button type="button" class="btn btn-confirm" onclick="retryFromFail()" data-i18n="wifi.failRetry"></button>
       </div>
-      <button type="button" class="modal-link-btn" style="margin-top:12px" onclick="enterOfflineMode()" data-i18n="wifi.offlineEntryBtn"></button>
-    </div>
-  </div>
-
-  <!-- 离线模式说明弹窗 -->
-  <div class="overlay" id="overlayOffline">
-    <div class="modal">
-      <div class="modal-header">
-        <span class="modal-title" data-i18n="wifi.offlineTitle"></span>
-        <button type="button" class="modal-close" onclick="closeOfflineModal()">×</button>
-      </div>
-      <div class="modal-body">
-        <div data-i18n="wifi.offlineDesc"></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-cancel" onclick="closeOfflineModal()" data-i18n="wifi.offlineCancel"></button>
-        <button type="button" class="btn btn-confirm" onclick="confirmOfflineMode()" data-i18n="wifi.offlineConfirm"></button>
-      </div>
+      <button type="button" class="modal-link-btn" id="fail-offline-entry" style="margin-top:12px;display:none" onclick="offlineEntryFromFail()" data-i18n="wifi.offlineEntryBtn"></button>
     </div>
   </div>
 
@@ -548,7 +531,8 @@
       "wifi.failNetDesc": "신호가 약하거나 네트워크가 잠시 불안정할 수 있어요. 다시 시도해 볼까요?",
       "wifi.failRetry": "다시 시도",
       "wifi.failLater": "나중에",
-      "wifi.failToast": "연결에 실패했어요. 다시 시도해 주세요."
+      "wifi.failToast": "연결에 실패했어요. 다시 시도해 주세요.",
+      "wifi.simulateFailBtn": "Wi‑Fi 실패 시뮬레이션"
     },
     en: {
       "wifi.title": "Configure device network",
@@ -576,7 +560,8 @@
       "wifi.failNetDesc": "The signal may be weak or the network is unstable. Try again?",
       "wifi.failRetry": "Retry",
       "wifi.failLater": "Later",
-      "wifi.failToast": "Connection failed. Please try again."
+      "wifi.failToast": "Connection failed. Please try again.",
+      "wifi.simulateFailBtn": "Simulate Wi‑Fi failure"
     },
     zh: {
       "wifi.title": "为设备配置网络",
@@ -604,7 +589,8 @@
       "wifi.failNetDesc": "可能是信号弱，或网络在打瞌睡。要不要再试一次？",
       "wifi.failRetry": "再试一次",
       "wifi.failLater": "稍后再说",
-      "wifi.failToast": "连接失败了，再试一次吧～"
+      "wifi.failToast": "连接失败了，再试一次吧～",
+      "wifi.simulateFailBtn": "模拟 Wi‑Fi 失败"
     }
   };
   function detectLang() {
@@ -640,6 +626,7 @@
   window._wifiApplyLang = applyLang;
 })();
     var currentSsid = '';
+    var WIFI_PASSWORD_STORE_KEY = 'noddy_wifi_saved_passwords_v1';
     var successRedirectTimer = null;
     var ownerName = (localStorage.getItem('ownerName') || '').trim();
     var uiLang = (localStorage.getItem('noddy_lang') || '').toLowerCase();
@@ -653,6 +640,8 @@
     var sceneMessageEl = document.getElementById('sceneMessage');
     var passwordHintEl = document.getElementById('passwordHint');
     var connectingTextEl = document.getElementById('connectingText');
+    var wifiFailCount = 0;
+    var OFFLINE_TRIGGER_FAIL_COUNT = 3;
 
     function getWifiSceneCopy() {
       var lang = (localStorage.getItem('noddy_lang') || '').toLowerCase();
@@ -759,9 +748,39 @@
       currentSsid = ssid;
       var titleEl = document.getElementById('modalPasswordTitle');
       titleEl.textContent = (window._wifiT ? window._wifiT('wifi.pwdTitleFormat') : ('输入 ' + currentSsid + ' 密码')).replace('{ssid}', currentSsid);
-      document.getElementById('inputPassword').value = '';
+      document.getElementById('inputPassword').value = getSavedPasswordBySsid(currentSsid) || '';
       document.getElementById('overlayPassword').classList.add('show');
       if (passwordHintEl) passwordHintEl.textContent = pick(passwordMsgs);
+    }
+
+    function getSavedWifiPasswordMap() {
+      try {
+        var raw = localStorage.getItem(WIFI_PASSWORD_STORE_KEY);
+        var parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function savePasswordBySsid(ssid, pwd) {
+      if (!ssid) return;
+      var map = getSavedWifiPasswordMap();
+      map[String(ssid)] = String(pwd || '');
+      try { localStorage.setItem(WIFI_PASSWORD_STORE_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+
+    function removePasswordBySsid(ssid) {
+      if (!ssid) return;
+      var map = getSavedWifiPasswordMap();
+      delete map[String(ssid)];
+      try { localStorage.setItem(WIFI_PASSWORD_STORE_KEY, JSON.stringify(map)); } catch (_) {}
+    }
+
+    function getSavedPasswordBySsid(ssid) {
+      if (!ssid) return '';
+      var map = getSavedWifiPasswordMap();
+      return map[String(ssid)] || '';
     }
 
     if (resultsWrap) {
@@ -845,7 +864,13 @@
 
     function confirmPassword() {
       var pwd = document.getElementById('inputPassword').value;
+      var remember = !!(document.getElementById('rememberPwd') && document.getElementById('rememberPwd').checked);
       if (!pwd.trim()) return;
+      if (remember) {
+        savePasswordBySsid(currentSsid, pwd);
+      } else {
+        removePasswordBySsid(currentSsid);
+      }
       closePasswordModal();
       document.getElementById('selectView').classList.remove('show');
       document.getElementById('successView').classList.remove('show');
@@ -859,6 +884,7 @@
         if (val === 'timeout' || val === 'network' || val === 'unstable') failType = 'net';
         document.getElementById('connectingView').classList.remove('show');
         if (failType) {
+          wifiFailCount += 1;
           setSceneMessage(pick(failedMsgs));
           document.getElementById('selectView').classList.add('show');
           openFailModal(failType);
@@ -875,8 +901,17 @@
       }, 1800);
     }
 
+    function getMainTarget() {
+      try {
+        var params = new URLSearchParams(window.location.search || '');
+        return params.get('next') || params.get('redirect') || 'home.html';
+      } catch (_) {
+        return 'home.html';
+      }
+    }
+
     function goMain() {
-      window.location.href = 'home.html';
+      window.location.href = getMainTarget();
     }
 
     function goToLogin() {
@@ -888,8 +923,12 @@
       lastFailType = type === 'pwd' ? 'pwd' : 'net';
       var titleEl = document.getElementById('failTitle');
       var descEl = document.getElementById('failDesc');
+      var offlineBtn = document.getElementById('fail-offline-entry');
       if (titleEl) titleEl.textContent = (window._wifiT ? window._wifiT(lastFailType === 'pwd' ? 'wifi.failPwdTitle' : 'wifi.failNetTitle') : '');
       if (descEl) descEl.textContent = (window._wifiT ? window._wifiT(lastFailType === 'pwd' ? 'wifi.failPwdDesc' : 'wifi.failNetDesc') : '');
+      if (offlineBtn) {
+        offlineBtn.style.display = wifiFailCount >= OFFLINE_TRIGGER_FAIL_COUNT ? 'inline-flex' : 'none';
+      }
       var overlay = document.getElementById('overlayFail');
       if (overlay) overlay.classList.add('show');
     }
@@ -906,18 +945,16 @@
       setSceneMessage(window._wifiT ? window._wifiT('wifi.failToast') : '');
     }
 
-    function enterOfflineMode() {
-      var overlay = document.getElementById('overlayOffline');
-      if (overlay) overlay.classList.add('show');
+    function simulateWifiFail() {
+      wifiFailCount += 1;
+      setSceneMessage(window._wifiT ? window._wifiT('wifi.failToast') : '');
+      openFailModal('net');
     }
-    function closeOfflineModal() {
-      var overlay = document.getElementById('overlayOffline');
-      if (overlay) overlay.classList.remove('show');
-    }
-    function confirmOfflineMode() {
+
+    function offlineEntryFromFail() {
       try { localStorage.setItem('noddy_offline_mode', '1'); } catch(_) {}
-      closeOfflineModal();
-      window.location.href = 'home.html';
+      closeFailModal();
+      goMain();
     }
 
     var pwdInput = document.getElementById('inputPassword');

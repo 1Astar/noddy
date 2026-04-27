@@ -186,6 +186,7 @@
               class="hidden w-full inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-3 text-sm sm:text-base font-medium text-amber-700 shadow-sm hover:bg-amber-100 active:scale-[0.99] transition">
               <span data-i18n="home.phoneLogin"></span>
             </button>
+
           </div>
 
           <div class="pt-3 text-center text-xs sm:text-sm text-slate-500 space-y-1">
@@ -269,7 +270,7 @@
                 <div class="flex gap-2">
                   <input id="email-otp-input" type="text" data-i18n-placeholder="emailLogin.otpPlaceholder"
                     class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm sm:text-base text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-                  <button id="btn-send-email-code" type="button" onclick="handleSendCode()"
+                  <button id="btn-send-email-code" type="button" onclick="handleSendEmailCode()"
                     class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
                     <span data-i18n="emailLogin.sendCode"></span>
                   </button>
@@ -361,7 +362,7 @@
                 <div class="flex gap-2">
                   <input id="code-input" type="text" data-i18n-placeholder="phoneLogin.codePlaceholder"
                     class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-300" />
-                  <button id="btn-send-code" type="button" onclick="handleSendCode()"
+                  <button id="btn-send-code" type="button" onclick="handleSendPhoneCode()"
                     class="shrink-0 rounded-full bg-rose-100 text-rose-600 text-[11px] sm:text-xs font-medium px-3 py-2 hover:bg-rose-200 active:scale-[0.99] transition">
                     <span data-i18n="phoneLogin.sendCode"></span>
                   </button>
@@ -638,6 +639,65 @@
     </div>
   </div>
 
+  <!-- 微信未安装提示 -->
+  <div id="wechat-install-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">微信未安装</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">请先安装微信</p>
+        </div>
+        <button type="button" onclick="closeWechatInstallModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="closeWechatInstallModal()"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 密码错误次数过多 -->
+  <div id="password-locked-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">密码错误次数过多</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">密码错误次数过多，请15分钟后重试或使用验证码登录</p>
+        </div>
+        <button type="button" onclick="closePasswordLockedModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="closePasswordLockedModal()"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 账号不存在 -->
+  <div id="account-not-found-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">账号不存在</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">账号不存在，是否去注册？</p>
+        </div>
+        <button type="button" onclick="closeAccountNotFoundModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="goSignupFromNotFound()"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">去注册</button>
+        <button type="button" onclick="closeAccountNotFoundModal()"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-600 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">取消</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 已有账号绑定提示 -->
   <div id="bind-existing-modal"
     class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
@@ -667,20 +727,51 @@
         <div class="space-y-1">
           <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">检测到邮箱已注册</p>
           <p id="google-existing-email-desc" class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
-            该邮箱已注册，请用原方式登录或绑定此Google账号。
+            检测到该邮箱已注册。是否将 Google 账号与现有账号绑定？绑定后，您可以使用任一方式登录。
           </p>
         </div>
         <button type="button" onclick="closeGoogleExistingEmailModal()"
           class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
       </div>
       <div class="space-y-2 pt-2">
-        <button type="button" onclick="goLoginWithOriginalMethod()"
-          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
-          用原方式登录
-        </button>
         <button type="button" onclick="bindGoogleToExistingEmail()"
           class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
-          绑定此 Google 账号
+          绑定账号
+        </button>
+        <button type="button" onclick="cancelGoogleExistingEmailLogin()"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apple 登录后绑定方式选择 -->
+  <div id="apple-bind-modal"
+    class="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-sm hidden items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white shadow-xl px-5 py-6 sm:px-6 sm:py-7 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="space-y-1">
+          <p class="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">Apple 登录成功</p>
+          <p class="text-[11px] sm:text-xs text-slate-500 leading-relaxed">
+            为了便于找回账号，请绑定邮箱或手机号。绑定后可使用 Apple + 已绑定方式登录。
+          </p>
+        </div>
+        <button type="button" onclick="closeAppleBindModal()"
+          class="shrink-0 rounded-full px-2 py-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition">✕</button>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="chooseAppleBindMethod('email')"
+          class="w-full rounded-full bg-rose-400 text-white text-xs sm:text-sm font-medium px-4 py-2.5 shadow-sm hover:bg-rose-500 active:scale-[0.99] transition">
+          绑定邮箱
+        </button>
+        <button type="button" onclick="chooseAppleBindMethod('phone')"
+          class="w-full rounded-full border border-amber-200 bg-amber-50 text-xs sm:text-sm text-amber-700 px-4 py-2.5 hover:bg-amber-100 active:scale-[0.99] transition">
+          绑定手机号
+        </button>
+        <button type="button" onclick="skipAppleBindAndContinue()"
+          class="w-full rounded-full border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 px-4 py-2.5 hover:bg-slate-50 active:scale-[0.99] transition">
+          稍后再绑定
         </button>
       </div>
     </div>
@@ -1172,6 +1263,35 @@
       }, duration);
     }
 
+    function mockRSAEncrypt(payload) {
+      try {
+        const txt = typeof payload === "string" ? payload : JSON.stringify(payload || {});
+        return btoa(unescape(encodeURIComponent(txt)));
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function setInputError(inputId, message, tipId) {
+      const input = document.getElementById(inputId);
+      if (input) {
+        input.classList.add("border-rose-300", "ring-2", "ring-rose-200");
+      }
+      if (tipId) {
+        showFieldTip(tipId, message || "验证码错误", "error");
+      }
+    }
+
+    function clearInputError(inputId, tipId) {
+      const input = document.getElementById(inputId);
+      if (input) {
+        input.classList.remove("border-rose-300", "ring-2", "ring-rose-200");
+      }
+      if (tipId) {
+        showFieldTip(tipId, "", "");
+      }
+    }
+
     function hideAllFieldTips() {
       document.querySelectorAll(".field-tip").forEach((el) => {
         el.classList.remove("show", "error", "success");
@@ -1287,6 +1407,28 @@
     function handleEmailLoginSubmit() {
       // 账号登录：验证码输入了才校验；验证码登录：校验邮箱验证码
       if (emailLoginTab === "account") {
+        const emailInput = document.getElementById("email-input");
+        const email = ((emailInput && emailInput.value) || "").trim().toLowerCase();
+        const pwdInput = document.getElementById("password-input");
+        const password = ((pwdInput && pwdInput.value) || "").trim();
+        const encryptedAccountPayload = mockRSAEncrypt({ email, password, ts: Date.now() });
+        void encryptedAccountPayload;
+        if (!getAccountRegionByEmailLite(email)) {
+          openAccountNotFoundModal();
+          return;
+        }
+        if (isPasswordLocked("email", email)) {
+          openPasswordLockedModal();
+          return;
+        }
+        if (password && password !== getStoredPassword("email", email)) {
+          const fail = increasePasswordFail("email", email);
+          setInputError("password-input", "密码错误", "tip-password-input");
+          if (fail >= 3) openPasswordLockedModal();
+          return;
+        }
+        clearInputError("password-input", "tip-password-input");
+        resetPasswordFail("email", email);
         if (captchaInput) {
           const code = (captchaInput.value || "").trim();
           if (code && code !== "123456") {
@@ -1298,15 +1440,32 @@
       } else {
         const otpEl = document.getElementById("email-otp-input");
         const otp = ((otpEl && otpEl.value) || "").trim();
-        if (!otp || otp !== "123456") {
-          showToast(t("toast.codeInvalid"));
+        if (!emailCodeSentAt || (Date.now() - emailCodeSentAt > CODE_TTL_MS)) {
+          showToast("验证码已过期，请重新获取");
+          setInputError("email-otp-input", "验证码已过期", "tip-email-input");
           if (otpEl) otpEl.focus();
           return;
         }
+        if (!otp || otp !== "123456") {
+          setInputError("email-otp-input", "验证码错误", "tip-email-input");
+          if (otpEl) otpEl.focus();
+          return;
+        }
+        clearInputError("email-otp-input", "tip-email-input");
       }
 
       const emailInput = document.getElementById("email-input");
       const email = ((emailInput && emailInput.value) || "").trim().toLowerCase();
+      if (pendingThirdPartyBind && pendingThirdPartyBind.provider === "apple" && pendingThirdPartyBind.method === "email" && email) {
+        mergeAccountAuthSource(email, "apple");
+        markUserBinding("apple", true);
+        pendingThirdPartyBind = null;
+      }
+      if (email) {
+        mergeAccountAuthSource(email, "email");
+        markUserBinding("email", true);
+        markLoginContext("email", email);
+      }
 
       // 第二阶段：输入邮箱后（二次校验，模拟“账号不存在 404”引导切换）
       // 本页不提供切换入口；“去切换”会跳回 index.html 一键切换后再回到这里
@@ -1347,14 +1506,54 @@
 
     function handlePhoneLoginSubmit() {
       // 账号登录：不校验；验证码登录：简单校验 123456
-      if (phoneLoginTab === "code") {
+      if (phoneLoginTab === "account") {
+        const phoneEl = document.getElementById("phone-input");
+        const phone = ((phoneEl && phoneEl.value) || "").trim();
+        const pwdEl = document.getElementById("phone-password-input");
+        const password = ((pwdEl && pwdEl.value) || "").trim();
+        const encryptedAccountPayload = mockRSAEncrypt({ phone, password, ts: Date.now() });
+        void encryptedAccountPayload;
+        if (isPasswordLocked("phone", phone)) {
+          openPasswordLockedModal();
+          return;
+        }
+        if (password && password !== getStoredPassword("phone", phone)) {
+          const fail = increasePasswordFail("phone", phone);
+          setInputError("phone-password-input", "密码错误", "tip-phone-password-input");
+          if (fail >= 3) openPasswordLockedModal();
+          return;
+        }
+        clearInputError("phone-password-input", "tip-phone-password-input");
+        resetPasswordFail("phone", phone);
+      } else {
         const codeEl = document.getElementById("code-input");
         const code = ((codeEl && codeEl.value) || "").trim();
-        if (!code || code !== "123456") {
-          showToast(t("toast.codeInvalid"));
+        if (!phoneCodeSentAt || (Date.now() - phoneCodeSentAt > CODE_TTL_MS)) {
+          showToast("验证码已过期，请重新获取");
+          setInputError("code-input", "验证码已过期", "tip-captcha-input");
           if (codeEl) codeEl.focus();
           return;
         }
+        if (!code || code !== "123456") {
+          setInputError("code-input", "验证码错误", "tip-captcha-input");
+          if (codeEl) codeEl.focus();
+          return;
+        }
+        clearInputError("code-input", "tip-captcha-input");
+      }
+      if (pendingThirdPartyBind && pendingThirdPartyBind.provider === "apple" && pendingThirdPartyBind.method === "phone") {
+        const phoneEl = document.getElementById("phone-input");
+        const phone = ((phoneEl && phoneEl.value) || "").trim();
+        const pseudoEmail = phone ? ("phone_" + phone.replace(/\D+/g, "") + "@noddy.local") : "apple_phone_binding@noddy.local";
+        mergeAccountAuthSource(pseudoEmail, "apple");
+        markUserBinding("apple", true);
+        pendingThirdPartyBind = null;
+      }
+      const phoneEl = document.getElementById("phone-input");
+      const phone = ((phoneEl && phoneEl.value) || "").trim();
+      if (phone) {
+        markUserBinding("phone", true);
+        markLoginContext("phone", phone);
       }
       setPhoneLoading(true);
 
@@ -1423,28 +1622,183 @@
       // 若需要也可在后续切回登录页：switchView('email-login');
     }
 
-    // 手机验证码发送频率限制（保留原手机登录逻辑）
-    const sendCodeBtn = document.getElementById("btn-send-code");
-    let lastCodeSentAt = 0;
+    // 验证码/限流/有效期模拟
+    const CODE_TTL_MS = 5 * 60 * 1000;
+    const CODE_COUNTDOWN_SECONDS = 60;
+    const VERIFY_IP_LOG_KEY = "noddy_verify_ip_send_log_v1";
+    const VERIFY_PHONE_LOG_KEY = "noddy_verify_phone_send_log_v1";
+    const VERIFY_PENDING_KEY = "noddy_verify_pending_code_v1";
+    let lastPhoneCodeSentAt = 0;
+    let lastEmailCodeSentAt = 0;
+    let phoneCodeSentAt = 0;
+    let emailCodeSentAt = 0;
+    let verifyRequestInFlight = { phone: false, email: false };
 
-    function handleSendCode() {
+    function readJsonMap(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) { return {}; }
+    }
+
+    function writeJsonMap(key, map) {
+      try { localStorage.setItem(key, JSON.stringify(map || {})); } catch (_) {}
+    }
+
+    function getNowMs() { return Date.now(); }
+
+    function appendIpSendLog() {
+      const now = getNowMs();
+      const map = readJsonMap(VERIFY_IP_LOG_KEY);
+      const ipKey = "mock_ip";
+      const arr = Array.isArray(map[ipKey]) ? map[ipKey] : [];
+      map[ipKey] = arr.filter((ts) => now - ts <= 5 * 60 * 1000).concat(now);
+      writeJsonMap(VERIFY_IP_LOG_KEY, map);
+    }
+
+    function getIpSendCountIn5m() {
+      const now = getNowMs();
+      const map = readJsonMap(VERIFY_IP_LOG_KEY);
+      const arr = Array.isArray(map.mock_ip) ? map.mock_ip : [];
+      return arr.filter((ts) => now - ts <= 5 * 60 * 1000).length;
+    }
+
+    function getPhoneSendLog(phone) {
+      const key = String(phone || "").trim();
+      if (!key) return [];
+      const map = readJsonMap(VERIFY_PHONE_LOG_KEY);
+      return Array.isArray(map[key]) ? map[key] : [];
+    }
+
+    function appendPhoneSendLog(phone) {
+      const key = String(phone || "").trim();
+      if (!key) return;
+      const now = getNowMs();
+      const map = readJsonMap(VERIFY_PHONE_LOG_KEY);
+      const arr = Array.isArray(map[key]) ? map[key] : [];
+      map[key] = arr.filter((ts) => now - ts <= 24 * 60 * 60 * 1000).concat(now);
+      writeJsonMap(VERIFY_PHONE_LOG_KEY, map);
+    }
+
+    function hasUnverifiedCode(target) {
+      const now = getNowMs();
+      const map = readJsonMap(VERIFY_PENDING_KEY);
+      const exp = Number(map[String(target || "").trim()] || 0);
+      return exp > now;
+    }
+
+    function markPendingCode(target) {
+      const map = readJsonMap(VERIFY_PENDING_KEY);
+      map[String(target || "").trim()] = getNowMs() + CODE_TTL_MS;
+      writeJsonMap(VERIFY_PENDING_KEY, map);
+    }
+
+    function startSendCountdown(btn, baseText) {
+      let remaining = CODE_COUNTDOWN_SECONDS;
+      if (!btn) return;
+      btn.disabled = true;
+      btn.classList.add("opacity-70", "cursor-not-allowed", "pointer-events-none");
+      btn.textContent = `${baseText} (${remaining}s)`;
+      const timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          btn.disabled = false;
+          btn.classList.remove("opacity-70", "cursor-not-allowed", "pointer-events-none");
+          btn.textContent = baseText;
+        } else {
+          btn.textContent = `${baseText} (${remaining}s)`;
+        }
+      }, 1000);
+    }
+
+    function validateSendRules(channel, target) {
+      const now = getNowMs();
+      if (verifyRequestInFlight[channel]) return { ok: false, msg: "请求处理中，请稍候..." };
+      if (getIpSendCountIn5m() >= 3) return { ok: false, msg: "发送过于频繁，请稍后再试" };
+      if (hasUnverifiedCode(target)) return { ok: false, msg: "验证码仍在有效期内，请先完成验证" };
+      if (channel === "phone") {
+        const log = getPhoneSendLog(target);
+        const in60s = log.filter((ts) => now - ts <= 60 * 1000).length;
+        const in10m = log.filter((ts) => now - ts <= 10 * 60 * 1000).length;
+        const in24h = log.filter((ts) => now - ts <= 24 * 60 * 60 * 1000).length;
+        if (in60s >= 1) return { ok: false, msg: "同一手机号60秒内仅可发送1次" };
+        if (in10m >= 5) return { ok: false, msg: "同一手机号10分钟内最多发送5次" };
+        if (in24h >= 20) return { ok: false, msg: "同一手机号24小时内最多发送20次" };
+      }
+      return { ok: true };
+    }
+
+    function handleSendPhoneCode() {
       const now = Date.now();
       const cooldown = 60000; // 60s 内重复点击视为太频繁
 
-      if (now - lastCodeSentAt < cooldown) {
+      if (now - lastPhoneCodeSentAt < cooldown) {
         showToast(t("toast.tooFrequent"));
         return;
       }
+      const phoneEl = document.getElementById("phone-input");
+      const phone = ((phoneEl && phoneEl.value) || "").trim();
+      const btn = document.getElementById("btn-send-code");
+      const check = validateSendRules("phone", phone);
+      if (!check.ok) {
+        showToast(check.msg);
+        return;
+      }
+      verifyRequestInFlight.phone = true;
+      if (btn) btn.disabled = true;
+      const encrypted = mockRSAEncrypt({ channel: "phone", target: phone, ts: now });
+      void encrypted;
+      setTimeout(() => {
+        verifyRequestInFlight.phone = false;
+        lastPhoneCodeSentAt = now;
+        phoneCodeSentAt = now;
+        markPendingCode(phone);
+        appendIpSendLog();
+        appendPhoneSendLog(phone);
+        showToast(t("toast.codeSent"));
+        showFieldTip("tip-captcha-input", FIELD_HINTS.codeLike);
+        startSendCountdown(btn, t("phoneLogin.sendCode"));
+      }, 600);
+    }
 
-      lastCodeSentAt = now;
-      showToast(t("toast.codeSent"));
-      showFieldTip("tip-captcha-input", FIELD_HINTS.codeLike);
+    function handleSendEmailCode() {
+      const now = Date.now();
+      const cooldown = 60000;
+      if (now - lastEmailCodeSentAt < cooldown) {
+        showToast(t("toast.tooFrequent"));
+        return;
+      }
+      const emailEl = document.getElementById("email-input");
+      const email = ((emailEl && emailEl.value) || "").trim().toLowerCase();
+      const btn = document.getElementById("btn-send-email-code");
+      const check = validateSendRules("email", email);
+      if (!check.ok) {
+        showToast(check.msg);
+        return;
+      }
+      verifyRequestInFlight.email = true;
+      if (btn) btn.disabled = true;
+      const encrypted = mockRSAEncrypt({ channel: "email", target: email, ts: now });
+      void encrypted;
+      setTimeout(() => {
+        verifyRequestInFlight.email = false;
+        lastEmailCodeSentAt = now;
+        emailCodeSentAt = now;
+        markPendingCode(email);
+        appendIpSendLog();
+        showToast(t("toast.codeSent"));
+        const otpEl = document.getElementById("email-otp-input");
+        if (otpEl) otpEl.focus();
+        startSendCountdown(btn, t("emailLogin.sendCode"));
+      }, 600);
     }
 
     // 注册页邮箱验证码发送 + 倒计时 & 校验
     let signupCodeSentAt = 0;
     let signupCodeTimer = null;
-    const signupCodeTTL = 60000; // 60s 有效期
+    const signupCodeTTL = CODE_TTL_MS;
 
     function handleSignupSendCode(btn) {
       const now = Date.now();
@@ -1489,7 +1843,7 @@
     // 重置密码：邮箱验证码发送 + 校验
     let forgotCodeSentAt = 0;
     let forgotCodeTimer = null;
-    const forgotCodeTTL = 60000;
+    const forgotCodeTTL = CODE_TTL_MS;
 
     function handleForgotSendCode(btn) {
       const now = Date.now();
@@ -1550,6 +1904,11 @@
           // 简单处理：密码不一致直接提示
           showToast(t("toast.captchaError"));
           return;
+        }
+        const forgotEmailEl = document.getElementById("forgot-email");
+        const forgotEmail = ((forgotEmailEl && forgotEmailEl.value) || "").trim().toLowerCase();
+        if (forgotEmail) {
+          setStoredPassword("email", forgotEmail, p1);
         }
       }
 
@@ -1713,8 +2072,16 @@
     const MERGED_KEY = "noddy_merged_from_anonymous";
     const ACCOUNT_AUTH_SOURCE_KEY = "noddy_account_auth_source_map_v1"; // { [email]: "email" | "google" | "email+google" }
     const GOOGLE_BOUND_EMAILS_KEY = "noddy_google_bound_emails_v1"; // { [email]: true }
+    const USER_BINDINGS_KEY = "noddy_user_bindings"; // { google, apple, phone, email }
+    const LAST_LOGIN_PROVIDER_KEY = "noddy_last_login_provider";
+    const LAST_LOGIN_ACCOUNT_KEY = "noddy_last_login_account";
+    const ACCOUNT_PASSWORD_MAP_KEY = "noddy_account_password_map_v1";
+    const PWD_FAIL_COUNT_KEY = "noddy_pwd_fail_count_map_v1";
+    const PWD_LOCK_UNTIL_KEY = "noddy_pwd_lock_until_map_v1";
+    const DEFAULT_ACCOUNT_PASSWORD = "Noddy@123!";
     let lastThirdPartyProvider = null;
     let pendingGoogleConflictEmail = "";
+    let pendingThirdPartyBind = null; // { provider: "apple", method: "email"|"phone" }
 
     function getDefaultPostLoginTarget() {
       try {
@@ -1774,6 +2141,25 @@
       return map[String(email).toLowerCase()] || "";
     }
 
+    function parseAuthSource(source) {
+      return String(source || "")
+        .split(/[+,]/)
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+    }
+
+    function hasAuthSource(source, key) {
+      return parseAuthSource(source).includes(String(key || "").toLowerCase());
+    }
+
+    function mergeAccountAuthSource(email, sourceToAdd) {
+      if (!email || !sourceToAdd) return;
+      const account = String(email).toLowerCase();
+      const set = new Set(parseAuthSource(getAccountAuthSource(account)));
+      set.add(String(sourceToAdd).toLowerCase());
+      setAccountAuthSource(account, Array.from(set).join("+"));
+    }
+
     function getGoogleBoundMap() {
       try {
         const raw = localStorage.getItem(GOOGLE_BOUND_EMAILS_KEY);
@@ -1796,13 +2182,101 @@
       const map = getGoogleBoundMap();
       map[key] = true;
       try { localStorage.setItem(GOOGLE_BOUND_EMAILS_KEY, JSON.stringify(map)); } catch (_) {}
+      mergeAccountAuthSource(key, "google");
+    }
 
-      const source = getAccountAuthSource(key);
-      if (source === "email" || source === "google" || source === "email+google") {
-        setAccountAuthSource(key, "email+google");
-      } else {
-        setAccountAuthSource(key, "google");
+    function getUserBindings() {
+      try {
+        const raw = localStorage.getItem(USER_BINDINGS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return Object.assign({ google: false, apple: false, phone: false, email: false }, parsed || {});
+      } catch (_) {
+        return { google: false, apple: false, phone: false, email: false };
       }
+    }
+
+    function setUserBindings(bindings) {
+      try { localStorage.setItem(USER_BINDINGS_KEY, JSON.stringify(bindings || {})); } catch (_) {}
+    }
+
+    function markUserBinding(provider, bound) {
+      const key = String(provider || "").toLowerCase();
+      if (!key) return;
+      const bindings = getUserBindings();
+      if (Object.prototype.hasOwnProperty.call(bindings, key)) {
+        bindings[key] = bound !== false;
+        setUserBindings(bindings);
+      }
+    }
+
+    function markLoginContext(provider, account) {
+      try {
+        if (provider) localStorage.setItem(LAST_LOGIN_PROVIDER_KEY, String(provider).toLowerCase());
+        if (account) localStorage.setItem(LAST_LOGIN_ACCOUNT_KEY, String(account).toLowerCase());
+      } catch (_) {}
+    }
+
+    function getMapByKey(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) { return {}; }
+    }
+
+    function setMapByKey(key, map) {
+      try { localStorage.setItem(key, JSON.stringify(map || {})); } catch (_) {}
+    }
+
+    function getPasswordMap() {
+      return getMapByKey(ACCOUNT_PASSWORD_MAP_KEY);
+    }
+
+    function getPasswordAccountKey(type, account) {
+      return String(type || "account") + ":" + String(account || "").toLowerCase();
+    }
+
+    function getStoredPassword(type, account) {
+      const map = getPasswordMap();
+      return String(map[getPasswordAccountKey(type, account)] || DEFAULT_ACCOUNT_PASSWORD);
+    }
+
+    function setStoredPassword(type, account, password) {
+      const map = getPasswordMap();
+      map[getPasswordAccountKey(type, account)] = String(password || "");
+      setMapByKey(ACCOUNT_PASSWORD_MAP_KEY, map);
+    }
+
+    function getPwdLockKey(type, account) {
+      return String(type || "account") + ":" + String(account || "default").toLowerCase();
+    }
+
+    function isPasswordLocked(type, account) {
+      const key = getPwdLockKey(type, account);
+      const map = getMapByKey(PWD_LOCK_UNTIL_KEY);
+      return Number(map[key] || 0) > Date.now();
+    }
+
+    function increasePasswordFail(type, account) {
+      const key = getPwdLockKey(type, account);
+      const countMap = getMapByKey(PWD_FAIL_COUNT_KEY);
+      const lockMap = getMapByKey(PWD_LOCK_UNTIL_KEY);
+      const next = Number(countMap[key] || 0) + 1;
+      countMap[key] = next;
+      if (next >= 3) {
+        lockMap[key] = Date.now() + 15 * 60 * 1000;
+        countMap[key] = 0;
+      }
+      setMapByKey(PWD_FAIL_COUNT_KEY, countMap);
+      setMapByKey(PWD_LOCK_UNTIL_KEY, lockMap);
+      return next;
+    }
+
+    function resetPasswordFail(type, account) {
+      const key = getPwdLockKey(type, account);
+      const countMap = getMapByKey(PWD_FAIL_COUNT_KEY);
+      countMap[key] = 0;
+      setMapByKey(PWD_FAIL_COUNT_KEY, countMap);
     }
 
     function openGoogleExistingEmailModal(email) {
@@ -1810,7 +2284,7 @@
       const modal = document.getElementById("google-existing-email-modal");
       const desc = document.getElementById("google-existing-email-desc");
       if (desc && pendingGoogleConflictEmail) {
-        desc.textContent = `邮箱 ${pendingGoogleConflictEmail} 已注册，请用原方式登录或绑定此Google账号。`;
+        desc.textContent = `检测到邮箱 ${pendingGoogleConflictEmail} 已注册。是否将 Google 账号与现有账号绑定？绑定后，您可以使用任一方式登录。`;
       }
       if (!modal) return;
       modal.classList.remove("hidden");
@@ -1827,23 +2301,57 @@
 
     window.closeGoogleExistingEmailModal = closeGoogleExistingEmailModal;
 
-    window.goLoginWithOriginalMethod = function() {
-      const email = pendingGoogleConflictEmail;
-      closeGoogleExistingEmailModal();
-      switchView("email-login");
-      setEmailLoginTab("account");
-      const emailInput = document.getElementById("email-input");
-      if (emailInput && email) {
-        emailInput.value = email;
-        emailInput.focus();
-      }
-    };
-
     window.bindGoogleToExistingEmail = function() {
       const email = pendingGoogleConflictEmail;
       if (email) markGoogleBound(email);
+      markUserBinding("google", true);
       closeGoogleExistingEmailModal();
-      finalizeLoginAndRedirect("google");
+      finalizeLoginAndRedirect("google", email || "user@gmail.com");
+    };
+
+    window.cancelGoogleExistingEmailLogin = function() {
+      closeGoogleExistingEmailModal();
+      // 终止本次 Google 登录，回到首页让用户重新选择登录方式/账号
+      switchView("home");
+      showToast("已取消本次登录，请重新选择登录方式。", 1800);
+    };
+
+    function openAppleBindModal() {
+      const modal = document.getElementById("apple-bind-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeAppleBindModal() {
+      const modal = document.getElementById("apple-bind-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    window.closeAppleBindModal = closeAppleBindModal;
+
+    window.chooseAppleBindMethod = function(method) {
+      pendingThirdPartyBind = { provider: "apple", method: method === "phone" ? "phone" : "email" };
+      closeAppleBindModal();
+      if (pendingThirdPartyBind.method === "phone") {
+        switchView("phone-login");
+        setPhoneLoginTab("code");
+        showToast("请先完成手机号验证，完成后将自动与 Apple 账号绑定。", 2200);
+        return;
+      }
+      switchView("email-login");
+      setEmailLoginTab("account");
+      showToast("请先完成邮箱登录，完成后将自动与 Apple 账号绑定。", 2200);
+    };
+
+    window.skipAppleBindAndContinue = function() {
+      pendingThirdPartyBind = null;
+      closeAppleBindModal();
+      mergeAccountAuthSource("apple_user@privaterelay.appleid.com", "apple");
+      markUserBinding("apple", true);
+      finalizeLoginAndRedirect("apple", "apple_user@privaterelay.appleid.com");
     };
 
     function openLoginFailedModal() {
@@ -1860,6 +2368,58 @@
       modal.classList.remove("flex");
     }
 
+    function openWechatInstallModal() {
+      const modal = document.getElementById("wechat-install-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeWechatInstallModal() {
+      const modal = document.getElementById("wechat-install-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    window.closeWechatInstallModal = closeWechatInstallModal;
+
+    function openPasswordLockedModal() {
+      const modal = document.getElementById("password-locked-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closePasswordLockedModal() {
+      const modal = document.getElementById("password-locked-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    window.closePasswordLockedModal = closePasswordLockedModal;
+
+    function openAccountNotFoundModal() {
+      const modal = document.getElementById("account-not-found-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeAccountNotFoundModal() {
+      const modal = document.getElementById("account-not-found-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    window.closeAccountNotFoundModal = closeAccountNotFoundModal;
+    window.goSignupFromNotFound = function() {
+      closeAccountNotFoundModal();
+      switchView("signup");
+    };
+
     function openBindExistingModal() {
       const modal = document.getElementById("bind-existing-modal");
       if (!modal) return;
@@ -1874,12 +2434,16 @@
       modal.classList.remove("flex");
     }
 
-    function finalizeLoginAndRedirect(provider) {
+    function finalizeLoginAndRedirect(provider, accountHint) {
       try {
         const existing = localStorage.getItem(ACCOUNT_ID_KEY);
         const accountId = existing || (provider + "_" + Date.now());
         localStorage.setItem(ACCOUNT_ID_KEY, accountId);
       } catch (_) {}
+      markLoginContext(provider, accountHint || "");
+      if (provider === "google" || provider === "apple" || provider === "email" || provider === "phone") {
+        markUserBinding(provider, true);
+      }
       // 合并：不删除匿名数据，只做“绑定/同步”标记 + 关键字段对齐
       (function mergeAnonymousToAccount() {
         try {
@@ -1933,31 +2497,48 @@
 
     window.simulateThirdPartyLogin = function(provider, ev) {
       lastThirdPartyProvider = provider;
+      // Ctrl 点击: 用户取消授权，安静返回登录页
+      if (ev && ev.ctrlKey) {
+        switchView("home");
+        return;
+      }
+      // Shift 点击: 网络超时
+      if (ev && ev.shiftKey) {
+        showToast("网络超时，请重试");
+        return;
+      }
+      // Alt 点击: 后端接口报错
+      if (ev && ev.altKey) {
+        showToast("登录失败，请稍后重试");
+        return;
+      }
+      if (provider === "wechat" && localStorage.getItem("noddy_mock_wechat_installed") !== "1") {
+        openWechatInstallModal();
+        return;
+      }
+      if (provider === "apple") {
+        openAppleBindModal();
+        return;
+      }
       if (provider === "google") {
         // 原型模拟：Google 首次登录拿到邮箱
         const googleEmail = "user@gmail.com";
         const existingRegion = getAccountRegionByEmailLite(googleEmail);
         const existingSource = getAccountAuthSource(googleEmail);
-        const isExistingEmailAccount = !!existingRegion && (existingSource === "email" || existingSource === "email+google" || !existingSource);
+        const isExistingEmailAccount = !!existingRegion && (hasAuthSource(existingSource, "email") || !existingSource);
         if (isExistingEmailAccount && !isGoogleBound(googleEmail)) {
           openGoogleExistingEmailModal(googleEmail);
           return;
         }
         markGoogleBound(googleEmail);
+        markUserBinding("google", true);
       }
-      // 原型：按住 Alt 点击 = 模拟失败
-      const shouldFail = !!(ev && ev.altKey);
-      if (shouldFail) {
-        openLoginFailedModal();
-        return;
-      }
-
       if (shouldAskBindExisting()) {
         openBindExistingModal();
         return;
       }
 
-      finalizeLoginAndRedirect(provider);
+      finalizeLoginAndRedirect(provider, provider === "google" ? "user@gmail.com" : "");
     };
 
     window.retryLastLogin = function() {
@@ -2116,9 +2697,12 @@
 
     function handleRegionMismatchSwitch() {
       const target = pendingMismatchTargetRegion || "global";
+      const lang = (localStorage.getItem("noddy_lang") || detectLang() || "zh");
       const url =
         "./index.html?setRegion=" +
         encodeURIComponent(target) +
+        "&lang=" +
+        encodeURIComponent(lang) +
         "&redirect=" +
         encodeURIComponent("./signup.html#email-login") +
         (pendingMismatchEmail ? "&email=" + encodeURIComponent(pendingMismatchEmail) : "");
@@ -2141,9 +2725,14 @@
       try {
         const params = new URLSearchParams(window.location.search || "");
         const email = (params.get("email") || "").trim();
+        const targetView = (params.get("view") || "").trim();
         if (email) {
           const emailInput = document.getElementById("email-input");
           if (emailInput) emailInput.value = email;
+        }
+        if (targetView === "forgot") {
+          switchView("forgot");
+          return;
         }
         if ((window.location.hash || "") === "#email-login") {
           switchView("email-login");

@@ -37,6 +37,36 @@
       gap: 12px;
     }
 
+    .network-banner {
+      display: none;
+      margin: 0 20px 10px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #fff6db, #ffe8d4);
+      border: 1px solid rgba(251, 146, 60, 0.35);
+      color: #9a4d00;
+      box-shadow: 0 3px 12px rgba(251, 146, 60, 0.2);
+      font-size: 12px;
+      line-height: 1.5;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .network-banner.show {
+      display: flex;
+    }
+
+    .network-banner .close {
+      border: none;
+      background: rgba(255, 255, 255, 0.85);
+      color: #a85d0a;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     .user-header {
       display: flex;
       flex-direction: column;
@@ -79,11 +109,74 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
 
     .avatar-btn:hover {
       box-shadow: var(--shadow-hover);
       transform: scale(1.05);
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .owner-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(196, 181, 224, 0.35);
+    }
+
+    .owner-avatar {
+      width: 54px;
+      height: 54px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .owner-meta { flex: 1; min-width: 0; }
+
+    .owner-name-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #5a4a7a;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .owner-name-btn span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .owner-subline {
+      font-size: 12px;
+      color: #7d6ea5;
+      margin-top: 4px;
     }
 
     .task-pill {
@@ -265,6 +358,25 @@
       align-items: center;
       justify-content: center;
       font-size: 16px;
+    }
+
+    .danger-zone {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(196, 181, 224, 0.6);
+    }
+
+    .danger-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #b42318;
+      background: rgba(244, 63, 94, 0.10);
+      box-shadow: 0 2px 10px rgba(244, 63, 94, 0.10);
     }
 
     /* 社区动态列表（发现页） */
@@ -1698,8 +1810,9 @@
   <!-- 顶部：左上头像 + 任务入口，右上语言+设置 -->
   <div class="top-bar">
     <div class="user-header">
-      <button class="avatar-btn" onclick="openUserPage()" aria-label="用户中心">
-        👤
+      <button class="avatar-btn" id="top-avatar-btn" onclick="openUserPage()" aria-label="用户中心">
+        <img id="owner-avatar-top" class="avatar-img" alt="" style="display:none">
+        <span id="owner-avatar-top-fallback">👤</span>
       </button>
       <div class="task-pill" onclick="goToDetail('diary')">
         <span>📝 任务</span>
@@ -1712,26 +1825,43 @@
       </button>
     </div>
   </div>
+  <div class="network-banner" id="network-banner">
+    <span id="network-banner-text">未连接网络，部分功能受限</span>
+    <button class="close" type="button" onclick="closeNetworkBanner()">关闭</button>
+  </div>
 
   <!-- 用户页面（侧滑） -->
   <div class="user-page-overlay" id="user-overlay" onclick="closeUserPage()"></div>
   <div class="user-page" id="user-page">
     <button class="close-btn" onclick="closeUserPage()">×</button>
     <div class="user-page-content">
+      <div class="owner-head">
+        <button class="owner-avatar" type="button" onclick="openOwnerProfile()" aria-label="编辑个人信息">
+          <img id="owner-avatar-side" class="avatar-img" alt="" style="display:none">
+          <span id="owner-avatar-side-fallback" style="color:#fff;font-size:18px">👤</span>
+        </button>
+        <div class="owner-meta">
+          <button class="owner-name-btn" type="button" onclick="openOwnerProfile()" aria-label="编辑主人信息">
+            <span id="owner-name-label">主人</span>
+            <span style="font-weight:900;color:#6a56a2">›</span>
+          </button>
+          <div class="owner-subline" id="owner-subline">点击修改主人信息（含生日）</div>
+        </div>
+      </div>
       <div class="companion-text" id="companion-text">今天是noddy陪你的第2天哦</div>
       <div class="name-edit">
         <input type="text" id="pet-name-input" value="noddy" placeholder="修改宠物昵称" maxlength="10" oninput="updatePetName()">
       </div>
       <ul class="menu-list">
-        <li class="menu-item"><span class="icon">🐾</span>宠物列表</li>
-        <li class="menu-item" onclick="openMessages()"><span class="icon">🔔</span>消息提醒</li>
+        <li class="menu-item" onclick="openDeviceManage()"><span class="icon">🧩</span>设备管理</li>
         <li class="menu-item" onclick="openSettings()"><span class="icon">⚙️</span>设置</li>
-        <li class="menu-item"><span class="icon">📖</span>使用说明</li>
-        <li class="menu-item"><span class="icon">👋</span>动作引导</li>
-        <li class="menu-item"><span class="icon">📲</span>多端登录</li>
-        <li class="menu-item" onclick="openBatteryQaModal()"><span class="icon">📘</span>帮助Q&A</li>
+        <li class="menu-item" onclick="openFeedback()"><span class="icon">📝</span>建议反馈</li>
+        <li class="menu-item" onclick="openHelpCenter()"><span class="icon">📘</span>帮助Q&A</li>
         <li class="menu-item" onclick="openParentalEntry()" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode"><span class="icon">🛡️</span>家长模式</li>
       </ul>
+      <div class="danger-zone">
+        <button type="button" class="danger-btn" onclick="requestAccountDeletion()">账号注销</button>
+      </div>
     </div>
   </div>
 
@@ -2119,52 +2249,62 @@
           <div class="modal-qa-section-title">设备连接与管理</div>
           <div class="modal-qa-list">
             <details class="modal-qa-item">
-              <summary>1. 添加设备后一直扫不到设备？</summary>
-              <p>A: 先确认设备已进入配网模式，手机与设备保持在 10 米内，再点击“重试扫描”并等待几秒刷新结果。</p>
+              <summary>1. 添加设备时扫描不到设备怎么办？</summary>
+              <p>A: 先确认设备已进入配网模式（按指引操作），手机与设备尽量保持 10 米内，再点击重试扫描。若仍失败，退出后重新进入“添加设备”。</p>
             </details>
             <details class="modal-qa-item">
-              <summary>2. Wi-Fi 连接失败 / 配网失败怎么办？</summary>
-              <p>A: 建议优先使用 2.4G Wi-Fi，检查 Wi-Fi 密码是否正确；若失败，请让设备重新进入配网模式后再“重试一次/重新选网”。</p>
+              <summary>2. 手机连接设备时“连接失败”怎么办？</summary>
+              <p>A: 常见原因是设备未处于配网状态或网络短时波动。请让设备重新进入配网状态后，点击“再试一次”；连续失败时可重新选网。</p>
             </details>
             <details class="modal-qa-item">
-              <summary>3. 电量相关异常（充电慢 / 刚充电没反应）？</summary>
-              <p>A: 先确认底座指示灯常亮，建议使用 10W 充电器并正确放置设备；电量极低时通常需要 1-3 分钟回电才会恢复。</p>
-            </details>
-          </div>
-        </section>
-
-        <section class="modal-qa-section">
-          <div class="modal-qa-section-title">账户与数据</div>
-          <div class="modal-qa-list">
-            <details class="modal-qa-item">
-              <summary>1. 为什么会弹出“保存宠物，防止数据丢失”？</summary>
-              <p>A: 当前是匿名体验逻辑，互动达到阈值后会提示登录保存进度，这是预期行为；点“稍后再说”也可继续体验。</p>
-            </details>
-            <details class="modal-qa-item">
-              <summary>2. 刷新后数据变了或清空了？</summary>
-              <p>A: 原型状态主要保存在浏览器本地（localStorage）；清缓存、隐私模式或更换浏览器后，记录可能不会保留。</p>
-            </details>
-            <details class="modal-qa-item">
-              <summary>3. 家长模式进不去怎么办？</summary>
-              <p>A: 先完成家长验证（算式或按住 3 秒）后才可进入设置面板；长按过程中松手会重新计时。</p>
+              <summary>3. 为设备配置网络时总失败怎么办？</summary>
+              <p>A: noddy咿扭扭当前仅支持 2.4GHz Wi-Fi。请先确认密码正确、信号稳定，再重试；连续多次失败后，系统会提供离线登录入口。</p>
             </details>
           </div>
         </section>
 
         <section class="modal-qa-section">
-          <div class="modal-qa-section-title">互动与任务</div>
+          <div class="modal-qa-section-title">设备与账户数据</div>
           <div class="modal-qa-list">
             <details class="modal-qa-item">
-              <summary>1. 点“喂食 / 任务 / 番茄钟”没反应？</summary>
-              <p>A: 这些入口会新开页面跳转到 detail.html。若浏览器拦截了新窗口，请允许该站点弹出窗口后重试。</p>
+              <summary>1. 为已绑定设备新增 Wi-Fi 怎么操作？</summary>
+              <p>A: 可从设置中的设备管理再次进入配网流程，按“选择网络 -> 输入密码 -> 确认连接”完成新增。</p>
             </details>
             <details class="modal-qa-item">
-              <summary>2. 任务点“完成”后没看到奖励？</summary>
-              <p>A: 奖励通过弹窗展示，若被快速关闭可再次点击任务按钮触发；也可在成长日记里确认任务状态变化。</p>
+              <summary>2. 数据为什么会重置或看起来丢失？</summary>
+              <p>A: 原型数据保存在浏览器本地缓存。清缓存、无痕模式或更换浏览器环境后，历史记录可能不会保留。</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">电量与充电</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>1. 为什么 noddy咿扭扭充不上电？</summary>
+              <p>A: 请确认底座电源指示灯常亮，设备放在底座正中，并使用 10W 及以上充电器。</p>
             </details>
             <details class="modal-qa-item">
-              <summary>3. 为什么Noddy突然不动了？</summary>
-              <p>A: 可能进入休息状态，或电量偏低导致动作减少；先互动一下或补电后再观察是否恢复。</p>
+              <summary>2. 为什么刚开始充电没反应？</summary>
+              <p>A: 电量过低时会先回电，通常需要 1-3 分钟后才会恢复显示，属于正常现象。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>3. 为什么 noddy咿扭扭突然不动了？</summary>
+              <p>A: 可能进入休息状态或电量偏低。可先尝试互动唤醒，若无响应建议先补电再观察。</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">任务与奖励</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>1. 如何查看任务列表？</summary>
+              <p>A: 可在首页任务入口查看当日任务与阶段任务；完成后会更新进度条与阶段状态。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>2. 点“完成”后没看到奖励？</summary>
+              <p>A: 奖励通常通过弹窗反馈；若关闭过快，可再次触发任务按钮，或在成长相关面板查看状态是否已变更。</p>
             </details>
           </div>
         </section>
@@ -2391,6 +2531,81 @@
       window.open('detail.html#settings', '_blank');
     }
 
+    function openDeviceManage() {
+      recordInteraction('home_openDeviceManage');
+      window.open('detail.html#device', '_blank');
+    }
+
+    function openFeedback() {
+      recordInteraction('home_openFeedback');
+      window.open('feedback.html', '_blank');
+    }
+
+    function openHelpCenter() {
+      recordInteraction('home_openHelpCenter');
+      window.open('help-center.html', '_blank');
+    }
+
+    const OWNER_AVATAR_KEY = 'noddy_owner_avatar_dataurl';
+    const USER_PROFILE_KEY = 'noddy_user_profile_info';
+
+    function getUserProfileSafe() {
+      try {
+        const raw = localStorage.getItem(USER_PROFILE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function getOwnerNameSafe() {
+      const profile = getUserProfileSafe();
+      return String(profile.nickname || '').trim() || '主人';
+    }
+
+    function getOwnerBirthdaySafe() {
+      const profile = getUserProfileSafe();
+      return String(profile.birthday || '').trim();
+    }
+
+    function applyOwnerAvatar(dataUrl) {
+      const topImg = document.getElementById('owner-avatar-top');
+      const topFallback = document.getElementById('owner-avatar-top-fallback');
+      const sideImg = document.getElementById('owner-avatar-side');
+      const sideFallback = document.getElementById('owner-avatar-side-fallback');
+      const has = !!dataUrl;
+
+      if (topImg && topFallback) {
+        topImg.style.display = has ? 'block' : 'none';
+        topFallback.style.display = has ? 'none' : 'inline';
+        if (has) topImg.src = dataUrl;
+      }
+      if (sideImg && sideFallback) {
+        sideImg.style.display = has ? 'block' : 'none';
+        sideFallback.style.display = has ? 'none' : 'inline';
+        if (has) sideImg.src = dataUrl;
+      }
+    }
+
+    function renderOwnerHeader() {
+      const nameEl = document.getElementById('owner-name-label');
+      const subEl = document.getElementById('owner-subline');
+      if (nameEl) nameEl.textContent = getOwnerNameSafe();
+      if (subEl) {
+        const bd = getOwnerBirthdaySafe();
+        subEl.textContent = bd ? ('生日：' + bd) : '点击编辑个人资料';
+      }
+      let avatar = '';
+      try { avatar = localStorage.getItem(OWNER_AVATAR_KEY) || ''; } catch (_) {}
+      applyOwnerAvatar(avatar);
+    }
+
+    function openOwnerProfile() {
+      recordInteraction('home_openOwnerProfile');
+      window.open('profile-account.html', '_blank');
+    }
+
     function openUserPage() {
       document.getElementById('user-overlay').classList.add('show');
       document.getElementById('user-page').classList.add('show');
@@ -2399,6 +2614,11 @@
     function closeUserPage() {
       document.getElementById('user-overlay').classList.remove('show');
       document.getElementById('user-page').classList.remove('show');
+    }
+
+    function requestAccountDeletion() {
+      closeUserPage();
+      window.open('account-delete.html', '_blank');
     }
 
     function getPetName() {
@@ -2445,14 +2665,19 @@
       }
     }
 
+    renderOwnerHeader();
     initPetName();
     initPetStatus();
     refreshTaskProgress();
+    initNetworkBanner();
 
     // ------------------------
     // Anonymous save prompt + interaction counter
     // ------------------------
     const ANON_KEY = "noddy_is_anonymous"; // "1" | "0"
+    const WIFI_DONE_KEY = "noddy_wifi_setup_done";
+    const OFFLINE_MODE_KEY = "noddy_offline_mode";
+    const NETWORK_BANNER_CLOSED_KEY = "noddy_network_banner_closed";
     const INTERACTION_COUNT_KEY = "noddy_interaction_count";
     /** 仅用 sessionStorage：关闭 App/标签页后清空，下次冷启动可再次弹出「保存」引导 */
     const SAVE_PROMPT_SHOWN_SESSION_KEY = "noddy_save_modal_shown_tab_session";
@@ -2519,6 +2744,33 @@
       setInteractionCount(next);
       void source;
       maybeShowSavePrompt();
+    }
+
+    function shouldShowNetworkBanner() {
+      const wifiDone = localStorage.getItem(WIFI_DONE_KEY) === "1";
+      const offline = localStorage.getItem(OFFLINE_MODE_KEY) === "1";
+      const closed = localStorage.getItem(NETWORK_BANNER_CLOSED_KEY) === "1";
+      if (wifiDone) {
+        localStorage.removeItem(NETWORK_BANNER_CLOSED_KEY);
+        return false;
+      }
+      return (offline || !wifiDone) && !closed;
+    }
+
+    function closeNetworkBanner() {
+      const el = document.getElementById("network-banner");
+      if (el) el.classList.remove("show");
+      localStorage.setItem(NETWORK_BANNER_CLOSED_KEY, "1");
+    }
+
+    function initNetworkBanner() {
+      const el = document.getElementById("network-banner");
+      if (!el) return;
+      if (shouldShowNetworkBanner()) {
+        el.classList.add("show");
+      } else {
+        el.classList.remove("show");
+      }
     }
 
     function openSavePetModal() {
