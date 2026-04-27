@@ -1,0 +1,3603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Noddy - 宠物陪伴主页</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --purple-light: #e8dff5;
+      --purple: #c4b5e0;
+      --blue-light: #d4e8f7;
+      --blue: #a8d4f0;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --shadow: 0 4px 20px rgba(164, 150, 200, 0.25);
+      --shadow-hover: 0 6px 24px rgba(164, 150, 200, 0.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(180deg, var(--purple-light) 0%, var(--blue-light) 50%, var(--purple-light) 100%);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* 顶部区域：左上头像+任务入口，右上设置 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px 12px;
+      gap: 12px;
+    }
+
+    .network-banner {
+      display: none;
+      margin: 0 20px 10px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #fff6db, #ffe8d4);
+      border: 1px solid rgba(251, 146, 60, 0.35);
+      color: #9a4d00;
+      box-shadow: 0 3px 12px rgba(251, 146, 60, 0.2);
+      font-size: 12px;
+      line-height: 1.5;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .network-banner.show {
+      display: flex;
+    }
+
+    .network-banner .close {
+      border: none;
+      background: rgba(255, 255, 255, 0.85);
+      color: #a85d0a;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .user-header {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .settings-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 1);
+      box-shadow: var(--shadow-hover);
+      transform: scale(1.05);
+    }
+
+    .avatar-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #fff;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .avatar-btn:hover {
+      box-shadow: var(--shadow-hover);
+      transform: scale(1.05);
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .owner-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.7);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(196, 181, 224, 0.35);
+    }
+
+    .owner-avatar {
+      width: 54px;
+      height: 54px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+
+    .owner-meta { flex: 1; min-width: 0; }
+
+    .owner-name-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #5a4a7a;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .owner-name-btn span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .owner-subline {
+      font-size: 12px;
+      color: #7d6ea5;
+      margin-top: 4px;
+    }
+
+    .task-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      font-size: 12px;
+      color: #5a4a7a;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .task-pill span.progress {
+      font-size: 11px;
+      color: #999;
+    }
+
+    .task-pill:hover {
+      background: #fff;
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-1px);
+    }
+
+    /* 宠物身份卡（宠物图下方） */
+    .pet-id-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      box-shadow: var(--shadow);
+      width: min(320px, calc(100% - 48px));
+      max-width: 320px;
+      margin-top: 12px;
+    }
+
+    .pet-id-card .card-title {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .pet-id-card .pet-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #5a4a7a;
+      margin-bottom: 6px;
+    }
+
+    .pet-id-card .personality {
+      font-size: 11px;
+      color: #999;
+      line-height: 1.4;
+    }
+
+    /* 用户页面（侧滑） */
+    .user-page-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 300;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .user-page-overlay.show {
+      display: block;
+      opacity: 1;
+    }
+
+    .user-page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 85%;
+      max-width: 320px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--purple-light), var(--card-bg));
+      z-index: 301;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+
+    .user-page.show {
+      transform: translateX(0);
+    }
+
+    .user-page .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-page-content {
+      padding: 24px 20px 40px;
+    }
+
+    .user-page .companion-text {
+      font-size: 15px;
+      color: #5a4a7a;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.7);
+      border-radius: var(--radius-sm);
+    }
+
+    .user-page .name-edit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .user-page .name-edit input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid rgba(196, 181, 224, 0.5);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: inherit;
+      color: #5a4a7a;
+    }
+
+    .user-page .name-edit input:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .user-page .menu-list {
+      list-style: none;
+    }
+
+    .user-page .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--card-bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      font-size: 14px;
+      color: #5a4a7a;
+      font-weight: 500;
+    }
+
+    .user-page .menu-item:hover {
+      transform: translateX(4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .user-page .menu-item .icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .danger-zone {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(196, 181, 224, 0.6);
+    }
+
+    .danger-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #b42318;
+      background: rgba(244, 63, 94, 0.10);
+      box-shadow: 0 2px 10px rgba(244, 63, 94, 0.10);
+    }
+
+    /* 社区动态列表（发现页） */
+    .feed-item {
+      background: linear-gradient(135deg, #f5f0fa, #fff);
+      border-radius: var(--radius-sm);
+      padding: 14px 14px;
+      border: 1px solid rgba(196, 181, 224, 0.25);
+      box-shadow: 0 2px 12px rgba(164, 150, 200, 0.12);
+      margin-bottom: 10px;
+    }
+
+    .feed-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .mini-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+
+    .feed-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .feed-name {
+      font-weight: 700;
+      color: #5a4a7a;
+      font-size: 14px;
+    }
+
+    .feed-time {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .feed-text {
+      font-size: 14px;
+      color: #5a4a7a;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .feed-like {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .pet-cards-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .pet-mini-card {
+      background: linear-gradient(135deg, #f5f0fa, #fff);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      border: 1px solid rgba(196, 181, 224, 0.25);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .pet-mini-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .pet-mini-emoji {
+      font-size: 36px;
+      margin-bottom: 6px;
+    }
+
+    .pet-mini-name {
+      font-weight: 700;
+      color: #5a4a7a;
+      margin-bottom: 4px;
+    }
+
+    .pet-mini-cta {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* 性格参数弹窗（居中） */
+    .overlay-center {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 250;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .overlay-center.show {
+      display: flex;
+    }
+
+    .personality-modal {
+      background: var(--card-bg);
+      border-radius: 26px;
+      padding: 20px 20px 18px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .personality-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .personality-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #5a4a7a;
+    }
+
+    .personality-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-circle-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    .personality-tags {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: #5a4a7a;
+    }
+
+    .personality-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .personality-metric {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 14px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #5a4a7a;
+      box-shadow: 0 2px 10px rgba(164, 150, 200, 0.18);
+    }
+
+    .personality-metric .label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .personality-bar {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(196, 181, 224, 0.35);
+      overflow: hidden;
+    }
+
+    .personality-bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff9ac4, #ffc371);
+    }
+
+    .quadrant-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 18px;
+      padding: 10px 10px 12px;
+      box-shadow: 0 2px 10px rgba(164, 150, 200, 0.16);
+      font-size: 11px;
+      color: #777;
+    }
+
+    .quadrant-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #5a4a7a;
+      margin-bottom: 6px;
+    }
+
+    .quadrant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .quadrant-cell {
+      padding: 4px 4px;
+      border-radius: 6px;
+      background: #f6f0ff;
+      text-align: center;
+    }
+
+    .quadrant-cell.active {
+      background: #ffe6f2;
+      font-weight: 600;
+      color: #e75480;
+    }
+
+    .personality-tip {
+      font-size: 11px;
+      color: #999;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    /* 宠物展示区 */
+    .pet-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0 12px;
+    }
+
+    .pet-container {
+      position: relative;
+    }
+
+    .pet-avatar {
+      width: 130px;
+      height: 130px;
+      background: linear-gradient(145deg, #d4c4e8, #e8e0f0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(164, 150, 200, 0.4);
+      border: 4px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .pet-face {
+      width: 85px;
+      height: 85px;
+      background: linear-gradient(145deg, #c4b5d8, #e0d8e8);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .pet-eyes {
+      position: absolute;
+      top: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 18px;
+    }
+
+    .pet-eye {
+      width: 12px;
+      height: 16px;
+      background: #4a90d9;
+      border-radius: 50%;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);
+    }
+
+    .pet-nose {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 5px;
+      background: #5a4a4a;
+      border-radius: 50%;
+    }
+
+    .pet-status-icons {
+      position: absolute;
+      right: -36px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .status-icon {
+      width: 26px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      box-shadow: var(--shadow);
+    }
+
+    @keyframes batteryPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.18); }
+      50% { box-shadow: 0 0 0 7px rgba(74, 144, 217, 0); }
+    }
+
+    .bubble {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffd4e5;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #c44a7a;
+      box-shadow: var(--shadow);
+    }
+
+    #battery-bubble,
+    #battery-status-icon {
+      cursor: pointer;
+      animation: batteryPulse 1.9s ease-in-out infinite;
+    }
+
+    #battery-bubble::after {
+      content: "点我看看";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: -18px;
+      white-space: nowrap;
+      font-size: 10px;
+      color: #4a90d9;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(168, 212, 240, 0.8);
+      border-radius: 999px;
+      padding: 1px 6px;
+      opacity: 0.95;
+    }
+
+    .pet-status-text {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 13px;
+      color: #5a4a7a;
+      line-height: 1.5;
+    }
+
+    .pet-status-text .travel {
+      display: inline-block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .battery-help-card {
+      width: min(340px, calc(100% - 40px));
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(168, 212, 240, 0.75);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+      color: #4e4a66;
+    }
+
+    .battery-help-tip {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #5f5a7f;
+      margin-bottom: 8px;
+    }
+
+    .battery-help-tip strong {
+      color: #4a90d9;
+      font-weight: 600;
+    }
+
+    .qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .qa-item {
+      border: 1px solid rgba(164, 150, 200, 0.28);
+      border-radius: 10px;
+      background: rgba(246, 240, 255, 0.7);
+      padding: 6px 8px;
+    }
+
+    .qa-item summary {
+      list-style: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #f39c12;
+      line-height: 1.5;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qa-item summary::-webkit-details-marker { display: none; }
+
+    .qa-item summary::before {
+      content: "Q";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffe4b5;
+      color: #c77700;
+      font-size: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qa-item p {
+      font-size: 12px;
+      line-height: 1.55;
+      color: #39526d;
+      margin-top: 6px;
+      background: rgba(212, 232, 247, 0.7);
+      border: 1px solid rgba(136, 184, 220, 0.45);
+      border-radius: 8px;
+      padding: 6px 8px;
+    }
+
+    .modal-qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .modal-qa-section {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(231, 84, 128, 0.2);
+    }
+
+    .modal-qa-section:first-child {
+      margin-top: 6px;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .modal-qa-section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2f3d56;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid rgba(255, 143, 163, 0.75);
+    }
+
+    .modal-qa-item {
+      border: 1px solid rgba(164, 150, 200, 0.3);
+      border-radius: 10px;
+      background: rgba(246, 240, 255, 0.75);
+      padding: 7px 8px;
+    }
+
+    .modal-qa-item summary {
+      list-style: none;
+      cursor: pointer;
+      color: #f39c12;
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .modal-qa-item summary::-webkit-details-marker { display: none; }
+
+    .modal-qa-item p {
+      margin-top: 6px;
+      color: #2f5876;
+      font-size: 13px;
+      line-height: 1.6;
+      background: rgba(212, 232, 247, 0.7);
+      border: 1px solid rgba(136, 184, 220, 0.45);
+      border-radius: 8px;
+      padding: 7px 8px;
+    }
+
+    /* 陪伴数据 - 紧贴宠物展示区下 */
+    .companion-stats {
+      display: flex;
+      gap: 16px;
+      padding: 12px 24px 16px;
+      justify-content: center;
+    }
+
+    .stat-card {
+      flex: 1;
+      max-width: 140px;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label { font-size: 12px; color: #888; margin-bottom: 2px; }
+    .stat-value { font-size: 18px; font-weight: 700; color: #5a4a7a; }
+
+    /* 功能操作区：喂食、任务 左右对称 */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 24px 20px;
+    }
+
+    .action-btn {
+      flex: 1;
+      max-width: 140px;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      color: #fff;
+      font-family: inherit;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .action-btn.feed { background: linear-gradient(135deg, #9b7ed9, #b89ce8); }
+    .action-btn.task { background: linear-gradient(135deg, #f5b041, #f7dc6f); }
+
+    /* 成长日记 + 成长唤醒地图 */
+    .growth-section {
+      padding: 0 24px 100px;
+    }
+
+    .growth-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .growth-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #5a4a7a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .growth-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .growth-item {
+      background: linear-gradient(135deg, #f5f0fa, #fff);
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(196, 181, 224, 0.3);
+      font-size: 14px;
+      font-weight: 500;
+      color: #5a4a7a;
+    }
+
+    .growth-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .growth-item .icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .diary-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .diary-list {
+      list-style: none;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #5a4a7a;
+    }
+
+    .diary-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .diary-list li span.icon {
+      width: 18px;
+      text-align: center;
+    }
+
+    /* 技能墙 / 食物图鉴 / 任务中心底部弹层公用样式 */
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--card-bg);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+      max-height: 80%;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 240;
+      padding: 14px 18px 18px;
+      overflow-y: auto;
+    }
+
+    .sheet.show {
+      transform: translateY(0);
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .sheet-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #5a4a7a;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(196, 181, 224, 0.24);
+      font-size: 11px;
+      color: #7b6aa8;
+    }
+
+    .skill-wall {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .skill-summary {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #8b7ab4;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .skill-phase-tabs {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      padding: 2px 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .skill-phase-tab {
+      flex-shrink: 0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 11px;
+      background: rgba(196, 181, 224, 0.25);
+      color: #7b6aa8;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .skill-phase-tab.active {
+      background: linear-gradient(135deg, #ff9ac4, #ffc371);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(255, 154, 196, 0.45);
+    }
+
+    .skill-progress-bar {
+      margin-top: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(196, 181, 224, 0.35);
+      overflow: hidden;
+    }
+
+    .skill-progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ff9ac4, #ffc371);
+      transition: width 0.25s ease;
+    }
+
+    .skill-stage {
+      border-radius: 12px;
+      background: #f5f0fb;
+      padding: 8px 10px;
+    }
+
+    .skill-stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .skill-stage-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #5a4a7a;
+    }
+
+    .skill-stage-subtitle {
+      margin-top: 2px;
+      font-size: 11px;
+      color: #9b8fc0;
+    }
+
+    .skill-stage-progress {
+      margin-top: 6px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      overflow: hidden;
+    }
+
+    .skill-stage-progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ff9ac4, #ffc371);
+      transition: width 0.25s ease;
+    }
+
+    .skill-stage-arrow {
+      font-size: 12px;
+      color: #b3a6d5;
+      margin-left: 10px;
+    }
+
+    .skill-stage-body {
+      margin-top: 8px;
+    }
+
+    .skill-stage.collapsed .skill-stage-body {
+      display: none;
+    }
+
+    .skill-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .skill-card {
+      position: relative;
+      border-radius: 10px;
+      padding: 8px 8px 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .skill-card .skill-icon-ring {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.04);
+      flex-shrink: 0;
+    }
+
+    .skill-card .skill-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .skill-name {
+      font-weight: 500;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .skill-tags {
+      margin-top: 2px;
+      font-size: 10px;
+      opacity: 0.85;
+      color: #fff;
+    }
+
+    .skill-cta {
+      border: 0;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #ff7ca6;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .skill-status {
+      font-size: 10px;
+      color: #fff;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+
+    .skill-card.locked {
+      opacity: 0.94;
+    }
+
+    .skill-card.rarity-normal {
+      background: linear-gradient(135deg, #b5b6f3, #c9d3ff);
+    }
+
+    .skill-card.rarity-rare {
+      background: linear-gradient(135deg, #ff9ac4, #ffc371);
+    }
+
+    .skill-card.rarity-epic {
+      background: linear-gradient(135deg, #9b8cff, #ffc8ff);
+      box-shadow: 0 0 16px rgba(155, 140, 255, 0.7);
+    }
+
+    .skill-card.rarity-normal .skill-icon-ring {
+      box-shadow: 0 0 0 2px rgba(181, 182, 243, 0.6);
+    }
+
+    .skill-card.rarity-rare .skill-icon-ring {
+      box-shadow: 0 0 0 2px rgba(255, 154, 196, 0.6);
+    }
+
+    .skill-card.rarity-epic .skill-icon-ring {
+      box-shadow: 0 0 0 2px rgba(155, 140, 255, 0.8);
+    }
+
+    .food-groups {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .food-group-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #5a4a7a;
+      margin-bottom: 4px;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .food-item {
+      background: #f7f2ff;
+      border-radius: 12px;
+      padding: 6px 4px 8px;
+      text-align: center;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .food-item .emoji {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .task-stage-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .task-progress {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 154, 196, 0.2);
+      overflow: hidden;
+    }
+
+    .task-progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff9ac4, #ffc371);
+      width: 60%;
+    }
+
+    .task-list {
+      margin-top: 10px;
+    }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: 13px;
+      color: #5a4a7a;
+    }
+
+    .task-row:last-child {
+      border-bottom: none;
+    }
+
+    .task-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .task-meta span.sub {
+      font-size: 11px;
+      color: #999;
+    }
+
+    .task-coin {
+      font-size: 12px;
+      color: #f5b041;
+      margin-right: 8px;
+    }
+
+    .task-btn {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, #ff9ac4, #ffc371);
+    }
+
+    .task-tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 6px;
+    }
+
+    .task-tab {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #999;
+    }
+
+    .task-tab.active {
+      background: rgba(255, 154, 196, 0.16);
+      color: #e75480;
+      font-weight: 500;
+    }
+
+    /* 第二页 */
+    .page {
+      display: none;
+      padding-bottom: 100px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* 第二页：番茄钟/金币/小游戏 横向三列 */
+    .triple-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 20px 24px;
+    }
+
+    .triple-item {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(196, 181, 224, 0.2);
+    }
+
+    .triple-item:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .triple-item .icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 8px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .triple-item .label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5a4a7a;
+      margin-bottom: 4px;
+    }
+
+    .triple-item .desc {
+      font-size: 11px;
+      color: #999;
+    }
+
+    /* 宠物社区 */
+    .community-section {
+      padding: 0 24px 100px;
+    }
+
+    .community-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .community-card .growth-title { margin-bottom: 12px; }
+
+    /* 底部导航 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 14px 24px;
+      box-shadow: 0 -4px 20px rgba(164, 150, 200, 0.2);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #999;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item.active { color: #8b7bb8; font-weight: 600; }
+    .nav-item .icon { font-size: 22px; }
+
+    .nav-logo-item {
+      width: 108px;
+      height: 78px;
+      margin-top: -22px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      color: #2d2d2d;
+      background: transparent;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      line-height: 1;
+    }
+
+    .nav-logo-item .logo-img-wrap {
+      width: 88px;
+      height: 50px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #f7f8ff);
+      box-shadow: 0 8px 18px rgba(80, 115, 170, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .nav-logo-item .logo-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #5f5f7a;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-logo-item .logo-img {
+      width: 62px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    .diary-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .diary-tab {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #6d5ca5;
+      background: #f0e9fb;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* 奖励弹窗 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 420;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .modal-content { font-size: 14px; line-height: 1.8; color: #555; }
+    .modal-content ul { list-style: none; }
+    .modal-content li { margin-bottom: 6px; padding-left: 16px; position: relative; }
+    .modal-content li::before { content: '•'; position: absolute; left: 0; color: #8b7bb8; }
+
+    .modal-close {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #9b7ed9, #b89ce8);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* 家长验证弹窗 */
+    .parental-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 260;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .parental-overlay.show {
+      display: flex;
+    }
+
+    .parental-modal {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 22px 20px 18px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+      font-size: 14px;
+      color: #555;
+    }
+
+    .parental-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #5a4a7a;
+      margin-bottom: 6px;
+    }
+
+    .parental-title span.sub {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: #999;
+      font-weight: 400;
+    }
+
+    .parental-tip {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .parental-question {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5a4a7a;
+      margin-bottom: 8px;
+    }
+
+    .parental-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(164, 150, 200, 0.5);
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .parental-input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 2px rgba(196, 181, 224, 0.35);
+    }
+
+    .parental-primary-btn,
+    .parental-hold-btn {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+
+    .parental-primary-btn {
+      background: linear-gradient(135deg, #9b7ed9, #b89ce8);
+      color: #fff;
+    }
+
+    .parental-hold-btn {
+      background: rgba(196, 181, 224, 0.16);
+      color: #5a4a7a;
+    }
+
+    .parental-press-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .parental-switch {
+      margin-top: 8px;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(196, 181, 224, 0.18);
+      font-size: 12px;
+      color: #7b6aa8;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .parental-cancel {
+      margin-top: 6px;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      color: #999;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* 家长模式底部设置面板 */
+    .parental-section {
+      margin-top: 10px;
+    }
+
+    .parental-item {
+      background: #f7f3ff;
+      border-radius: var(--radius-sm);
+      padding: 12px 12px 10px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(196, 181, 224, 0.35);
+    }
+
+    .parental-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #5a4a7a;
+      margin-bottom: 4px;
+    }
+
+    .parental-item-desc {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .parental-tag {
+      font-size: 11px;
+      color: #9b8fc0;
+    }
+
+    .parental-primary-btn.full {
+      margin-top: 8px;
+    }
+
+    @media (max-width: 380px) {
+      .pet-avatar { width: 110px; height: 110px; }
+      .pet-face { width: 70px; height: 70px; }
+      .pet-status-icons { right: -28px; }
+      .triple-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部：左上头像 + 任务入口，右上语言+设置 -->
+  <div class="top-bar">
+    <div class="user-header">
+      <button class="avatar-btn" id="top-avatar-btn" onclick="openUserPage()" aria-label="用户中心">
+        <img id="owner-avatar-top" class="avatar-img" alt="" style="display:none">
+        <span id="owner-avatar-top-fallback">👤</span>
+      </button>
+      <div class="task-pill" onclick="goToDetail('diary')">
+        <span>📝 任务</span>
+        <span class="progress" id="task-progress-label">新手阶段 · 25/30</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="settings-btn" onclick="openSettings()" aria-label="设置">
+        ⚙️
+      </button>
+    </div>
+  </div>
+  <div class="network-banner" id="network-banner">
+    <span id="network-banner-text">未连接网络，部分功能受限</span>
+    <button class="close" type="button" onclick="closeNetworkBanner()">关闭</button>
+  </div>
+
+  <!-- 用户页面（侧滑） -->
+  <div class="user-page-overlay" id="user-overlay" onclick="closeUserPage()"></div>
+  <div class="user-page" id="user-page">
+    <button class="close-btn" onclick="closeUserPage()">×</button>
+    <div class="user-page-content">
+      <div class="owner-head">
+        <button class="owner-avatar" type="button" onclick="openOwnerProfile()" aria-label="编辑个人信息">
+          <img id="owner-avatar-side" class="avatar-img" alt="" style="display:none">
+          <span id="owner-avatar-side-fallback" style="color:#fff;font-size:18px">👤</span>
+        </button>
+        <div class="owner-meta">
+          <button class="owner-name-btn" type="button" onclick="openOwnerProfile()" aria-label="编辑主人信息">
+            <span id="owner-name-label">主人</span>
+            <span style="font-weight:900;color:#6a56a2">›</span>
+          </button>
+          <div class="owner-subline" id="owner-subline">点击修改主人信息（含生日）</div>
+        </div>
+      </div>
+      <div class="companion-text" id="companion-text">今天是noddy陪你的第2天哦</div>
+      <div class="name-edit">
+        <input type="text" id="pet-name-input" value="noddy" placeholder="修改宠物昵称" maxlength="10" oninput="updatePetName()">
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item" onclick="openDeviceManage()"><span class="icon">🧩</span>设备管理</li>
+        <li class="menu-item" onclick="openSettings()"><span class="icon">⚙️</span>设置</li>
+        <li class="menu-item" onclick="openFeedback()"><span class="icon">📝</span>建议反馈</li>
+        <li class="menu-item" id="manual-entry" onclick="openHelpCenter()"><span class="icon">📘</span>Noddy 照护手册</li>
+        <li class="menu-item" onclick="openParentalEntry()" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode"><span class="icon">🛡️</span>家长模式</li>
+      </ul>
+      <div class="danger-zone">
+        <button type="button" class="danger-btn" onclick="requestAccountDeletion()">账号注销</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 性格参数弹窗 -->
+  <div class="overlay-center" id="personality-overlay">
+    <div class="personality-modal">
+      <div class="personality-header">
+        <div class="personality-title">性格参数</div>
+        <div class="personality-actions">
+          <button class="icon-circle-btn" type="button" onclick="showPersonalityHelp()">?</button>
+          <button class="icon-circle-btn" type="button" onclick="closePersonalityModal()">×</button>
+        </div>
+      </div>
+      <div class="personality-tags">
+        <span>当前性格：<strong>调皮型</strong></span>
+        <span>当前状态：<strong>大笑</strong></span>
+      </div>
+      <div class="personality-grid">
+        <div class="personality-metric">
+          <div class="label-row"><span>亲密度</span><span>100%</span></div>
+          <div class="personality-bar"><div class="personality-bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="personality-metric">
+          <div class="label-row"><span>外向值</span><span>70%</span></div>
+          <div class="personality-bar"><div class="personality-bar-fill" style="width:70%"></div></div>
+        </div>
+        <div class="personality-metric">
+          <div class="label-row"><span>舒适度</span><span>100%</span></div>
+          <div class="personality-bar"><div class="personality-bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="personality-metric">
+          <div class="label-row"><span>活泼值</span><span>65%</span></div>
+          <div class="personality-bar"><div class="personality-bar-fill" style="width:65%"></div></div>
+        </div>
+      </div>
+      <div class="quadrant-card">
+        <div class="quadrant-title">外向-亲密性格图谱</div>
+        <div class="quadrant-grid">
+          <div class="quadrant-cell">敏感型</div>
+          <div class="quadrant-cell">慢热型</div>
+          <div class="quadrant-cell">疏远型</div>
+          <div class="quadrant-cell active">调皮型</div>
+        </div>
+        <p class="personality-tip">性格会根据你和宠物的交互、完成的任务、使用时长等持续变化，你的每一次回应都会慢慢塑造 ta。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成长日记 · 成长唤醒地图 · 技能墙 -->
+  <div class="sheet" id="skill-sheet">
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title">成长日记 · 成长唤醒地图 · 技能墙</div>
+        <div class="skill-summary">
+          <span id="skill-current-stage-label">当前阶段：阶段1 · 初识伙伴</span>
+          <span id="skill-total-count-label">已解锁 0 / 0 个技能</span>
+        </div>
+        <div class="skill-progress-bar">
+          <div class="skill-progress-fill" id="skill-total-progress"></div>
+        </div>
+      </div>
+      <button class="icon-circle-btn" type="button" onclick="closeSkillWall()">×</button>
+    </div>
+    <div class="skill-phase-tabs" id="skill-phase-tabs"></div>
+    <div class="skill-wall" id="skill-stage-list"></div>
+  </div>
+
+  <!-- 食物图鉴（仅食物项） -->
+  <div class="sheet" id="food-sheet">
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title">食物图鉴</div>
+        <div class="chip">看到喜欢的食物，把它变成团子吃下去</div>
+      </div>
+      <button class="icon-circle-btn" type="button" onclick="closeFoodAtlas()">×</button>
+    </div>
+    <div class="food-groups">
+      <div>
+        <div class="food-group-title">喜欢的食物</div>
+        <div class="food-grid">
+          <div class="food-item"><span class="emoji">🥕</span><span>胡萝卜</span></div>
+          <div class="food-item"><span class="emoji">🍊</span><span>橘子</span></div>
+          <div class="food-item"><span class="emoji">🍩</span><span>甜甜圈</span></div>
+          <div class="food-item"><span class="emoji">🥪</span><span>三明治</span></div>
+          <div class="food-item"><span class="emoji">🎂</span><span>蛋糕</span></div>
+          <div class="food-item"><span class="emoji">🍌</span><span>香蕉</span></div>
+          <div class="food-item"><span class="emoji">🥦</span><span>花椰菜</span></div>
+          <div class="food-item"><span class="emoji">🍎</span><span>苹果</span></div>
+          <div class="food-item"><span class="emoji">🍕</span><span>披萨</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 任务中心（新手任务 + 日常/互动任务） -->
+  <div class="sheet" id="task-sheet">
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title">任务中心</div>
+        <div class="chip" id="task-stage-chip">新手阶段 · 25/30</div>
+      </div>
+      <button class="icon-circle-btn" type="button" onclick="closeTaskCenter()">×</button>
+    </div>
+    <div class="task-stage-bar">
+      <span>完成新手任务解锁下一阶段</span>
+      <div style="flex:1;margin-left:12px;">
+        <div class="task-progress">
+          <div class="task-progress-fill" id="task-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-list" id="newbie-task-list">
+      <div class="task-row">
+        <div class="task-meta">
+          <span>为 noddy 取一个专属昵称</span>
+          <span class="sub">昵称会显示在宠物身份卡和对话里</span>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="task-coin">+5</span>
+          <button class="task-btn" type="button" onclick="completeNewbieTask(0)">去完成</button>
+        </div>
+      </div>
+      <div class="task-row">
+        <div class="task-meta">
+          <span>设置 noddy 对你的称呼</span>
+          <span class="sub">比如「小怪兽」「小朋友」</span>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="task-coin">+5</span>
+          <button class="task-btn" type="button" onclick="completeNewbieTask(1)">去完成</button>
+        </div>
+      </div>
+      <div class="task-row">
+        <div class="task-meta">
+          <span>调节设备亮度 / 音量</span>
+          <span class="sub">让 noddy 在合适环境里陪你</span>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="task-coin">+5</span>
+          <button class="task-btn" type="button" onclick="completeNewbieTask(2)">去完成</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div class="task-tabs">
+        <button class="task-tab active" type="button" onclick="switchTaskTab('daily')">日常任务</button>
+        <button class="task-tab" type="button" onclick="switchTaskTab('interact')">互动任务</button>
+      </div>
+      <div class="task-list" id="daily-task-panel">
+        <div class="task-row">
+          <div class="task-meta">
+            <span>完成 1 个番茄钟</span>
+            <span class="sub">专注 25 分钟，noddy 会为你加油</span>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <span class="task-coin">+10</span>
+            <button class="task-btn" type="button" onclick="showRewardModal()">完成</button>
+          </div>
+        </div>
+      </div>
+      <div class="task-list" id="interact-task-panel" style="display:none;">
+        <div class="task-row">
+          <div class="task-meta">
+            <span>和 noddy 说一句话</span>
+            <span class="sub">例如「今天好累呀」</span>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <span class="task-coin">+5</span>
+            <button class="task-btn" type="button" onclick="showRewardModal()">完成</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第一页 -->
+  <main class="page active" id="page-home">
+    <!-- 宠物展示区 -->
+    <section class="pet-display">
+      <div class="pet-container">
+        <div class="bubble" id="battery-bubble" onclick="openBatteryOnlyQaModal()" role="button" aria-label="打开电量帮助">🔋 1</div>
+        <div class="pet-avatar">
+          <div class="pet-face">
+            <div class="pet-eyes"><div class="pet-eye"></div><div class="pet-eye"></div></div>
+            <div class="pet-nose"></div>
+          </div>
+        </div>
+        <div class="pet-status-icons">
+          <div class="status-icon">📶</div>
+          <div class="status-icon" id="battery-status-icon" onclick="openBatteryOnlyQaModal()" role="button" aria-label="打开电量帮助">🔋</div>
+          <div class="status-icon">🔊</div>
+        </div>
+      </div>
+
+      <div class="pet-status-text">
+        <div id="pet-mood-text">当前状态：大笑 · 精力满满</div>
+        <div class="travel" id="pet-travel-text">我去北京玩啦～ 给你寄来一张旅行明信片 ✈️</div>
+      </div>
+
+      <!-- 宠物身份卡：移动到宠物图下方 -->
+      <div class="pet-id-card" onclick="openPersonalityModal()">
+        <div class="card-title">宠物身份卡</div>
+        <div class="pet-name" id="display-pet-name">noddy</div>
+        <div class="personality">性格：温柔黏人 · 喜欢撒娇</div>
+      </div>
+    </section>
+
+    <!-- 陪伴天数、互动次数 -->
+    <section class="companion-stats">
+      <div class="stat-card">
+        <div class="stat-label">已陪伴</div>
+        <div class="stat-value">2 天</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">今日互动</div>
+        <div class="stat-value">770</div>
+      </div>
+    </section>
+
+    <!-- 喂食、任务 左右对称 -->
+    <section class="action-buttons">
+      <button class="action-btn feed" onclick="goToDetail('feed')">🍖 喂食</button>
+      <button class="action-btn task" onclick="goToDetail('diary')">📋 任务</button>
+    </section>
+
+    <!-- 成长日记 + 成长唤醒地图 -->
+    <section class="growth-section">
+      <div class="diary-card" onclick="goToDetail('diary')" style="cursor:pointer">
+        <div class="growth-title">📒 成长日记</div>
+        <div class="diary-tabs">
+          <button type="button" class="diary-tab" onclick="goToDetail('diary')">成长日记</button>
+          <button type="button" class="diary-tab" onclick="goToDetail('diary')">交互日志</button>
+        </div>
+        <ul class="diary-list">
+          <li>
+            <span class="icon">✈️</span>
+            <span>noddy 给你寄来一张「北京」的旅行明信片：「我去北京玩啦～」</span>
+          </li>
+          <li>
+            <span class="icon">✅</span>
+            <span>一起完成了第 <strong>7</strong> / 100 件小事</span>
+          </li>
+          <li>
+            <span class="icon">⏱️</span>
+            <span>今天完成 1 个番茄钟，获得 10 金币</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="growth-card">
+        <div class="growth-title">🌈 成长唤醒地图</div>
+        <div class="growth-grid">
+          <div class="growth-item" onclick="openSkillWall()"><div class="icon">💡</div><span>成长唤醒地图</span></div>
+          <div class="growth-item" onclick="goToDetail('food')"><div class="icon">🍎</div><span>食物图鉴</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 第二页 -->
+  <main class="page" id="page-second">
+    <!-- 番茄钟、金币兑换、小游戏 横向三列，在社区上面 -->
+    <div class="triple-row">
+      <div class="triple-item" onclick="goToDetail('pomodoro')">
+        <div class="icon">🍅</div>
+        <div class="label">番茄钟</div>
+        <div class="desc">25/50分钟专注计时，宠物语音提醒</div>
+      </div>
+      <div class="triple-item" onclick="goToDetail('reward')">
+        <div class="icon">🪙</div>
+        <div class="label">金币兑换奖励</div>
+        <div class="desc">用金币兑换好礼</div>
+      </div>
+      <div class="triple-item" onclick="goToDetail('games')">
+        <div class="icon">🎮</div>
+        <div class="label">小游戏</div>
+        <div class="desc">趣味互动游戏</div>
+      </div>
+    </div>
+
+    <!-- 宠物社区（做成与细分页面社区类似的展示） -->
+    <section class="community-section">
+      <div class="community-card">
+        <div class="growth-title">👥 宠物社区</div>
+        <div class="feed-item">
+          <div class="feed-head">
+            <div class="mini-avatar">🐱</div>
+            <div class="feed-meta">
+              <div class="feed-name">小橘</div>
+              <div class="feed-time">2分钟前</div>
+            </div>
+          </div>
+          <div class="feed-text">今天完成了 2 个番茄钟，开心～</div>
+          <div class="feed-like">❤️ 12</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-head">
+            <div class="mini-avatar">🐱</div>
+            <div class="feed-meta">
+              <div class="feed-name">奶盖</div>
+              <div class="feed-time">1小时前</div>
+            </div>
+          </div>
+          <div class="feed-text">和主人一起打卡了「一起看书」小事～</div>
+          <div class="feed-like">❤️ 8</div>
+        </div>
+
+        <div class="growth-title" style="margin-top:14px;">🐾 其他宠物主页</div>
+        <div class="pet-cards-row">
+          <div class="pet-mini-card" onclick="goToDetail('social')">
+            <div class="pet-mini-emoji">🐱</div>
+            <div class="pet-mini-name">小橘</div>
+            <div class="pet-mini-cta">去串门 →</div>
+          </div>
+          <div class="pet-mini-card" onclick="goToDetail('social')">
+            <div class="pet-mini-emoji">🐱</div>
+            <div class="pet-mini-name">奶盖</div>
+            <div class="pet-mini-cta">去串门 →</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-page="home">
+      <span class="icon">🏠</span>
+      <span>首页</span>
+    </div>
+    <button class="nav-logo-item" type="button" onclick="goToDetail('diary')" aria-label="打开交互日志">
+      <span class="logo-img-wrap">
+        <img src="./logo.png" alt="Noddy logo" class="logo-img" />
+      </span>
+      <span class="logo-sub">交互日志</span>
+    </button>
+    <div class="nav-item" data-page="second">
+      <span class="icon">🌈</span>
+      <span>发现</span>
+    </div>
+  </nav>
+
+  <!-- 奖励弹窗 -->
+  <div class="modal-overlay" id="reward-modal">
+    <div class="modal">
+      <div class="modal-title">📢 你触发了1阶宝箱</div>
+      <div class="modal-content">
+        <ul>
+          <li>任务已完成!你获得了:鸡肉干1个 蓝莓1个 鱼油1个 胡萝卜1个</li>
+          <li>你获得了3金币</li>
+          <li>你获得了3次万能次数</li>
+          <li>你获得19经验值</li>
+        </ul>
+      </div>
+      <button class="modal-close" onclick="closeRewardModal()">太棒啦</button>
+    </div>
+  </div>
+
+  <!-- 保存宠物引导弹窗（匿名用户） -->
+  <div class="modal-overlay" id="save-pet-modal">
+    <div class="modal">
+      <div class="modal-title">💾 保存你的宠物，防止数据丢失</div>
+      <div class="modal-content">
+        <p style="margin-bottom:10px;color:#555;line-height:1.7">
+          你已经和宠物互动了一会儿啦（原型：累计约 3～5 次互动后触发）。登录后可把当前进度保存到账号，并支持多设备同步。
+        </p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        <button class="modal-close" style="background:#fff;border:1px solid rgba(0,0,0,.08);color:#666" onclick="dismissSavePetModal()">稍后再说</button>
+        <button class="modal-close" style="background:linear-gradient(135deg,#ff8fa3,#e75480);color:#fff;border:none" onclick="savePetNow()">立即保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Noddy 照护手册弹窗 -->
+  <div class="modal-overlay" id="battery-qa-modal">
+    <div class="modal">
+      <div class="modal-title">📘 Noddy 照护手册</div>
+      <div class="modal-content">
+        <p style="margin-bottom:8px;color:#666">你的 Noddy 偶尔也会犯点小迷糊，下面是它最常见的几种“症状”和“护理方法”。</p>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">🧸 添加设备时扫描不到 Noddy？</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>它可能怎么了？</summary>
+              <p>Noddy 有点小害羞，躲在了蓝牙信号找不到的角落，或者还没进入“等你来玩”的状态。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>你可以这样帮它</summary>
+              <p>确认 Noddy 已经长按进入配对模式（灯会轻轻闪烁）。把手机靠近它，保持在 10 米以内。在 App 里点“再扫一次”。如果还是找不到，退出添加页面重新进来一次，它就会重新打招呼了。<br><br>“刚才我没认出你，现在准备好啦～”</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">💔 手机连接 Noddy 时显示“连接失败”</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>它可能怎么了？</summary>
+              <p>Noddy 可能在发呆，或者刚才的“握手”没握好。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>你可以这样帮它</summary>
+              <p>让 Noddy 重新进入配对模式（灯闪起来），在 App 上点“再试一次”。如果连续两次都连不上，退出连接页面重新进入，它会重新伸出手等你。<br><br>“刚才走神了一下，我们再握一次手好不好？”</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">🌐 配置网络时总是失败？</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>它可能怎么了？</summary>
+              <p>Noddy 目前只认识 2.4GHz 的 Wi-Fi 信号（5GHz 它暂时还听不懂），或者密码悄悄记错了。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>你可以这样帮它</summary>
+              <p>确认家里的 Wi-Fi 是 2.4GHz 频段。重新输入一次 Wi-Fi 密码（让它再听一遍）。如果反复失败，先走“离线先玩”，让 Noddy 先陪你。<br><br>“我还在学认你家网络，再告诉我一遍好不好？”</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">🔋 Noddy 充不上电？</div>
+          <div class="modal-qa-list">
+            <details class="modal-qa-item">
+              <summary>它可能怎么了？</summary>
+              <p>可能是底座没睡醒，或者 Noddy 没有乖乖坐在正中间。</p>
+            </details>
+            <details class="modal-qa-item">
+              <summary>你可以这样帮它</summary>
+              <p>确认充电底座的指示灯是常亮状态。把 Noddy 放在底座正中间并放稳。建议使用 10W 及以上功率的充电器。<br><br>“刚才没坐稳，现在好好充电啦～”</p>
+            </details>
+          </div>
+        </section>
+
+        <section class="modal-qa-section">
+          <div class="modal-qa-section-title">🏥 给 Noddy 找医生</div>
+          <p style="margin-top:4px;">客服电话：400-xxx-xxxx</p>
+          <p style="margin-top:2px;color:#64748b;">（医生出诊时间：周一至周五 9:00 - 18:00）</p>
+          <p style="margin-top:8px;">客服邮箱：support@noddy.cn</p>
+          <p style="margin-top:2px;color:#64748b;">（把 Noddy 的“病情”写下来，医生 24 小时内回复）</p>
+          <p style="margin-top:8px;">在线问诊：App 内 -> “我的” -> “联系医生”</p>
+          <p style="margin-top:2px;color:#64748b;">（推荐优先使用，可以把 Noddy 的日志一起发给医生）</p>
+          <p style="margin-top:8px;color:#e75480;">请不要担心，Noddy 的“医生”都很温柔，会尽快帮它恢复健康 ❤️</p>
+
+          <div style="margin-top:10px;display:none;gap:10px;flex-wrap:wrap;justify-content:flex-end" aria-hidden="true">
+            <button type="button" class="modal-close" style="margin-top:0;width:auto;padding:10px 14px;background:#fff;border:1px solid rgba(0,0,0,.10);color:#475569" onclick="openClinicModal()">🏥 Noddy体检</button>
+          </div>
+        </section>
+      </div>
+      <button class="modal-close" onclick="closeBatteryQaModal()">我知道怎么照护它啦</button>
+    </div>
+  </div>
+
+  <!-- Noddy 体检（模拟发送到飞书/钉钉/企微） -->
+  <div class="modal-overlay" id="clinic-modal">
+    <div class="modal">
+      <div class="modal-title">🏥 Noddy体检</div>
+      <div class="modal-content">
+        <p style="margin-bottom:8px;color:#666;line-height:1.6">
+          Noddy 会把最近 10 条错误日志打包成一份“病历”，在你同意后发送到医生团队群里（飞书 / 钉钉 / 企业微信群）。
+        </p>
+
+        <div style="margin-top:10px;">
+          <div style="font-weight:700;color:#334155;margin-bottom:6px">选择发送渠道</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label style="display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;">
+              <input type="radio" name="clinic_channel" value="feishu" checked />
+              <span>飞书</span>
+            </label>
+            <label style="display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;">
+              <input type="radio" name="clinic_channel" value="dingtalk" />
+              <span>钉钉</span>
+            </label>
+            <label style="display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#475569;cursor:pointer;">
+              <input type="radio" name="clinic_channel" value="wecom" />
+              <span>企业微信</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div style="font-weight:700;color:#334155;margin-bottom:6px">将发送的“群消息卡片”（示意）</div>
+          <div id="clinic-card-preview" style="border:1px solid rgba(226,232,240,.95);background:rgba(248,250,252,.95);border-radius:14px;padding:10px 10px;font-size:13px;color:#334155;line-height:1.55;"></div>
+          <div style="margin-top:8px;border:1px dashed rgba(148,163,184,.8);border-radius:12px;padding:8px 10px;background:rgba(255,255,255,.7)">
+            <div style="font-weight:700;color:#475569;margin-bottom:6px">最近 10 条错误日志（预览）</div>
+            <div id="clinic-log-preview" style="white-space:pre-wrap;font-size:12px;color:#475569;max-height:140px;overflow:auto;"></div>
+          </div>
+        </div>
+
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:13px;color:#475569;cursor:pointer;">
+          <input id="clinic-consent" type="checkbox" />
+          <span>我已知晓：将上传最近 10 条错误日志用于排障，不包含支付等敏感信息。</span>
+        </label>
+        <div id="clinic-result" style="margin-top:10px;font-size:12px;color:#e11d48;display:none;"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px">
+        <button type="button" class="modal-close" style="margin-top:0;width:auto;padding:10px 14px;background:#fff;border:1px solid rgba(0,0,0,.10);color:#475569" onclick="closeClinicModal()">取消</button>
+        <button type="button" class="modal-close" style="margin-top:0;width:auto;padding:10px 14px;background:linear-gradient(135deg,#fb7185,#f97316)" onclick="submitClinic()">确认上传</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 电池专属 Q&A 弹窗 -->
+  <div class="modal-overlay" id="battery-only-qa-modal">
+    <div class="modal">
+      <div class="modal-title">🔋 电量帮助 Q&A</div>
+      <div class="modal-content">
+        <p style="margin-bottom:8px;color:#666">这里仅展示电量相关问题；更多内容请在用户页点“Noddy 照护手册”。</p>
+        <div class="modal-qa-list">
+          <details class="modal-qa-item">
+            <summary>1. 为什么Noddy充不上电？</summary>
+            <p>A: 请确认底座电源指示灯常亮，设备已放置到底座正中，并使用 10W 及以上充电器。</p>
+          </details>
+          <details class="modal-qa-item">
+            <summary>2. 为什么刚开始充电没反应？</summary>
+            <p>A: 电量极低时会先回电，通常需要 1-3 分钟后才会重新启动，属于正常现象。</p>
+          </details>
+          <details class="modal-qa-item">
+            <summary>3. 为什么Noddy突然不动了？</summary>
+            <p>A: 可能进入休息状态或电量偏低。先尝试互动唤醒，若仍无响应请补电后再观察。</p>
+          </details>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeBatteryOnlyQaModal()">知道啦</button>
+    </div>
+  </div>
+
+  <!-- 家长验证弹窗 -->
+  <div class="parental-overlay" id="parental-overlay">
+    <div class="parental-modal">
+      <div class="parental-title" data-i18n-zh="需要家长确认" data-i18n-ko="부모님 확인이 필요해요." data-i18n-en="Parent verification required">
+        需要家长确认
+        <span class="sub" data-i18n-zh="需要家长确认后才能进入家长模式" data-i18n-ko="보호자 확인 후 부모님 모드에 들어갈 수 있어요." data-i18n-en="Parent verification is required before entering Parent Mode">需要家长确认后才能进入家长模式</span>
+      </div>
+      <p class="parental-tip">
+        为了保护小朋友，进入「家长模式」前需要完成一个只有成年人才能轻松解决的小问题。
+      </p>
+      <div id="parental-math-block">
+        <div class="parental-question">请计算：12 + 25 = ?</div>
+        <input type="number" id="parental-answer" class="parental-input" placeholder="在这里输入答案">
+        <button type="button" class="parental-primary-btn" onclick="checkParentalAnswer()">确认进入</button>
+      </div>
+      <div id="parental-press-block" style="display:none;">
+        <div class="parental-question">请按住下面的按钮 3 秒</div>
+        <button
+          type="button"
+          class="parental-hold-btn"
+          onmousedown="startParentalPress()"
+          onmouseup="cancelParentalPress()"
+          onmouseleave="cancelParentalPress()"
+          ontouchstart="startParentalPress()"
+          ontouchend="cancelParentalPress()"
+        >
+          按住不放
+        </button>
+        <div class="parental-press-hint" id="parental-press-hint">松手会重新计时哦</div>
+      </div>
+      <button type="button" class="parental-switch" onclick="toggleParentalMode()">切换为另一种验证方式</button>
+      <button type="button" class="parental-cancel" onclick="closeParentalGate()">暂不进入</button>
+    </div>
+  </div>
+
+  <!-- 家长模式设置面板 -->
+  <div class="sheet" id="parental-sheet">
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-title" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode">家长模式</div>
+        <div class="chip" data-i18n-zh="儿童保护设置 · 仅家长确认后可修改" data-i18n-ko="아이 보호 설정 · 보호자 확인 후 수정 가능" data-i18n-en="Child safety settings · Editable after parent verification">儿童保护设置 · 仅家长确认后可修改</div>
+      </div>
+      <button class="icon-circle-btn" type="button" onclick="closeParentalSheet()">×</button>
+    </div>
+    <div class="parental-section">
+      <div class="parental-item">
+        <div class="parental-item-title" data-i18n-zh="使用时长限制" data-i18n-ko="사용 시간 제한" data-i18n-en="Usage time limit">使用时长限制</div>
+        <div class="parental-item-desc" data-i18n-zh="设置孩子每天可以和 Noddy 玩的最长时间，让陪伴更有节奏。" data-i18n-ko="아이와 Noddy의 하루 사용 시간을 제한해 더 건강한 사용 리듬을 만듭니다." data-i18n-en="Set a daily time limit for children to use Noddy for a healthier routine.">
+          设置孩子每天可以和 Noddy 玩的最长时间，让陪伴更有节奏。
+        </div>
+        <div class="parental-tag" data-i18n-zh="示例：每天 60 分钟" data-i18n-ko="예: 하루 60분" data-i18n-en="Example: 60 minutes per day">示例：每天 60 分钟</div>
+        <button type="button" class="parental-primary-btn full" data-i18n-zh="设置每日时长 & 休眠时间" data-i18n-ko="일일 사용 시간 & 수면 시간 설정" data-i18n-en="Set daily usage & sleep schedule">设置每日时长 & 休眠时间</button>
+        <div class="parental-item-desc" style="margin-top:6px;" data-i18n-zh="晚上 21:00 之后，Noddy 会自动进入休眠模式（不可唤醒），避免影响孩子休息。" data-i18n-ko="밤 21:00 이후에는 Noddy가 자동으로 수면 모드로 전환되어 깨울 수 없어요." data-i18n-en="After 21:00, Noddy enters sleep mode automatically and cannot be awakened.">
+          晚上 21:00 之后，Noddy 会自动进入休眠模式（不可唤醒），避免影响孩子休息。
+        </div>
+        <div class="parental-item-desc" data-i18n-zh="可设置「免打扰时段」，防止孩子半夜偷偷唤醒宠物聊天，或者在写作业时被宠物主动发出的声音干扰。" data-i18n-ko="방해 금지 시간대를 설정해 야간 사용이나 공부 시간의 소리 방해를 줄일 수 있어요." data-i18n-en="Set Do Not Disturb hours to avoid nighttime use and interruptions during study time.">
+          可设置「免打扰时段」，防止孩子半夜偷偷唤醒宠物聊天，或者在写作业时被宠物主动发出的声音干扰。
+        </div>
+      </div>
+      <div class="parental-item" style="display:none;">
+        <div class="parental-item-title" data-i18n-zh="AI 对话过滤" data-i18n-ko="AI 대화 필터링" data-i18n-en="AI conversation filtering">AI 对话过滤</div>
+        <div class="parental-item-desc" data-i18n-zh="开启敏感词屏蔽或简单对话模式，只保留适合儿童的内容。" data-i18n-ko="민감어 차단 및 어린이 대화 모드로 아이에게 맞는 내용만 보여줍니다." data-i18n-en="Enable sensitive-word filtering or kids mode to keep conversations child-appropriate.">
+          开启敏感词屏蔽或简单对话模式，只保留适合儿童的内容。
+        </div>
+        <div class="parental-tag" data-i18n-zh="屏蔽敏感表达，儿童简化模式" data-i18n-ko="민감한 표현 차단, 어린이용 간단 모드" data-i18n-en="Block sensitive expressions, kids simple mode">屏蔽敏感表达，儿童简化模式</div>
+      </div>
+      <div class="parental-item">
+        <div class="parental-item-title" data-i18n-zh="硬件音量上限" data-i18n-ko="최대 볼륨 설정" data-i18n-en="Hardware volume limit">硬件音量上限</div>
+        <div class="parental-item-desc" data-i18n-zh="为设备设置一个最大音量，防止声音过大影响听力和休息。" data-i18n-ko="기기의 최대 볼륨을 제한해 청력과 수면을 보호할 수 있어요." data-i18n-en="Set a maximum volume limit to protect hearing and rest.">
+          为设备设置一个最大音量，防止声音过大影响听力和休息。
+        </div>
+        <div class="parental-tag" data-i18n-zh="示例：最大 60% / 夜间自动降低" data-i18n-ko="예: 최대 60% / 야간 자동 낮춤" data-i18n-en="Example: Max 60% / lower at night">示例：最大 60% / 夜间自动降低</div>
+      </div>
+      <div class="parental-item">
+        <div class="parental-item-title" data-i18n-zh="位置追踪" data-i18n-ko="위치 정보 공유" data-i18n-en="Location tracking">位置追踪</div>
+        <div class="parental-item-desc" data-i18n-zh="如果硬件支持定位，可为孩子设置活动范围或地理围栏，超出时提醒家长。" data-i18n-ko="기기 위치 기능을 지원하면 안전 구역(지오펜스)을 설정하고 이탈 시 알림을 받을 수 있어요." data-i18n-en="If location is supported, set a geofence and get alerts when children leave the safe zone.">
+          如果硬件支持定位，可为孩子设置活动范围或地理围栏，超出时提醒家长。
+        </div>
+        <div class="parental-tag" data-i18n-zh="地理围栏 · 安全区域提醒" data-i18n-ko="지오펜스 · 안전 구역 알림" data-i18n-en="Geofence · Safe zone alerts">地理围栏 · 安全区域提醒</div>
+      </div>
+      <div class="parental-item">
+        <div class="parental-item-title" data-i18n-zh="重置宠物" data-i18n-ko="노디 초기화" data-i18n-en="Reset pet">重置宠物</div>
+        <div class="parental-item-desc" data-i18n-zh="清空大模型记忆或重新配对设备，在需要时一键回到初始状态。" data-i18n-ko="대화 기억을 초기화하거나 기기를 다시 페어링해 처음 상태로 되돌릴 수 있어요." data-i18n-en="Clear memory or re-pair the device to reset it to an initial state.">
+          清空大模型记忆或重新配对设备，在需要时一键回到初始状态。
+        </div>
+        <div class="parental-tag" data-i18n-zh="整理与 Noddy 的记忆并重新开始" data-i18n-ko="노디와의 추억을 정리하고 새롭게 시작하기" data-i18n-en="Clear memories with Noddy and start fresh">整理与 Noddy 的记忆并重新开始</div>
+      </div>
+    </div>
+    <div class="parental-section">
+      <div class="parental-item">
+        <div class="parental-item-title" data-i18n-zh="活动报告" data-i18n-ko="활동 보고서" data-i18n-en="Activity report">活动报告</div>
+        <div class="parental-item-desc" data-i18n-zh="查看今天孩子和 Noddy 对话的大致主题与关键词云，帮助你更好了解使用情况。" data-i18n-ko="오늘 아이와 Noddy의 대화 주제와 키워드 요약을 확인할 수 있어요." data-i18n-en="View conversation topics and keywords from today to better understand usage.">
+          查看今天孩子和 Noddy 对话的大致主题与关键词云，帮助你更好了解使用情况。
+        </div>
+        <div class="parental-item-desc" style="margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="activity-collect-toggle" checked style="width:16px;height:16px;">
+            <span>
+              <span data-i18n-zh="允许采集对话以生成活动报告" data-i18n-ko="활동 리포트 생성을 위한 대화 수집 허용" data-i18n-en="Allow conversation collection for activity reports">允许采集对话以生成活动报告</span><br>
+              <span style="font-size:12px;color:#777;" data-i18n-zh="关闭后将无法生成活动报告" data-i18n-ko="끄면 활동 리포트를 생성할 수 없어요" data-i18n-en="Turning off disables activity reports">关闭后将无法生成活动报告</span>
+            </span>
+          </label>
+        </div>
+        <button type="button" class="parental-primary-btn full" data-i18n-zh="查看今日活动报告（示意）" data-i18n-ko="오늘 활동 보고서 보기 (예시)" data-i18n-en="View today's activity report (demo)">查看今日活动报告（示意）</button>
+        <button type="button" class="parental-hold-btn" onclick="deletePartialConversations()" style="margin-top:6px;" data-i18n-zh="选择部分对话删除" data-i18n-ko="대화 일부 선택 삭제" data-i18n-en="Delete selected conversations">
+          选择部分对话删除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const companionDays = 2;
+    let newbieProgress = 25;
+    const newbieTotal = 30;
+    let parentalVerified = false;
+    let parentalPressTimer = null;
+    let parentalPressStartAt = 0;
+    let activityCollectEnabled = true;
+
+    // 成长唤醒地图 · 技能墙数据（大阶段 + 小阶段）
+    const skillPhases = [
+      {
+        id: 'growth',
+        name: '成长',
+        stages: [
+          {
+            id: 'growth-1',
+            title: '成长1 · 初识伙伴',
+            summary: '和 noddy 互相认识，建立基础连接',
+            skills: [
+              { id: 'know-name', name: '认识名字', rarity: 'normal', unlocked: true, target: null },
+              { id: 'say-hi', name: '回应问好', rarity: 'normal', unlocked: true, target: null },
+              { id: 'animal-voice', name: '模仿小动物叫声', rarity: 'rare', unlocked: false, target: 'growth' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'awaken',
+        name: '觉醒',
+        stages: [
+          {
+            id: 'awaken-1',
+            title: '觉醒1 · 日常陪伴',
+            summary: '把 noddy 融入到每天的节奏里',
+            skills: [
+              { id: 'drink-water', name: '提醒喝水', rarity: 'normal', unlocked: true, target: 'task' },
+              { id: 'write-diary', name: '一起记日记', rarity: 'rare', unlocked: false, target: 'task' },
+              { id: 'check-in', name: '任务打卡', rarity: 'rare', unlocked: false, target: 'task' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ultimate',
+        name: '终极',
+        stages: [
+          {
+            id: 'ultimate-1',
+            title: '终极1 · 惊喜事件',
+            summary: '在重要时刻给你更多小惊喜',
+            skills: [
+              { id: 'emotion', name: '情绪陪伴', rarity: 'rare', unlocked: false, target: 'growth' },
+              { id: 'go-out', name: '出门提醒', rarity: 'normal', unlocked: false, target: 'task' },
+              { id: 'birthday', name: '生日惊喜', rarity: 'epic', unlocked: false, target: 'shop' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let activeSkillPhaseIndex = 0;
+    let activeSkillStageIndex = 0;
+
+    // 打开细分功能页（detail.html），新开窗口，不关闭当前主页
+    function goToDetail(section) {
+      // 与detail.html 中的 hash 路由对应
+      // 可跳转到 #pomodoro / #diary / #social 等
+      recordInteraction('home_goToDetail_' + section);
+      window.open('detail.html#' + section, '_blank');
+    }
+
+    function openMessages() {
+      recordInteraction('home_openMessages');
+      window.open('detail.html#messages', '_blank');
+    }
+
+    function openSettings() {
+      recordInteraction('home_openSettings');
+      window.open('detail.html#settings', '_blank');
+    }
+
+    function openDeviceManage() {
+      recordInteraction('home_openDeviceManage');
+      window.open('detail.html#device', '_blank');
+    }
+
+    function openFeedback() {
+      recordInteraction('home_openFeedback');
+      window.open('feedback.html', '_blank');
+    }
+
+    function openHelpCenter() {
+      recordInteraction('home_openHelpCenter');
+      closeUserPage();
+      setTimeout(function () {
+        openBatteryQaModal();
+      }, 280);
+    }
+    window.openHelpCenter = openHelpCenter;
+
+    const OWNER_AVATAR_KEY = 'noddy_owner_avatar_dataurl';
+    const USER_PROFILE_KEY = 'noddy_user_profile_info';
+
+    function getUserProfileSafe() {
+      try {
+        const raw = localStorage.getItem(USER_PROFILE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function getOwnerNameSafe() {
+      const profile = getUserProfileSafe();
+      return String(profile.nickname || '').trim() || '主人';
+    }
+
+    function getOwnerBirthdaySafe() {
+      const profile = getUserProfileSafe();
+      return String(profile.birthday || '').trim();
+    }
+
+    function applyOwnerAvatar(dataUrl) {
+      const topImg = document.getElementById('owner-avatar-top');
+      const topFallback = document.getElementById('owner-avatar-top-fallback');
+      const sideImg = document.getElementById('owner-avatar-side');
+      const sideFallback = document.getElementById('owner-avatar-side-fallback');
+      const has = !!dataUrl;
+
+      if (topImg && topFallback) {
+        topImg.style.display = has ? 'block' : 'none';
+        topFallback.style.display = has ? 'none' : 'inline';
+        if (has) topImg.src = dataUrl;
+      }
+      if (sideImg && sideFallback) {
+        sideImg.style.display = has ? 'block' : 'none';
+        sideFallback.style.display = has ? 'none' : 'inline';
+        if (has) sideImg.src = dataUrl;
+      }
+    }
+
+    function renderOwnerHeader() {
+      const nameEl = document.getElementById('owner-name-label');
+      const subEl = document.getElementById('owner-subline');
+      if (nameEl) nameEl.textContent = getOwnerNameSafe();
+      if (subEl) {
+        const bd = getOwnerBirthdaySafe();
+        subEl.textContent = bd ? ('生日：' + bd) : '点击编辑个人资料';
+      }
+      let avatar = '';
+      try { avatar = localStorage.getItem(OWNER_AVATAR_KEY) || ''; } catch (_) {}
+      applyOwnerAvatar(avatar);
+    }
+
+    function openOwnerProfile() {
+      recordInteraction('home_openOwnerProfile');
+      var bust = 'v=v0427&t=' + Date.now();
+      window.open('./profile-account.html?' + bust, '_blank');
+    }
+    window.openOwnerProfile = openOwnerProfile;
+
+    function openUserPage() {
+      document.getElementById('user-overlay').classList.add('show');
+      document.getElementById('user-page').classList.add('show');
+    }
+
+    function closeUserPage() {
+      document.getElementById('user-overlay').classList.remove('show');
+      document.getElementById('user-page').classList.remove('show');
+    }
+
+    function requestAccountDeletion() {
+      closeUserPage();
+      window.open('account-delete.html', '_blank');
+    }
+
+    function getPetName() {
+      return localStorage.getItem('petName') || 'noddy';
+    }
+
+    function updatePetName() {
+      const input = document.getElementById('pet-name-input');
+      const name = input.value.trim() || 'noddy';
+      localStorage.setItem('petName', name);
+      document.getElementById('display-pet-name').textContent = name;
+      document.getElementById('companion-text').textContent = '今天是' + name + '陪你的第' + companionDays + '天哦';
+    }
+
+    function initPetName() {
+      const name = getPetName();
+      document.getElementById('pet-name-input').value = name;
+      document.getElementById('display-pet-name').textContent = name;
+      document.getElementById('companion-text').textContent = '今天是' + name + '陪你的第' + companionDays + '天哦';
+    }
+
+    function initPetStatus() {
+      const name = getPetName();
+      const moodEl = document.getElementById('pet-mood-text');
+      const travelEl = document.getElementById('pet-travel-text');
+      if (moodEl) {
+        moodEl.textContent = '当前状态：大笑 · 精力满满';
+      }
+      if (travelEl) {
+        travelEl.textContent = '我去北京玩啦～ ' + name + ' 给你寄来一张旅行明信片';
+      }
+    }
+
+    function refreshTaskProgress() {
+      const percent = Math.min(100, (newbieProgress / newbieTotal) * 100);
+      const chip = document.getElementById('task-stage-chip');
+      const pillLabel = document.getElementById('task-progress-label');
+      const bar = document.getElementById('task-progress-bar');
+      if (chip) chip.textContent = '新手阶段 · ' + newbieProgress + '/' + newbieTotal;
+      if (pillLabel) pillLabel.textContent = '新手阶段 · ' + newbieProgress + '/' + newbieTotal;
+      if (bar) bar.style.width = percent + '%';
+      if (newbieProgress >= newbieTotal && chip) {
+        chip.textContent = '阶段2 · 已解锁';
+      }
+    }
+
+    renderOwnerHeader();
+    initPetName();
+    initPetStatus();
+    refreshTaskProgress();
+    initNetworkBanner();
+
+    // ------------------------
+    // Anonymous save prompt + interaction counter
+    // ------------------------
+    const ANON_KEY = "noddy_is_anonymous"; // "1" | "0"
+    const WIFI_DONE_KEY = "noddy_wifi_setup_done";
+    const OFFLINE_MODE_KEY = "noddy_offline_mode";
+    const NETWORK_BANNER_CLOSED_KEY = "noddy_network_banner_closed";
+    const INTERACTION_COUNT_KEY = "noddy_interaction_count";
+    /** 仅用 sessionStorage：关闭 App/标签页后清空，下次冷启动可再次弹出「保存」引导 */
+    const SAVE_PROMPT_SHOWN_SESSION_KEY = "noddy_save_modal_shown_tab_session";
+    const SAVE_PROMPT_DISMISSED_AT_KEY = "noddy_save_prompt_dismissed_at";
+    const SAVE_PROMPT_THRESHOLD_KEY = "noddy_save_prompt_threshold"; // optional override
+
+    function isAnonymous() {
+      try { return localStorage.getItem(ANON_KEY) !== "0"; } catch (_) { return true; }
+    }
+
+    function rollThresholdThreeToFive() {
+      const KEY = "noddy_save_prompt_threshold_roll";
+      try {
+        const stored = localStorage.getItem(KEY);
+        const parsed = stored ? parseInt(stored, 10) : NaN;
+        if (!Number.isNaN(parsed) && parsed >= 3 && parsed <= 5) return parsed;
+        const rolled = 3 + Math.floor(Math.random() * 3);
+        localStorage.setItem(KEY, String(rolled));
+        return rolled;
+      } catch (_) {
+        return 4;
+      }
+    }
+
+    function getThreshold() {
+      try {
+        const v = localStorage.getItem(SAVE_PROMPT_THRESHOLD_KEY);
+        const n = v ? parseInt(v, 10) : NaN;
+        if (!Number.isNaN(n) && n > 0) return n;
+      } catch (_) {}
+      return rollThresholdThreeToFive();
+    }
+
+    function getInteractionCount() {
+      try {
+        const v = localStorage.getItem(INTERACTION_COUNT_KEY);
+        const n = v ? parseInt(v, 10) : 0;
+        return Number.isFinite(n) ? n : 0;
+      } catch (_) { return 0; }
+    }
+
+    function setInteractionCount(n) {
+      try { localStorage.setItem(INTERACTION_COUNT_KEY, String(Math.max(0, n | 0))); } catch (_) {}
+    }
+
+    function maybeShowSavePrompt() {
+      if (!isAnonymous()) return;
+      let shown = null;
+      try {
+        shown = sessionStorage.getItem(SAVE_PROMPT_SHOWN_SESSION_KEY);
+      } catch (_) {}
+      if (shown === "1") return;
+      const c = getInteractionCount();
+      if (c < getThreshold()) return;
+      try {
+        sessionStorage.setItem(SAVE_PROMPT_SHOWN_SESSION_KEY, "1");
+      } catch (_) {}
+      openSavePetModal();
+    }
+
+    function recordInteraction(source) {
+      if (!isAnonymous()) return;
+      const next = getInteractionCount() + 1;
+      setInteractionCount(next);
+      void source;
+      maybeShowSavePrompt();
+    }
+
+    function shouldShowNetworkBanner() {
+      const wifiDone = localStorage.getItem(WIFI_DONE_KEY) === "1";
+      const offline = localStorage.getItem(OFFLINE_MODE_KEY) === "1";
+      const closed = localStorage.getItem(NETWORK_BANNER_CLOSED_KEY) === "1";
+      if (wifiDone) {
+        localStorage.removeItem(NETWORK_BANNER_CLOSED_KEY);
+        return false;
+      }
+      return (offline || !wifiDone) && !closed;
+    }
+
+    function closeNetworkBanner() {
+      const el = document.getElementById("network-banner");
+      if (el) el.classList.remove("show");
+      localStorage.setItem(NETWORK_BANNER_CLOSED_KEY, "1");
+    }
+
+    function initNetworkBanner() {
+      const el = document.getElementById("network-banner");
+      if (!el) return;
+      if (shouldShowNetworkBanner()) {
+        el.classList.add("show");
+      } else {
+        el.classList.remove("show");
+      }
+    }
+
+    function openSavePetModal() {
+      const el = document.getElementById('save-pet-modal');
+      if (!el) return;
+      el.classList.add('show');
+    }
+
+    function closeSavePetModal() {
+      const el = document.getElementById('save-pet-modal');
+      if (!el) return;
+      el.classList.remove('show');
+    }
+
+    function dismissSavePetModal() {
+      try { localStorage.setItem(SAVE_PROMPT_DISMISSED_AT_KEY, String(Date.now())); } catch (_) {}
+      closeSavePetModal();
+    }
+
+    function savePetNow() {
+      closeSavePetModal();
+      window.location.href = './signup.html?redirect=' + encodeURIComponent('./home.html');
+    }
+
+    (function bindSaveModalOverlay() {
+      const el = document.getElementById('save-pet-modal');
+      if (!el) return;
+      el.addEventListener('click', function (e) {
+        if (e.target === el) dismissSavePetModal();
+      });
+    })();
+
+    // 技能墙：总进度 + 分阶段进度计算
+    function getSkillStats() {
+      let total = 0;
+      let unlocked = 0;
+      skillPhases.forEach(phase => {
+        let phaseUnlocked = 0;
+        let phaseTotal = 0;
+        phase.stages.forEach(stage => {
+          const unlockedCount = stage.skills.filter(s => s.unlocked).length;
+          const totalCount = stage.skills.length;
+          stage._unlockedCount = unlockedCount;
+          stage._totalCount = totalCount;
+          phaseUnlocked += unlockedCount;
+          phaseTotal += totalCount;
+        });
+        phase._unlockedCount = phaseUnlocked;
+        phase._totalCount = phaseTotal;
+        unlocked += phaseUnlocked;
+        total += phaseTotal;
+      });
+      return { total, unlocked };
+    }
+
+    function getDefaultSkillLocation() {
+      for (let p = 0; p < skillPhases.length; p++) {
+        const phase = skillPhases[p];
+        for (let s = 0; s < phase.stages.length; s++) {
+          const st = phase.stages[s];
+          if (st._unlockedCount < st._totalCount) {
+            return { phaseIndex: p, stageIndex: s };
+          }
+        }
+      }
+      return { phaseIndex: 0, stageIndex: 0 };
+    }
+
+    function renderSkillCard(stage, skill) {
+      const rarity = skill.rarity || 'normal';
+      const rarityClass = 'rarity-' + rarity;
+      const lockClass = skill.unlocked ? 'unlocked' : 'locked';
+      const rarityLabelMap = { normal: '普通', rare: '稀有', epic: '史诗' };
+      const rarityLabel = rarityLabelMap[rarity] || '普通';
+      const statusHtml = skill.unlocked
+        ? '<span class="skill-status">已解锁</span>'
+        : '<button class="skill-cta" type="button" onclick="goUnlock(\'' + (skill.target || '') + '\')">去完成</button>';
+
+      return (
+        '<div class="skill-card ' + rarityClass + ' ' + lockClass + '">' +
+          '<div class="skill-icon-ring"></div>' +
+          '<div class="skill-text">' +
+            '<div class="skill-name">' + skill.name + '</div>' +
+            '<div class="skill-tags">' + rarityLabel + '</div>' +
+          '</div>' +
+          statusHtml +
+        '</div>'
+      );
+    }
+
+    function renderSkillStages(phaseIndex, stageIndex) {
+      const listEl = document.getElementById('skill-stage-list');
+      const tabsEl = document.getElementById('skill-phase-tabs');
+      const totalLabel = document.getElementById('skill-total-count-label');
+      const currentStageLabel = document.getElementById('skill-current-stage-label');
+      const totalBar = document.getElementById('skill-total-progress');
+      if (!listEl || !tabsEl || !totalLabel || !currentStageLabel || !totalBar) return;
+
+      const stats = getSkillStats();
+      totalLabel.textContent = '已解锁 ' + stats.unlocked + ' / ' + stats.total + ' 个技能';
+      const totalPercent = stats.total ? Math.min(100, (stats.unlocked / stats.total) * 100) : 0;
+      totalBar.style.width = totalPercent + '%';
+
+      // 决定当前高亮的大阶段和小阶段
+      if (typeof phaseIndex !== 'number' || phaseIndex < 0 || phaseIndex >= skillPhases.length) {
+        const loc = getDefaultSkillLocation();
+        activeSkillPhaseIndex = loc.phaseIndex;
+        activeSkillStageIndex = loc.stageIndex;
+      } else {
+        activeSkillPhaseIndex = phaseIndex;
+        if (typeof stageIndex === 'number') {
+          activeSkillStageIndex = stageIndex;
+        }
+      }
+
+      const activePhase = skillPhases[activeSkillPhaseIndex];
+      const stages = activePhase.stages;
+      if (typeof stageIndex !== 'number' || stageIndex < 0 || stageIndex >= stages.length) {
+        // 在当前大阶段内选择一个默认小阶段
+        let defaultStageIndex = 0;
+        for (let i = 0; i < stages.length; i++) {
+          const st = stages[i];
+          if (st._unlockedCount < st._totalCount) {
+            defaultStageIndex = i;
+            break;
+          }
+        }
+        activeSkillStageIndex = defaultStageIndex;
+      }
+
+      // 渲染顶部横向大阶段 Tab
+      tabsEl.innerHTML = skillPhases.map((phase, idx) => {
+        const activeClass = idx === activeSkillPhaseIndex ? 'skill-phase-tab active' : 'skill-phase-tab';
+        return '<button type="button" class="' + activeClass + '" onclick="switchSkillPhase(' + idx + ')">' + phase.name + '</button>';
+      }).join('');
+
+      // 渲染当前大阶段下的小阶段列表
+      listEl.innerHTML = '';
+      stages.forEach((stage, index) => {
+        const isActive = index === activeSkillStageIndex;
+        const percent = stage._totalCount ? Math.min(100, (stage._unlockedCount / stage._totalCount) * 100) : 0;
+        const stageEl = document.createElement('div');
+        stageEl.className = 'skill-stage ' + (isActive ? 'expanded' : 'collapsed');
+        stageEl.dataset.index = index;
+
+        stageEl.innerHTML =
+          '<div class="skill-stage-header" onclick="toggleSkillStage(' + index + ')">' +
+            '<div>' +
+              '<div class="skill-stage-title">' + stage.title + '</div>' +
+              '<div class="skill-stage-subtitle">已解锁 ' + stage._unlockedCount + ' / ' + stage._totalCount + '</div>' +
+              '<div class="skill-stage-progress">' +
+                '<div class="skill-stage-progress-fill" style="width:' + percent + '%"></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="skill-stage-arrow">' + (isActive ? '⌃' : '⌄') + '</div>' +
+          '</div>' +
+          '<div class="skill-stage-body">' +
+            '<div class="skill-grid">' +
+              stage.skills.map(s => renderSkillCard(stage, s)).join('') +
+            '</div>' +
+          '</div>';
+
+        listEl.appendChild(stageEl);
+
+        if (isActive) {
+          currentStageLabel.textContent = '当前阶段：' + activePhase.name + ' · ' + stage.title;
+        }
+      });
+    }
+
+    function toggleSkillStage(index) {
+      const listEl = document.getElementById('skill-stage-list');
+      const currentStageLabel = document.getElementById('skill-current-stage-label');
+      if (!listEl || index == null) return;
+      const nodes = listEl.querySelectorAll('.skill-stage');
+      const activePhase = skillPhases[activeSkillPhaseIndex];
+      const stages = activePhase ? activePhase.stages : [];
+
+      nodes.forEach((node, i) => {
+        const arrow = node.querySelector('.skill-stage-arrow');
+        if (i === index) {
+          const willExpand = node.classList.contains('collapsed');
+          node.classList.toggle('collapsed', !willExpand);
+          node.classList.toggle('expanded', willExpand);
+          if (arrow) arrow.textContent = willExpand ? '⌃' : '⌄';
+          if (willExpand && stages[i]) {
+            activeSkillStageIndex = i;
+            currentStageLabel.textContent = '当前阶段：' + activePhase.name + ' · ' + stages[i].title;
+            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else {
+          node.classList.remove('expanded');
+          node.classList.add('collapsed');
+          if (arrow) arrow.textContent = '⌄';
+        }
+      });
+    }
+
+    function switchSkillPhase(index) {
+      if (index == null || index < 0 || index >= skillPhases.length) return;
+      renderSkillStages(index);
+      // 渲染完成后，让当前展开的小阶段自动滚动对齐
+      setTimeout(() => {
+        const listEl = document.getElementById('skill-stage-list');
+        if (!listEl) return;
+        const active = listEl.querySelector('.skill-stage.expanded');
+        if (active) {
+          active.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    }
+
+    function goUnlock(target) {
+      if (!target) return;
+      if (target === 'task') {
+        // 跳转到任务列表
+        goToDetail('diary');
+      } else if (target === 'growth') {
+        // 跳转到养成相关界面（这里用任务页占位）
+        goToDetail('diary');
+      } else if (target === 'shop') {
+        // 跳转到商城 / 兑换
+        goToDetail('reward');
+      }
+    }
+
+    function openSkillWall() {
+      renderSkillStages();
+      const sheet = document.getElementById('skill-sheet');
+      if (sheet) {
+        sheet.classList.add('show');
+        // 默认展开的小阶段自动滚动对齐
+        setTimeout(() => {
+          const listEl = document.getElementById('skill-stage-list');
+          if (!listEl) return;
+          const active = listEl.querySelector('.skill-stage.expanded');
+          if (active) {
+            active.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 50);
+      }
+    }
+
+    function closeSkillWall() {
+      const sheet = document.getElementById('skill-sheet');
+      if (sheet) sheet.classList.remove('show');
+    }
+
+    function showRewardModal() {
+      document.getElementById('reward-modal').classList.add('show');
+    }
+
+    function closeRewardModal() {
+      document.getElementById('reward-modal').classList.remove('show');
+    }
+
+    document.getElementById('reward-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeRewardModal();
+    });
+
+    function openBatteryQaModal() {
+      const modal = document.getElementById('battery-qa-modal');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeBatteryQaModal() {
+      const modal = document.getElementById('battery-qa-modal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    const batteryQaModal = document.getElementById('battery-qa-modal');
+    if (batteryQaModal) {
+      batteryQaModal.addEventListener('click', function(e) {
+        if (e.target === this) closeBatteryQaModal();
+      });
+    }
+
+    // ------------------------
+    // Noddy 体检：打包最近10条错误日志 -> 模拟发送群卡片
+    // ------------------------
+    function getClinicUserId() {
+      try {
+        const account = (localStorage.getItem('noddy_account_id') || '').trim();
+        if (account) return account;
+      } catch (_) {}
+      try {
+        const hint = (localStorage.getItem('noddy_last_login_account') || '').trim();
+        if (hint) return 'user_' + hint.replace(/[^a-zA-Z0-9_@.\\-]/g, '').slice(0, 24);
+      } catch (_) {}
+      return 'user_xxx';
+    }
+
+    function getClinicDeviceId() {
+      try {
+        const d = (localStorage.getItem('noddy_device_id') || '').trim();
+        if (d) return d;
+      } catch (_) {}
+      return 'noddy_abcd';
+    }
+
+    function getRecentErrorLogsForClinic() {
+      // 支持外部写入：localStorage.noddy_recent_error_logs = [{ts,type,msg,code,device_id},...]
+      try {
+        const raw = localStorage.getItem('noddy_recent_error_logs') || '[]';
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length) return arr.slice(-10);
+      } catch (_) {}
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const mk = (minOffset, type, msg, code) => {
+        const d = new Date(now.getTime() - minOffset * 60 * 1000);
+        const ts = pad(d.getHours()) + ':' + pad(d.getMinutes());
+        return { ts: ts, type: type, msg: msg, code: code || '', device_id: getClinicDeviceId() };
+      };
+      return [
+        mk(12, 'server_error', 'JSON parse error at response.data', '500'),
+        mk(10, 'server_error', 'HTTP 500 internal server error', '500'),
+        mk(9, 'server_error', 'HTTP 500 internal server error', '500'),
+        mk(7, 'network_error', 'api timeout', ''),
+        mk(6, 'bluetooth_error', 'ble connect fail', ''),
+        mk(5, 'server_error', 'HTTP 500 internal server error', '500'),
+        mk(4, 'server_error', 'HTTP 500 internal server error', '500'),
+        mk(3, 'server_error', 'HTTP 500 internal server error', '500'),
+        mk(2, 'device_unresponsive', 'no data packet for 25s', ''),
+        mk(1, 'server_error', 'HTTP 500 internal server error', '500')
+      ];
+    }
+
+    function summarizeClinic(logs) {
+      const counts = {};
+      const codeCounts = {};
+      let latestTime = '';
+      logs.forEach((l) => {
+        const t = String(l.type || 'unknown');
+        counts[t] = (counts[t] || 0) + 1;
+        const c = String(l.code || '').trim();
+        if (c) codeCounts[c] = (codeCounts[c] || 0) + 1;
+        const ts = String(l.ts || '').trim();
+        if (ts) latestTime = ts;
+      });
+      let topType = 'unknown';
+      let topTypeCount = 0;
+      Object.keys(counts).forEach((k) => {
+        if (counts[k] > topTypeCount) {
+          topType = k;
+          topTypeCount = counts[k];
+        }
+      });
+      let topCode = '';
+      let topCodeCount = 0;
+      Object.keys(codeCounts).forEach((k) => {
+        if (codeCounts[k] > topCodeCount) {
+          topCode = k;
+          topCodeCount = codeCounts[k];
+        }
+      });
+      return { topType, topTypeCount, topCode, latestTime };
+    }
+
+    function getSelectedClinicChannel() {
+      const nodes = document.querySelectorAll('input[name="clinic_channel"]');
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].checked) return nodes[i].value;
+      }
+      return 'feishu';
+    }
+
+    function renderClinicPreview() {
+      const logs = getRecentErrorLogsForClinic();
+      const sum = summarizeClinic(logs);
+      const userId = getClinicUserId();
+      const device = getClinicDeviceId();
+      const card = document.getElementById('clinic-card-preview');
+      const logBox = document.getElementById('clinic-log-preview');
+      const detailId = 'clinic_' + Date.now();
+      const detailLink = 'detail.html#clinic=' + encodeURIComponent(detailId);
+
+      if (card) {
+        card.innerHTML =
+          '<div style="font-weight:900;color:#0f172a;margin-bottom:6px">🐾 Noddy 主动挂号</div>' +
+          '<div>用户：<strong>' + userId + '</strong></div>' +
+          '<div>设备：<strong>' + device + '</strong></div>' +
+          '<div>错误类型：<strong>' + sum.topType + '</strong> x <strong>' + (sum.topTypeCount || 0) + '</strong> 次</div>' +
+          '<div>错误码：<strong>' + (sum.topCode || '-') + '</strong></div>' +
+          '<div>时间：<strong>' + (sum.latestTime || '-') + '</strong></div>' +
+          '<div style="margin-top:8px;"><a href="' + detailLink + '" target="_blank" style="color:#e11d48;font-weight:700;text-decoration:none">🔗 查看详情（留存）</a></div>';
+      }
+      if (logBox) {
+        logBox.textContent = logs.map(function (l, idx) {
+          const code = String(l.code || '').trim();
+          return (idx + 1) + '. [' + (l.ts || '-') + '] ' + (l.type || 'unknown') + (code ? (' (' + code + ')') : '') + ' - ' + (l.msg || '');
+        }).join('\n');
+      }
+      return { logs, detailId, sum, userId, device };
+    }
+
+    function openClinicModal() {
+      const overlay = document.getElementById('clinic-modal');
+      const consent = document.getElementById('clinic-consent');
+      const result = document.getElementById('clinic-result');
+      if (consent) consent.checked = false;
+      if (result) {
+        result.style.display = 'none';
+        result.textContent = '';
+      }
+      renderClinicPreview();
+      if (overlay) overlay.classList.add('show');
+    }
+    window.openClinicModal = openClinicModal;
+
+    function closeClinicModal() {
+      const overlay = document.getElementById('clinic-modal');
+      if (overlay) overlay.classList.remove('show');
+    }
+    window.closeClinicModal = closeClinicModal;
+
+    function submitClinic() {
+      const consent = document.getElementById('clinic-consent');
+      const result = document.getElementById('clinic-result');
+      if (!consent || !consent.checked) {
+        if (result) {
+          result.style.display = 'block';
+          result.textContent = '请先勾选隐私告知后再上传。';
+        }
+        return;
+      }
+
+      const ctx = renderClinicPreview();
+      const channel = getSelectedClinicChannel();
+      const payload = {
+        id: ctx.detailId,
+        createdAt: new Date().toISOString(),
+        channel: channel,
+        user: ctx.userId,
+        device: ctx.device,
+        summary: ctx.sum,
+        logs: ctx.logs
+      };
+
+      try {
+        const key = 'noddy_clinic_outbox';
+        const raw = localStorage.getItem(key) || '[]';
+        const arr = JSON.parse(raw);
+        const next = Array.isArray(arr) ? arr : [];
+        next.unshift(payload);
+        localStorage.setItem(key, JSON.stringify(next.slice(0, 50)));
+      } catch (_) {}
+
+      closeClinicModal();
+      alert('病历已发给 Noddy 医生团队，我们会尽快看看它。');
+    }
+    window.submitClinic = submitClinic;
+
+    (function bindClinicOverlayClose() {
+      const el = document.getElementById('clinic-modal');
+      if (!el) return;
+      el.addEventListener('click', function (e) {
+        if (e.target === el) closeClinicModal();
+      });
+    })();
+
+    function openBatteryOnlyQaModal() {
+      const modal = document.getElementById('battery-only-qa-modal');
+      if (modal) modal.classList.add('show');
+    }
+
+    function closeBatteryOnlyQaModal() {
+      const modal = document.getElementById('battery-only-qa-modal');
+      if (modal) modal.classList.remove('show');
+    }
+
+    const batteryOnlyQaModal = document.getElementById('battery-only-qa-modal');
+    if (batteryOnlyQaModal) {
+      batteryOnlyQaModal.addEventListener('click', function(e) {
+        if (e.target === this) closeBatteryOnlyQaModal();
+      });
+    }
+
+    function openPersonalityModal() {
+      document.getElementById('personality-overlay').classList.add('show');
+    }
+
+    function closePersonalityModal() {
+      document.getElementById('personality-overlay').classList.remove('show');
+    }
+
+    function showPersonalityHelp() {
+      alert('性格会根据你和宠物的互动、完成的任务、使用时长等维度逐渐养成，越常陪伴，参数越丰富。');
+    }
+
+    // 家长模式：准入验证 + 设置面板
+    function openParentalEntry() {
+      if (parentalVerified) {
+        openParentalSheet();
+      } else {
+        openParentalGate();
+      }
+    }
+
+    function openParentalGate() {
+      const overlay = document.getElementById('parental-overlay');
+      const input = document.getElementById('parental-answer');
+      const mathBlock = document.getElementById('parental-math-block');
+      const pressBlock = document.getElementById('parental-press-block');
+      if (overlay) {
+        overlay.classList.add('show');
+      }
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 50);
+      }
+      if (mathBlock && pressBlock) {
+        mathBlock.style.display = 'block';
+        pressBlock.style.display = 'none';
+      }
+    }
+
+    function closeParentalGate() {
+      const overlay = document.getElementById('parental-overlay');
+      if (overlay) overlay.classList.remove('show');
+      cancelParentalPress();
+    }
+
+    function checkParentalAnswer() {
+      const input = document.getElementById('parental-answer');
+      if (!input) return;
+      const value = String(input.value || '').trim();
+      if (value === '37') {
+        parentalVerified = true;
+        closeParentalGate();
+        openParentalSheet();
+      } else {
+        alert('答案不太对哦，请家长再试一次。');
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function toggleParentalMode() {
+      const mathBlock = document.getElementById('parental-math-block');
+      const pressBlock = document.getElementById('parental-press-block');
+      if (!mathBlock || !pressBlock) return;
+      const mathVisible = mathBlock.style.display !== 'none';
+      if (mathVisible) {
+        mathBlock.style.display = 'none';
+        pressBlock.style.display = 'block';
+      } else {
+        mathBlock.style.display = 'block';
+        pressBlock.style.display = 'none';
+      }
+      cancelParentalPress();
+    }
+
+    function startParentalPress() {
+      cancelParentalPress();
+      parentalPressStartAt = Date.now();
+      const hint = document.getElementById('parental-press-hint');
+      if (hint) {
+        hint.textContent = '正在计时中，请持续按住 3 秒…';
+      }
+      parentalPressTimer = setTimeout(() => {
+        parentalVerified = true;
+        closeParentalGate();
+        openParentalSheet();
+      }, 3000);
+    }
+
+    function cancelParentalPress() {
+      if (parentalPressTimer) {
+        clearTimeout(parentalPressTimer);
+        parentalPressTimer = null;
+      }
+      const hint = document.getElementById('parental-press-hint');
+      if (hint) {
+        hint.textContent = '松手会重新计时哦';
+      }
+    }
+
+    function openParentalSheet() {
+      const sheet = document.getElementById('parental-sheet');
+      if (sheet) sheet.classList.add('show');
+    }
+
+    function closeParentalSheet() {
+      const sheet = document.getElementById('parental-sheet');
+      if (sheet) sheet.classList.remove('show');
+    }
+
+    function handleActivityCollectToggle(e) {
+      const checkbox = e.target;
+      if (!checkbox) return;
+      if (!checkbox.checked) {
+        const lang = (localStorage.getItem("noddy_lang") || (navigator.language || "").toLowerCase().slice(0, 2) || "zh");
+        const msg = lang === "ko"
+          ? "이 설정이 꺼져 있으면 Noddy와의 대화 리포트를 볼 수 없어요."
+          : lang === "en"
+            ? "If this setting is turned off, you won't be able to view the conversation report with Noddy."
+            : "如果关闭此设置，将无法查看与 Noddy 的对话报告。";
+        const ok = confirm(
+          msg
+        );
+        if (!ok) {
+          checkbox.checked = true;
+          activityCollectEnabled = true;
+          return;
+        }
+        activityCollectEnabled = false;
+      } else {
+        activityCollectEnabled = true;
+      }
+    }
+
+    function deletePartialConversations() {
+      alert('可以在后续版本中选择部分对话删除，目前为交互示意。');
+    }
+
+    // 任务中心、技能墙、食物图鉴统一在细分页面中展示，主页只负责跳转
+
+    document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+      item.addEventListener('click', function() {
+        const page = this.dataset.page;
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + page).classList.add('active');
+      });
+    });
+
+    const activityToggleEl = document.getElementById('activity-collect-toggle');
+    if (activityToggleEl) {
+      activityToggleEl.addEventListener('change', handleActivityCollectToggle);
+    }
+
+    (function bindManualEntryFallback() {
+      const entry = document.getElementById('manual-entry');
+      if (!entry) return;
+      entry.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openHelpCenter();
+      });
+    })();
+  </script>
+  <script>
+(function() {
+  var STATIC_TEXT_MAP = {
+    "首页": { ko: "홈", en: "Home" },
+    "发现": { ko: "탐색", en: "Discover" },
+    "交互日志": { ko: "상호작용 로그", en: "Interaction Log" },
+    "喂食": { ko: "먹이주기", en: "Feed" },
+    "任务": { ko: "작업", en: "Tasks" },
+    "成长日记": { ko: "성장 일기", en: "Growth Diary" },
+    "任务中心": { ko: "미션 센터", en: "Mission Center" },
+    "食物图鉴": { ko: "먹이 도감", en: "Food Gallery" },
+    "成长唤醒地图": { ko: "성장 각성 지도", en: "Growth Awakening Map" },
+    "用户中心": { ko: "사용자 센터", en: "User Center" },
+    "设置": { ko: "설정", en: "Settings" },
+    "宠物列表": { ko: "반려 목록", en: "Pet List" },
+    "消息提醒": { ko: "알림", en: "Notifications" },
+    "使用说明": { ko: "사용 안내", en: "Guide" },
+    "动作引导": { ko: "동작 가이드", en: "Action Guide" },
+    "多端登录": { ko: "다중 기기 로그인", en: "Multi-device Login" },
+    "性格参数": { ko: "성격 파라미터", en: "Personality Metrics" },
+    "当前性格：": { ko: "현재 성격:", en: "Current personality:" },
+    "当前状态：": { ko: "현재 상태:", en: "Current status:" },
+    "亲密度": { ko: "친밀도", en: "Closeness" },
+    "外向值": { ko: "외향성", en: "Extroversion" },
+    "舒适度": { ko: "안정감", en: "Comfort" },
+    "活泼值": { ko: "활발함", en: "Liveliness" },
+    "外向-亲密性格图谱": { ko: "외향-친밀 성향 맵", en: "Extroversion-Closeness Map" },
+    "敏感型": { ko: "민감형", en: "Sensitive" },
+    "慢热型": { ko: "느린적응형", en: "Slow-to-warm" },
+    "疏远型": { ko: "거리형", en: "Distant" },
+    "调皮型": { ko: "장난형", en: "Playful" },
+    "附近设备：": { ko: "주변 기기:", en: "Nearby devices:" },
+    "日常任务": { ko: "일상 미션", en: "Daily Tasks" },
+    "互动任务": { ko: "상호작용 미션", en: "Interaction Tasks" },
+    "和 noddy 说一句话": { ko: "noddy에게 한마디 하기", en: "Say one sentence to noddy" },
+    "完成 1 个番茄钟": { ko: "뽀모도로 1회 완료", en: "Finish 1 pomodoro" },
+    "去完成": { ko: "하러가기", en: "Go" },
+    "完成": { ko: "완료", en: "Done" },
+    "太棒啦": { ko: "좋아!", en: "Awesome!" },
+    "稍后再说": { ko: "나중에", en: "Later" },
+    "立即保存": { ko: "지금 저장", en: "Save Now" },
+    "按住不放": { ko: "길게 누르기", en: "Press and Hold" },
+    "确认进入": { ko: "입장 확인", en: "Confirm" },
+    "暂不进入": { ko: "나중에", en: "Not Now" },
+    "家长模式": { ko: "보호자 모드", en: "Parent Mode" },
+    "切换为另一种验证方式": { ko: "다른 인증 방식으로 전환", en: "Switch verification method" }
+  };
+  var STATIC_PLACEHOLDER_MAP = {
+    "修改宠物昵称": { ko: "반려 이름 수정", en: "Rename pet" },
+    "在这里输入答案": { ko: "여기에 답 입력", en: "Enter answer here" }
+  };
+  function applyStaticTextLang(lang) {
+    if (lang === "zh") return;
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (!node || !node.parentElement) continue;
+      var parentTag = node.parentElement.tagName;
+      if (parentTag === "SCRIPT" || parentTag === "STYLE") continue;
+      var raw = node.nodeValue;
+      if (!raw) continue;
+      var key = raw.trim();
+      if (!key || !STATIC_TEXT_MAP[key]) continue;
+      var translated = STATIC_TEXT_MAP[key][lang];
+      if (!translated) continue;
+      node.nodeValue = raw.replace(key, translated);
+    }
+    document.querySelectorAll("input[placeholder]").forEach(function(el) {
+      var ph = (el.getAttribute("placeholder") || "").trim();
+      if (!ph || !STATIC_PLACEHOLDER_MAP[ph] || !STATIC_PLACEHOLDER_MAP[ph][lang]) return;
+      el.setAttribute("placeholder", STATIC_PLACEHOLDER_MAP[ph][lang]);
+    });
+  }
+  function applyDataI18n(lang) {
+    var key = lang === "ko" ? "i18nKo" : lang === "en" ? "i18nEn" : "i18nZh";
+    document.querySelectorAll("[data-i18n-zh]").forEach(function(el) {
+      var translated = el.dataset[key];
+      if (!translated) return;
+      // Only replace direct text node to keep nested elements unchanged.
+      for (var i = 0; i < el.childNodes.length; i++) {
+        var child = el.childNodes[i];
+        if (child.nodeType === Node.TEXT_NODE && child.nodeValue.trim()) {
+          child.nodeValue = child.nodeValue.replace(child.nodeValue.trim(), translated);
+          return;
+        }
+      }
+      if (el.childNodes.length === 0) {
+        el.textContent = translated;
+      }
+    });
+  }
+  function detectLang() {
+    var saved = localStorage.getItem("noddy_lang");
+    if (saved && (saved === "ko" || saved === "en" || saved === "zh")) return saved;
+    var nav = (navigator.language || "").toLowerCase();
+    if (nav.indexOf("ko") === 0) return "ko";
+    if (nav.indexOf("zh") === 0) return "zh";
+    return "en";
+  }
+  var sel = document.getElementById("lang-select");
+  if (sel) {
+    sel.value = detectLang();
+    document.documentElement.lang = sel.value === "ko" ? "ko" : sel.value === "zh" ? "zh-CN" : "en";
+    applyStaticTextLang(sel.value);
+    applyDataI18n(sel.value);
+    sel.addEventListener("change", function() {
+      var lang = sel.value;
+      localStorage.setItem("noddy_lang", lang);
+      document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+      location.reload();
+    });
+  } else {
+    var lang = detectLang();
+    document.documentElement.lang = lang === "ko" ? "ko" : lang === "zh" ? "zh-CN" : "en";
+    applyStaticTextLang(lang);
+    applyDataI18n(lang);
+  }
+})();
+  </script>
+</body>
+</html>

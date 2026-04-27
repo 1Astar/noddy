@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Noddy 登录 / 开始使用</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 45%, #ffffff 100%);
+      color: #0f172a;
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 24px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 18px 38px rgba(248, 113, 113, 0.2);
+    }
+    .title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .sub { font-size: 13px; color: #64748b; line-height: 1.6; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .tab {
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+    }
+    .tab.active {
+      border-color: #fda4af;
+      background: #fff1f2;
+      color: #e11d48;
+    }
+    .panel { margin-top: 14px; display: none; }
+    .panel.show { display: block; }
+    label { display:block; font-size: 12px; color:#64748b; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus { border-color: #fda4af; box-shadow: 0 0 0 2px rgba(253,164,175,.22); }
+    .row { margin-top: 10px; }
+    .actions { margin-top: 12px; display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 11px 12px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-primary { background: linear-gradient(135deg, #fb7185, #fb923c); color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #cbd5e1; color: #475569; }
+    .hint { margin-top: 10px; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+    .error { margin-top: 10px; font-size: 12px; color: #e11d48; line-height: 1.5; display:none; }
+    .error.show { display:block; }
+    .split { display:flex; gap: 8px; align-items:center; }
+    .split input { flex: 1; }
+    .code-btn {
+      flex: 0 0 auto;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      padding: 11px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+    }
+    .code-btn:disabled { opacity: .55; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">登录 / 开始使用</div>
+    <div class="sub">本版本仅保留 <strong>邮箱</strong> 与 <strong>手机号</strong> 登录方式（不提供 Google / Apple / 微信）。</div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-email" type="button" onclick="switchTab('email')">邮箱</button>
+      <button class="tab" id="tab-phone" type="button" onclick="switchTab('phone')">手机号</button>
+    </div>
+
+    <div class="error" id="errBox"></div>
+
+    <section class="panel show" id="panel-email">
+      <div class="row">
+        <label for="email">邮箱</label>
+        <input id="email" type="email" placeholder="name@example.com" autocomplete="email" />
+      </div>
+      <div class="row">
+        <label for="emailPwd">密码（原型）</label>
+        <input id="emailPwd" type="password" placeholder="输入任意内容即可登录" autocomplete="current-password" />
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" onclick="loginByEmail()">邮箱登录</button>
+        <button class="btn btn-secondary" type="button" onclick="goBack()">返回</button>
+      </div>
+      <div class="hint">原型说明：这里不区分登录/注册，输入邮箱即可创建/登录同一账号。</div>
+    </section>
+
+    <section class="panel" id="panel-phone">
+      <div class="row">
+        <label for="phone">手机号</label>
+        <input id="phone" type="tel" placeholder="例如：13800000000" autocomplete="tel" />
+      </div>
+      <div class="row">
+        <label for="sms">短信验证码（原型）</label>
+        <div class="split">
+          <input id="sms" type="text" placeholder="输入 1234" inputmode="numeric" />
+          <button class="code-btn" id="btnSendCode" type="button" onclick="sendCode()">发送验证码</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" onclick="loginByPhone()">手机号登录</button>
+        <button class="btn btn-secondary" type="button" onclick="goBack()">返回</button>
+      </div>
+      <div class="hint">原型说明：验证码固定为 <strong>1234</strong>。</div>
+    </section>
+  </div>
+
+  <script>
+    var ACCOUNT_ID_KEY = "noddy_account_id";
+    var ANON_KEY = "noddy_is_anonymous";
+    var LAST_LOGIN_PROVIDER_KEY = "noddy_last_login_provider";
+    var LAST_LOGIN_ACCOUNT_KEY = "noddy_last_login_account";
+
+    function getRedirectTarget() {
+      try {
+        var params = new URLSearchParams(location.search || "");
+        return params.get("redirect") || params.get("next") || "home.html";
+      } catch (_) {
+        return "home.html";
+      }
+    }
+
+    function setError(msg) {
+      var el = document.getElementById("errBox");
+      if (!el) return;
+      if (!msg) {
+        el.textContent = "";
+        el.classList.remove("show");
+        return;
+      }
+      el.textContent = msg;
+      el.classList.add("show");
+    }
+
+    function switchTab(tab) {
+      var emailTab = document.getElementById("tab-email");
+      var phoneTab = document.getElementById("tab-phone");
+      var pEmail = document.getElementById("panel-email");
+      var pPhone = document.getElementById("panel-phone");
+      setError("");
+      if (tab === "phone") {
+        if (emailTab) emailTab.classList.remove("active");
+        if (phoneTab) phoneTab.classList.add("active");
+        if (pEmail) pEmail.classList.remove("show");
+        if (pPhone) pPhone.classList.add("show");
+        return;
+      }
+      if (emailTab) emailTab.classList.add("active");
+      if (phoneTab) phoneTab.classList.remove("active");
+      if (pEmail) pEmail.classList.add("show");
+      if (pPhone) pPhone.classList.remove("show");
+    }
+    window.switchTab = switchTab;
+
+    function markLoggedIn(provider, accountHint) {
+      try { localStorage.setItem(ACCOUNT_ID_KEY, "demo_account_" + Date.now()); } catch (_) {}
+      try { localStorage.setItem(ANON_KEY, "0"); } catch (_) {}
+      try { localStorage.setItem(LAST_LOGIN_PROVIDER_KEY, provider); } catch (_) {}
+      try { localStorage.setItem(LAST_LOGIN_ACCOUNT_KEY, accountHint || ""); } catch (_) {}
+    }
+
+    function loginByEmail() {
+      var email = ((document.getElementById("email") || {}).value || "").trim().toLowerCase();
+      if (!email || email.indexOf("@") < 1) {
+        setError("请输入正确的邮箱地址。");
+        return;
+      }
+      markLoggedIn("email", email);
+      location.href = getRedirectTarget();
+    }
+
+    var sendTimer = null;
+    var sendLeft = 0;
+    function sendCode() {
+      setError("");
+      var phone = ((document.getElementById("phone") || {}).value || "").trim();
+      if (!phone) {
+        setError("请先输入手机号。");
+        return;
+      }
+      var btn = document.getElementById("btnSendCode");
+      sendLeft = 30;
+      if (btn) btn.disabled = true;
+      if (sendTimer) clearInterval(sendTimer);
+      sendTimer = setInterval(function() {
+        sendLeft -= 1;
+        if (btn) btn.textContent = sendLeft > 0 ? ("已发送(" + sendLeft + "s)") : "发送验证码";
+        if (sendLeft <= 0) {
+          if (sendTimer) clearInterval(sendTimer);
+          sendTimer = null;
+          if (btn) btn.disabled = false;
+        }
+      }, 1000);
+      if (btn) btn.textContent = "已发送(30s)";
+    }
+
+    function loginByPhone() {
+      var phone = ((document.getElementById("phone") || {}).value || "").trim();
+      var code = ((document.getElementById("sms") || {}).value || "").trim();
+      if (!phone) {
+        setError("请输入手机号。");
+        return;
+      }
+      if (code !== "1234") {
+        setError("验证码不正确（原型固定为 1234）。");
+        return;
+      }
+      markLoggedIn("phone", phone);
+      location.href = getRedirectTarget();
+    }
+
+    function goBack() {
+      if (history.length > 1) history.back();
+      else location.href = "index.html";
+    }
+    window.goBack = goBack;
+  </script>
+</body>
+</html>

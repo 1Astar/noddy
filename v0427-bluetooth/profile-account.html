@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title data-i18n="pageTitle">资料信息</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #eee7f7 0%, #f5effb 45%, #f9f4ff 100%);
+      color: #5a4a7a;
+      min-height: 100vh;
+      padding: 16px 14px 24px;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .back-btn {
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.9);
+      color: #6a56a2;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #6a56a2;
+    }
+    .card {
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(196, 181, 224, 0.45);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(164, 150, 200, 0.22);
+    }
+    .group-title {
+      font-size: 13px;
+      color: #7a6a9f;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .avatar-editor {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 2px 12px;
+      margin-bottom: 4px;
+      border-bottom: 1px dashed rgba(196, 181, 224, 0.45);
+    }
+    .avatar-btn {
+      width: 64px;
+      height: 64px;
+      border: none;
+      border-radius: 50%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #7c5cff, #3aa1d3);
+      box-shadow: 0 6px 18px rgba(106, 86, 162, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 21px;
+      flex: 0 0 auto;
+    }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .avatar-tip {
+      font-size: 12px;
+      color: #8576ab;
+      line-height: 1.6;
+    }
+    .capsule {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(196, 181, 224, 0.5);
+      border-radius: 999px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .capsule input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #5a4a7a;
+      font-size: 14px;
+    }
+    .capsule .label {
+      white-space: nowrap;
+      font-size: 14px;
+      color: #5a4a7a;
+    }
+    .action-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #4b5c85;
+      background: #dfeafc;
+      cursor: pointer;
+    }
+    .hint {
+      font-size: 12px;
+      color: #8a7db0;
+      line-height: 1.55;
+      margin: 6px 2px 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <button class="back-btn" type="button" onclick="goBack()" data-i18n="backBtn">返回</button>
+    <div class="title" data-i18n="pageTitle">资料信息</div>
+    <div style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.9);border:1px solid rgba(196,181,224,0.55);color:#7a6a9f;">
+      v0427-bluetooth
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="group-title" data-i18n="profileGroup">资料信息</div>
+    <div class="avatar-editor">
+      <button class="avatar-btn" type="button" onclick="pickAvatar()">
+        <img id="owner-avatar-preview" class="avatar-img" alt="" style="display:none" />
+        <span id="owner-avatar-fallback">👤</span>
+      </button>
+      <div class="avatar-tip" data-i18n="avatarTip">点击头像可更换头像</div>
+      <input id="owner-avatar-input" type="file" accept="image/*" style="display:none">
+    </div>
+    <div class="capsule">
+      <span class="label" data-i18n="nicknameLabel">昵称</span>
+      <input id="profile-user-nickname" type="text" maxlength="20" data-i18n-placeholder="nicknamePlaceholder" placeholder="输入你的昵称">
+    </div>
+    <div class="capsule">
+      <span class="label" data-i18n="birthdayLabel">生日</span>
+      <input id="profile-birthday" type="date">
+    </div>
+
+    <button class="action-btn" type="button" onclick="openChangePassword()" data-i18n="changePwdBtn">修改密码</button>
+  </div>
+
+  <script>
+    const USER_PROFILE_KEY = "noddy_user_profile_info";
+    const OWNER_AVATAR_KEY = "noddy_owner_avatar_dataurl";
+    const I18N = {
+      zh: {
+        pageTitle: "资料信息",
+        backBtn: "返回",
+        profileGroup: "资料信息",
+        avatarTip: "点击头像可更换头像",
+        nicknameLabel: "昵称",
+        nicknamePlaceholder: "输入你的昵称",
+        birthdayLabel: "生日",
+        changePwdBtn: "修改密码"
+      },
+      ko: {
+        pageTitle: "프로필 정보",
+        backBtn: "뒤로",
+        profileGroup: "프로필 정보",
+        avatarTip: "아바타를 눌러 변경할 수 있어요",
+        nicknameLabel: "닉네임",
+        nicknamePlaceholder: "닉네임을 입력하세요",
+        birthdayLabel: "생일",
+        changePwdBtn: "비밀번호 변경"
+      },
+      en: {
+        pageTitle: "Profile",
+        backBtn: "Back",
+        profileGroup: "Profile",
+        avatarTip: "Tap avatar to change",
+        nicknameLabel: "Nickname",
+        nicknamePlaceholder: "Enter your nickname",
+        birthdayLabel: "Birthday",
+        changePwdBtn: "Change password"
+      }
+    };
+    let currentLang = "zh";
+
+    function detectLang() {
+      const saved = localStorage.getItem("noddy_lang");
+      if (saved === "zh" || saved === "ko" || saved === "en") return saved;
+      const nav = (navigator.language || "").toLowerCase();
+      if (nav.indexOf("ko") === 0) return "ko";
+      if (nav.indexOf("zh") === 0) return "zh";
+      return "en";
+    }
+
+    function t(key) {
+      const table = I18N[currentLang] || I18N.zh;
+      return table[key] || key;
+    }
+
+    function applyI18n() {
+      document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+      document.title = t("pageTitle");
+      document.querySelectorAll("[data-i18n]").forEach(function(el) {
+        const key = el.getAttribute("data-i18n");
+        if (!key) return;
+        el.textContent = t(key);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el) {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (!key) return;
+        el.setAttribute("placeholder", t(key));
+      });
+    }
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      window.location.href = "home.html";
+    }
+
+    function getUserProfile() {
+      try {
+        const raw = localStorage.getItem(USER_PROFILE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function setUserProfile(profile) {
+      try { localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile || {})); } catch (_) {}
+    }
+
+    function saveUserProfileField(field, value) {
+      const profile = getUserProfile();
+      profile[field] = String(value || "").trim();
+      setUserProfile(profile);
+    }
+
+    function applyAvatar(dataUrl) {
+      const img = document.getElementById("owner-avatar-preview");
+      const fallback = document.getElementById("owner-avatar-fallback");
+      if (!img || !fallback) return;
+      const has = !!dataUrl;
+      img.style.display = has ? "block" : "none";
+      fallback.style.display = has ? "none" : "inline";
+      if (has) img.src = dataUrl;
+    }
+
+    function pickAvatar() {
+      const input = document.getElementById("owner-avatar-input");
+      if (!input) return;
+      input.value = "";
+      input.click();
+    }
+
+    function initAvatarPicker() {
+      const input = document.getElementById("owner-avatar-input");
+      if (!input) return;
+      input.addEventListener("change", function() {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        if (!/^image\//i.test(file.type || "")) {
+          alert("请选择图片文件");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function() {
+          const dataUrl = String(reader.result || "");
+          try { localStorage.setItem(OWNER_AVATAR_KEY, dataUrl); } catch (_) {}
+          applyAvatar(dataUrl);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function openChangePassword() {
+      window.open("change-password.html", "_blank");
+    }
+
+    function init() {
+      currentLang = detectLang();
+      applyI18n();
+      initAvatarPicker();
+      const profile = getUserProfile();
+      const nicknameInput = document.getElementById("profile-user-nickname");
+      const birthdayInput = document.getElementById("profile-birthday");
+      if (nicknameInput) nicknameInput.value = profile.nickname || "";
+      if (birthdayInput) birthdayInput.value = profile.birthday || "";
+      applyAvatar(localStorage.getItem(OWNER_AVATAR_KEY) || "");
+
+      if (nicknameInput) {
+        nicknameInput.addEventListener("input", function(e) {
+          saveUserProfileField("nickname", e.target.value);
+        });
+      }
+      if (birthdayInput) {
+        birthdayInput.addEventListener("change", function(e) {
+          saveUserProfileField("birthday", e.target.value);
+        });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
