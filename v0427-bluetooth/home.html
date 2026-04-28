@@ -1861,7 +1861,7 @@
         <li class="menu-item" onclick="openSettings()"><span class="icon">⚙️</span>设置</li>
         <li class="menu-item" onclick="openFeedback()"><span class="icon">📝</span>建议反馈</li>
         <li class="menu-item" id="manual-entry" onclick="openHelpCenter()"><span class="icon">📘</span>Noddy 照护手册</li>
-        <li class="menu-item" onclick="openParentalEntry()" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode"><span class="icon">🛡️</span>家长模式</li>
+        <li class="menu-item" id="parental-entry" onclick="openParentalEntry()" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode" style="display:none;"><span class="icon">🛡️</span>家长模式</li>
       </ul>
       <div class="danger-zone">
         <button type="button" class="danger-btn" onclick="requestAccountDeletion()">账号注销</button>
@@ -2399,7 +2399,7 @@
   </div>
 
   <!-- 家长验证弹窗 -->
-  <div class="parental-overlay" id="parental-overlay">
+  <div class="parental-overlay" id="parental-overlay" style="display:none;">
     <div class="parental-modal">
       <div class="parental-title" data-i18n-zh="需要家长确认" data-i18n-ko="부모님 확인이 필요해요." data-i18n-en="Parent verification required">
         需要家长确认
@@ -2434,7 +2434,7 @@
   </div>
 
   <!-- 家长模式设置面板 -->
-  <div class="sheet" id="parental-sheet">
+  <div class="sheet" id="parental-sheet" style="display:none;">
     <div class="sheet-header">
       <div>
         <div class="sheet-title" data-i18n-zh="家长模式" data-i18n-ko="부모님 모드" data-i18n-en="Parent Mode">家长模式</div>

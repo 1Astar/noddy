@@ -744,29 +744,6 @@
             </div>
           </div>
 
-          <div class="rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-3 space-y-2">
-            <div id="modal-child-title" class="text-xs text-slate-700">是否为儿童使用</div>
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                id="is-child-yes"
-                class="rounded-full border border-slate-300 bg-white text-xs text-slate-700 px-3 py-2"
-              >
-                <span id="modal-child-yes">是</span>
-              </button>
-              <button
-                type="button"
-                id="is-child-no"
-                class="rounded-full border border-rose-300 bg-rose-50 text-xs text-rose-500 px-3 py-2"
-              >
-                <span id="modal-child-no">否</span>
-              </button>
-            </div>
-            <div id="modal-child-hint" class="text-[11px] sm:text-xs text-slate-500 leading-5">
-              如果是儿童使用，我们会默认开启更严格的提示与保护。
-            </div>
-          </div>
-
           <div class="flex gap-3">
             <button
               id="btn-skip-owner-name"
@@ -821,10 +798,6 @@
         ownerTitle: "맞다, 네 이름을 아직 못 들었어",
         ownerSub: "어떻게 불러주면 좋을까~",
         ownerHint: "닉네임은 나중에도 바꿀 수 있어~",
-        childTitle: "어린이 사용 여부",
-        childYes: "예",
-        childNo: "아니오",
-        childHint: "어린이 사용이면 더 엄격한 보호 안내를 기본으로 켜둘게요.",
         skipOwner: "나중에",
         continueOwner: "계속"
       },
@@ -836,10 +809,6 @@
         ownerTitle: "By the way, I still don't know your name",
         ownerSub: "How would you like me to call you?",
         ownerHint: "You can change this nickname later.",
-        childTitle: "Is this for a child?",
-        childYes: "Yes",
-        childNo: "No",
-        childHint: "If this is for a child, stricter prompts and protection will be enabled by default.",
         skipOwner: "Later",
         continueOwner: "Continue"
       },
@@ -851,10 +820,6 @@
         ownerTitle: "对了，你还没告诉我你的名字呢",
         ownerSub: "你希望我怎么称呼你呀～",
         ownerHint: "昵称后续可以更改的哦~",
-        childTitle: "是否为儿童使用",
-        childYes: "是",
-        childNo: "否",
-        childHint: "如果是儿童使用，我们会默认开启更严格的提示与保护。",
         skipOwner: "稍后再说",
         continueOwner: "继续"
       }
@@ -903,10 +868,6 @@
       setText("modal-owner-title", copy.ownerTitle);
       setText("modal-owner-subtitle", copy.ownerSub);
       setText("modal-owner-hint", copy.ownerHint);
-      setText("modal-child-title", copy.childTitle);
-      setText("modal-child-yes", copy.childYes);
-      setText("modal-child-no", copy.childNo);
-      setText("modal-child-hint", copy.childHint);
       setText("btn-skip-owner-name", copy.skipOwner);
       setText("btn-confirm-owner-name", copy.continueOwner);
     }
@@ -927,7 +888,6 @@
     const AI_PET_STATE_KEY = "ai-pet-state"; // home/detail 都在用这个 JSON
     const ONBOARDING_KEY = "noddy_onboarding_complete"; // "1" = 已完成起名，下次启动跳过创建宠物
     const OWNER_NAME_KEY = "ownerName";
-    const IS_CHILD_USER_KEY = "noddy_is_child_user";
     const BT_PAIRED_KEY = "noddy_bluetooth_paired";
     const DEVICE_ID_KEY = "noddy_device_id";
     const FLOW_MODE_KEY = "noddy_flow_mode";
@@ -1199,40 +1159,6 @@
       if (ownerInput) ownerInput.focus();
     }
 
-    function setChildUsageSelected(isChild) {
-      const yesBtn = document.getElementById("is-child-yes");
-      const noBtn = document.getElementById("is-child-no");
-      if (!yesBtn || !noBtn) return;
-      if (isChild) {
-        yesBtn.className =
-          "rounded-full border border-rose-300 bg-rose-50 text-xs text-rose-500 px-3 py-2";
-        noBtn.className =
-          "rounded-full border border-slate-300 bg-white text-xs text-slate-700 px-3 py-2";
-      } else {
-        yesBtn.className =
-          "rounded-full border border-slate-300 bg-white text-xs text-slate-700 px-3 py-2";
-        noBtn.className =
-          "rounded-full border border-rose-300 bg-rose-50 text-xs text-rose-500 px-3 py-2";
-      }
-    }
-
-    function initChildUsageToggle() {
-      const yesBtn = document.getElementById("is-child-yes");
-      const noBtn = document.getElementById("is-child-no");
-      if (!yesBtn || !noBtn) return;
-      const stored = localStorage.getItem(IS_CHILD_USER_KEY);
-      const initialIsChild = stored === "1";
-      setChildUsageSelected(initialIsChild);
-      yesBtn.onclick = function () {
-        setChildUsageSelected(true);
-        localStorage.setItem(IS_CHILD_USER_KEY, "1");
-      };
-      noBtn.onclick = function () {
-        setChildUsageSelected(false);
-        localStorage.setItem(IS_CHILD_USER_KEY, "0");
-      };
-    }
-
     function typewriter80(text) {
       const content = String(text || "");
       setTalkText("");
@@ -1466,7 +1392,6 @@
       }, 2000);
     }
 
-    initChildUsageToggle();
     playBootAnimation();
   </script>
 </body>
