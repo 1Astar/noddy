@@ -932,9 +932,55 @@
     "喂食": { ko: "먹이주기", en: "Feed" },
     "小游戏乐园": { ko: "미니게임 파크", en: "Mini Game Park" },
     "金币兑换": { ko: "코인 교환", en: "Coin Exchange" },
-    "宠物社交": { ko: "반려 커뮤니티", en: "Pet Social" },
-    "消息提醒": { ko: "알림", en: "Notifications" }
+    "宠物社交": { ko: "펫 커뮤니티", en: "Pet Social" },
+    "消息提醒": { ko: "알림", en: "Notifications" },
+    "设备管理": { ko: "기기 관리", en: "Device Management" },
+    "音量键": { ko: "볼륨 버튼", en: "Volume Buttons" },
+    "noddy咿扭扭昵称": { ko: "Noddy 별명", en: "Noddy Nickname" },
+    "对你的称呼": { ko: "사용자 호칭", en: "How Noddy Calls You" },
+    "添加设备": { ko: "기기 추가", en: "Add Device" },
+    "解绑设备": { ko: "기기 연결 해제", en: "Unbind Device" },
+    "返回": { ko: "뒤로", en: "Back" },
+    "设置": { ko: "설정", en: "Settings" },
+    "系统与权限": { ko: "시스템 및 권한", en: "System & Permissions" },
+    "推送通知权限": { ko: "푸시 알림 권한", en: "Push Notification Permission" },
+    "检查更新": { ko: "업데이트 확인", en: "Check for Updates" },
+    "协议与隐私": { ko: "약관 및 개인정보", en: "Terms & Privacy" },
+    "用户协议": { ko: "이용약관", en: "User Agreement" },
+    "隐私政策": { ko: "개인정보처리방침", en: "Privacy Policy" },
+    "个人信息收集清单": { ko: "개인정보 수집 항목", en: "Personal Data Collection List" },
+    "账号操作": { ko: "계정 관리", en: "Account Actions" },
+    "退出登录": { ko: "로그아웃", en: "Log Out" },
+    "账号注销": { ko: "계정 삭제", en: "Delete Account" }
   };
+  var EXTRA_I18N = {
+    zh: {
+      petNicknamePlaceholder: "请输入昵称",
+      ownerCallPlaceholder: "请输入称呼",
+      unbindAlert: "解绑设备（原型占位）"
+    },
+    en: {
+      petNicknamePlaceholder: "Enter nickname",
+      ownerCallPlaceholder: "Enter preferred title",
+      unbindAlert: "Unbind device (prototype placeholder)"
+    },
+    ko: {
+      petNicknamePlaceholder: "별명을 입력해 주세요",
+      ownerCallPlaceholder: "호칭을 입력해 주세요",
+      unbindAlert: "기기 연결 해제 (프로토타입 안내)"
+    }
+  };
+  function applyExtraLang(lang) {
+    var copy = EXTRA_I18N[lang] || EXTRA_I18N.en;
+    var petInput = document.getElementById("setting-pet-nickname");
+    var ownerInput = document.getElementById("setting-owner-call");
+    if (petInput) petInput.placeholder = copy.petNicknamePlaceholder;
+    if (ownerInput) ownerInput.placeholder = copy.ownerCallPlaceholder;
+    var unbindLink = document.querySelector('#page-device a[onclick*="解绑设备"]');
+    if (unbindLink) {
+      unbindLink.setAttribute("onclick", "alert('" + copy.unbindAlert + "')");
+    }
+  }
   function applyStaticTextLang(lang) {
     if (lang === "zh") return;
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
@@ -965,6 +1011,7 @@
     sel.value = detectLang();
     document.documentElement.lang = sel.value === "ko" ? "ko" : sel.value === "zh" ? "zh-CN" : "en";
     applyStaticTextLang(sel.value);
+    applyExtraLang(sel.value);
     sel.addEventListener("change", function() {
       var lang = sel.value;
       localStorage.setItem("noddy_lang", lang);

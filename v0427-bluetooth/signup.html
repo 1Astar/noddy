@@ -86,8 +86,8 @@
 </head>
 <body>
   <div class="card">
-    <div class="title">登录 / 开始使用</div>
-    <div class="sub">本版本仅保留 <strong>邮箱</strong> 与 <strong>手机号</strong> 登录方式（不提供 Google / Apple / 微信）。</div>
+    <div class="title" id="pageTitle">登录 / 开始使用</div>
+    <div class="sub" id="pageSub">本版本仅保留 <strong>邮箱</strong> 与 <strong>手机号</strong> 登录方式（不提供 Google / Apple / 微信）。</div>
 
     <div class="tabs">
       <button class="tab active" id="tab-email" type="button" onclick="switchTab('email')">邮箱</button>
@@ -98,41 +98,160 @@
 
     <section class="panel show" id="panel-email">
       <div class="row">
-        <label for="email">邮箱</label>
+        <label for="email" id="emailLabel">邮箱</label>
         <input id="email" type="email" placeholder="name@example.com" autocomplete="email" />
       </div>
       <div class="row">
-        <label for="emailPwd">密码（原型）</label>
+        <label for="emailPwd" id="emailPwdLabel">密码（原型）</label>
         <input id="emailPwd" type="password" placeholder="输入任意内容即可登录" autocomplete="current-password" />
       </div>
       <div class="actions">
-        <button class="btn btn-primary" type="button" onclick="loginByEmail()">邮箱登录</button>
-        <button class="btn btn-secondary" type="button" onclick="goBack()">返回</button>
+        <button class="btn btn-primary" id="emailLoginBtn" type="button" onclick="loginByEmail()">邮箱登录</button>
+        <button class="btn btn-secondary" id="backBtn1" type="button" onclick="goBack()">返回</button>
       </div>
-      <div class="hint">原型说明：这里不区分登录/注册，输入邮箱即可创建/登录同一账号。</div>
+      <div class="hint" id="emailHint">原型说明：这里不区分登录/注册，输入邮箱即可创建/登录同一账号。</div>
     </section>
 
     <section class="panel" id="panel-phone">
       <div class="row">
-        <label for="phone">手机号</label>
+        <label for="phone" id="phoneLabel">手机号</label>
         <input id="phone" type="tel" placeholder="例如：13800000000" autocomplete="tel" />
       </div>
       <div class="row">
-        <label for="sms">短信验证码（原型）</label>
+        <label for="sms" id="smsLabel">短信验证码（原型）</label>
         <div class="split">
           <input id="sms" type="text" placeholder="输入 1234" inputmode="numeric" />
           <button class="code-btn" id="btnSendCode" type="button" onclick="sendCode()">发送验证码</button>
         </div>
       </div>
       <div class="actions">
-        <button class="btn btn-primary" type="button" onclick="loginByPhone()">手机号登录</button>
-        <button class="btn btn-secondary" type="button" onclick="goBack()">返回</button>
+        <button class="btn btn-primary" id="phoneLoginBtn" type="button" onclick="loginByPhone()">手机号登录</button>
+        <button class="btn btn-secondary" id="backBtn2" type="button" onclick="goBack()">返回</button>
       </div>
-      <div class="hint">原型说明：验证码固定为 <strong>1234</strong>。</div>
+      <div class="hint" id="phoneHint">原型说明：验证码固定为 <strong>1234</strong>。</div>
     </section>
   </div>
 
   <script>
+    var I18N = {
+      zh: {
+        title: "登录 / 开始使用",
+        sub: "本版本仅保留 <strong>邮箱</strong> 与 <strong>手机号</strong> 登录方式（不提供 Google / Apple / 微信）。",
+        emailTab: "邮箱",
+        phoneTab: "手机号",
+        emailLabel: "邮箱",
+        emailPwdLabel: "密码（原型）",
+        emailLoginBtn: "邮箱登录",
+        back: "返回",
+        emailHint: "原型说明：这里不区分登录/注册，输入邮箱即可创建/登录同一账号。",
+        phoneLabel: "手机号",
+        smsLabel: "短信验证码（原型）",
+        sendCode: "发送验证码",
+        phoneLoginBtn: "手机号登录",
+        phoneHint: "原型说明：验证码固定为 <strong>1234</strong>。",
+        emailPlaceholder: "name@example.com",
+        emailPwdPlaceholder: "输入任意内容即可登录",
+        phonePlaceholder: "例如：13800000000",
+        smsPlaceholder: "输入 1234",
+        errEmail: "请输入正确的邮箱地址。",
+        errPhoneFirst: "请先输入手机号。",
+        errPhone: "请输入手机号。",
+        errCode: "验证码不正确（原型固定为 1234）。",
+        sent: "已发送(",
+        sentSuffix: "s)"
+      },
+      en: {
+        title: "Sign in / Get started",
+        sub: "This version keeps only <strong>Email</strong> and <strong>Phone</strong> login (no Google / Apple / WeChat).",
+        emailTab: "Email",
+        phoneTab: "Phone",
+        emailLabel: "Email",
+        emailPwdLabel: "Password (prototype)",
+        emailLoginBtn: "Sign in with Email",
+        back: "Back",
+        emailHint: "Prototype note: sign-in and sign-up are merged. Enter an email to create/sign in to the same account.",
+        phoneLabel: "Phone",
+        smsLabel: "SMS code (prototype)",
+        sendCode: "Send code",
+        phoneLoginBtn: "Sign in with Phone",
+        phoneHint: "Prototype note: fixed verification code is <strong>1234</strong>.",
+        emailPlaceholder: "name@example.com",
+        emailPwdPlaceholder: "Enter anything to continue",
+        phonePlaceholder: "e.g. 13800000000",
+        smsPlaceholder: "Enter 1234",
+        errEmail: "Please enter a valid email address.",
+        errPhoneFirst: "Please enter your phone number first.",
+        errPhone: "Please enter your phone number.",
+        errCode: "Invalid verification code (prototype fixed code: 1234).",
+        sent: "Sent(",
+        sentSuffix: "s)"
+      },
+      ko: {
+        title: "로그인 / 시작하기",
+        sub: "이 버전은 <strong>이메일</strong>과 <strong>휴대폰 번호</strong> 로그인만 지원해요 (Google / Apple / WeChat 미지원).",
+        emailTab: "이메일",
+        phoneTab: "휴대폰",
+        emailLabel: "이메일",
+        emailPwdLabel: "비밀번호 (프로토타입)",
+        emailLoginBtn: "이메일 로그인",
+        back: "뒤로",
+        emailHint: "프로토타입 안내: 로그인/회원가입을 구분하지 않아요. 이메일 입력 시 동일 계정으로 생성/로그인돼요.",
+        phoneLabel: "휴대폰 번호",
+        smsLabel: "문자 인증번호 (프로토타입)",
+        sendCode: "인증번호 발송",
+        phoneLoginBtn: "휴대폰 로그인",
+        phoneHint: "프로토타입 안내: 인증번호는 <strong>1234</strong> 고정입니다.",
+        emailPlaceholder: "name@example.com",
+        emailPwdPlaceholder: "아무 내용이나 입력해 로그인",
+        phonePlaceholder: "예: 13800000000",
+        smsPlaceholder: "1234 입력",
+        errEmail: "올바른 이메일 주소를 입력해 주세요.",
+        errPhoneFirst: "먼저 휴대폰 번호를 입력해 주세요.",
+        errPhone: "휴대폰 번호를 입력해 주세요.",
+        errCode: "인증번호가 올바르지 않아요 (고정값: 1234).",
+        sent: "발송됨(",
+        sentSuffix: "초)"
+      }
+    };
+    var currentLang = "zh";
+
+    function detectLang() {
+      try {
+        var saved = localStorage.getItem("noddy_lang");
+        if (saved === "zh" || saved === "en" || saved === "ko") return saved;
+      } catch (_) {}
+      var nav = (navigator.language || "").toLowerCase();
+      if (nav.indexOf("ko") === 0) return "ko";
+      if (nav.indexOf("zh") === 0) return "zh";
+      return "en";
+    }
+    function t(key) {
+      return (I18N[currentLang] || I18N.zh)[key] || key;
+    }
+    function applyI18n() {
+      document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+      document.title = t("title");
+      document.getElementById("pageTitle").textContent = t("title");
+      document.getElementById("pageSub").innerHTML = t("sub");
+      document.getElementById("tab-email").textContent = t("emailTab");
+      document.getElementById("tab-phone").textContent = t("phoneTab");
+      document.getElementById("emailLabel").textContent = t("emailLabel");
+      document.getElementById("emailPwdLabel").textContent = t("emailPwdLabel");
+      document.getElementById("emailLoginBtn").textContent = t("emailLoginBtn");
+      document.getElementById("backBtn1").textContent = t("back");
+      document.getElementById("emailHint").innerHTML = t("emailHint");
+      document.getElementById("phoneLabel").textContent = t("phoneLabel");
+      document.getElementById("smsLabel").textContent = t("smsLabel");
+      document.getElementById("btnSendCode").textContent = t("sendCode");
+      document.getElementById("phoneLoginBtn").textContent = t("phoneLoginBtn");
+      document.getElementById("backBtn2").textContent = t("back");
+      document.getElementById("phoneHint").innerHTML = t("phoneHint");
+      document.getElementById("email").setAttribute("placeholder", t("emailPlaceholder"));
+      document.getElementById("emailPwd").setAttribute("placeholder", t("emailPwdPlaceholder"));
+      document.getElementById("phone").setAttribute("placeholder", t("phonePlaceholder"));
+      document.getElementById("sms").setAttribute("placeholder", t("smsPlaceholder"));
+    }
+
     var ACCOUNT_ID_KEY = "noddy_account_id";
     var ANON_KEY = "noddy_is_anonymous";
     var LAST_LOGIN_PROVIDER_KEY = "noddy_last_login_provider";
@@ -189,7 +308,7 @@
     function loginByEmail() {
       var email = ((document.getElementById("email") || {}).value || "").trim().toLowerCase();
       if (!email || email.indexOf("@") < 1) {
-        setError("请输入正确的邮箱地址。");
+        setError(t("errEmail"));
         return;
       }
       markLoggedIn("email", email);
@@ -202,7 +321,7 @@
       setError("");
       var phone = ((document.getElementById("phone") || {}).value || "").trim();
       if (!phone) {
-        setError("请先输入手机号。");
+        setError(t("errPhoneFirst"));
         return;
       }
       var btn = document.getElementById("btnSendCode");
@@ -211,25 +330,25 @@
       if (sendTimer) clearInterval(sendTimer);
       sendTimer = setInterval(function() {
         sendLeft -= 1;
-        if (btn) btn.textContent = sendLeft > 0 ? ("已发送(" + sendLeft + "s)") : "发送验证码";
+        if (btn) btn.textContent = sendLeft > 0 ? (t("sent") + sendLeft + t("sentSuffix")) : t("sendCode");
         if (sendLeft <= 0) {
           if (sendTimer) clearInterval(sendTimer);
           sendTimer = null;
           if (btn) btn.disabled = false;
         }
       }, 1000);
-      if (btn) btn.textContent = "已发送(30s)";
+      if (btn) btn.textContent = t("sent") + "30" + t("sentSuffix");
     }
 
     function loginByPhone() {
       var phone = ((document.getElementById("phone") || {}).value || "").trim();
       var code = ((document.getElementById("sms") || {}).value || "").trim();
       if (!phone) {
-        setError("请输入手机号。");
+        setError(t("errPhone"));
         return;
       }
       if (code !== "1234") {
-        setError("验证码不正确（原型固定为 1234）。");
+        setError(t("errCode"));
         return;
       }
       markLoggedIn("phone", phone);
@@ -241,6 +360,9 @@
       else location.href = "index.html";
     }
     window.goBack = goBack;
+
+    currentLang = detectLang();
+    applyI18n();
   </script>
 </body>
 </html>

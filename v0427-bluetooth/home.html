@@ -2307,9 +2307,9 @@
 
         <section class="modal-qa-section">
           <div class="modal-qa-section-title">🏥 给 Noddy 找医生</div>
-          <p style="margin-top:4px;">客服电话：400-xxx-xxxx</p>
+          <p style="margin-top:4px;">客服电话：4000-666-370</p>
           <p style="margin-top:2px;color:#64748b;">（医生出诊时间：周一至周五 9:00 - 18:00）</p>
-          <p style="margin-top:8px;">客服邮箱：support@noddy.cn</p>
+          <p style="margin-top:8px;">客服邮箱：noddysupport@guanyingis.com</p>
           <p style="margin-top:2px;color:#64748b;">（把 Noddy 的“病情”写下来，医生 24 小时内回复）</p>
           <p style="margin-top:8px;">在线问诊：App 内 -> “我的” -> “联系医生”</p>
           <p style="margin-top:2px;color:#64748b;">（推荐优先使用，可以把 Noddy 的日志一起发给医生）</p>
@@ -2604,9 +2604,8 @@
     function openHelpCenter() {
       recordInteraction('home_openHelpCenter');
       closeUserPage();
-      setTimeout(function () {
-        openBatteryQaModal();
-      }, 280);
+      var url = './noddy-care-manual.html?v=v0427&t=' + Date.now();
+      window.open(url, '_blank');
     }
     window.openHelpCenter = openHelpCenter;
 
