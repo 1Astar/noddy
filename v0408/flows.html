@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Noddy · 登录与配网流程（原型）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: Pretendard, "Apple SD Gothic Neo", system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ffeef5 0, #fff7f0 40%, #ffffff 100%);
+    }
+    .flow-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(245, 132, 155, 0.15);
+      border-radius: 1.25rem;
+      box-shadow: 0 18px 45px rgba(245, 132, 155, 0.12);
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 pb-16">
+  <div class="max-w-4xl mx-auto px-4 py-10 space-y-10">
+    <header class="space-y-3">
+      <p class="text-sm text-rose-600 font-medium">
+        <a href="index.html" class="underline underline-offset-2 hover:text-rose-700">← 返回启动页</a>
+      </p>
+      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
+        Noddy 流程 · 原型说明
+      </h1>
+      <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+        本文档与当前可点的 HTML 原型一致；迭代请只改
+        <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">noddy-main/</code>
+        目录。<span class="text-slate-500">历史参照版保留在</span>
+        <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">原型图/页面/noddy/v1/</code>。
+      </p>
+    </header>
+
+    <section class="flow-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-lg font-semibold text-slate-900">目录怎么放（建议）</h2>
+      <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700 leading-relaxed">
+        <li>
+          <strong class="font-medium text-slate-800">活跃原型</strong>：
+          <code class="rounded bg-rose-50 px-1 text-xs text-rose-800">noddy-main/</code>
+          —— 入口 <code class="text-xs">index.html</code> → 起名 → <code class="text-xs">home.html</code>；登录
+          <code class="text-xs">signup.html</code>；子功能 <code class="text-xs">detail.html</code>；硬件配网相关
+          <code class="text-xs">add-device.html</code>、<code class="text-xs">WiFi-connect.html</code> 等。
+        </li>
+        <li>
+          <strong class="font-medium text-slate-800">冻结快照</strong>：
+          <code class="rounded bg-slate-100 px-1 text-xs">noddy/v1/</code>
+          —— 仅作对照与回滚参照，不在此迭代。
+        </li>
+        <li>
+          若以后要区分多端，可在 <code class="text-xs">noddy-main/</code> 下再分子目录（例如
+          <code class="text-xs">device/</code>），但现阶段扁平即可，链接路径更简单。
+        </li>
+      </ul>
+    </section>
+
+    <section class="flow-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-lg font-semibold text-slate-900">登录与账号（冷启动）</h2>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        已实现：首次起名写入 <code class="rounded bg-slate-100 px-1 text-xs">noddy_onboarding_complete</code>，之后启动跳过起名；
+        匿名互动计数达随机 <strong>3～5</strong> 次后出现「保存你的宠物」；地区由
+        <code class="text-xs">localStorage.noddy_region</code>（<code class="text-xs">cn</code> /
+        <code class="text-xs">global</code>）控制登录按钮组合；合并匿名数据见
+        <code class="text-xs">signup.html</code>。
+      </p>
+      <div class="overflow-x-auto rounded-xl bg-white/60 p-4 border border-slate-100">
+        <pre class="mermaid">
+flowchart TD
+  A[打开 App] --> B[启动动画 + 开场白]
+  B --> C{已完成起名?}
+  C -->|否| D[创建宠物 · 起名]
+  C -->|是| E[进入主页 home.html]
+  D --> E
+  E --> F[匿名互动累计]
+  F --> G{达到 3～5 次?}
+  G -->|否| F
+  G -->|是| H[弹窗: 保存宠物]
+  H --> I[立即保存]
+  H --> J[稍后再说]
+  J --> K[继续匿名 · 会话内不重复弹窗]
+  K --> E
+  I --> L{判断地区}
+  L -->|CN| M[微信 / Apple / Email · 手机次级]
+  L -->|海外| N[Google / Apple / Email]
+  M --> O[登录成功]
+  N --> O
+  O --> P[匿名数据合并进账号]
+  P --> Q[正常使用]
+        </pre>
+      </div>
+      <p class="text-xs text-slate-500">
+        「稍后再说」后下次<strong>新开浏览器会话</strong>仍可再次触发保存引导（使用 sessionStorage 标记同一会话内不骚扰）。
+      </p>
+      <p class="text-xs text-slate-500">
+        原型：<code class="rounded bg-slate-100 px-1">signup.html</code> 内按住
+        <kbd class="rounded border border-slate-300 bg-white px-1">Alt</kbd>
+        再点第三方登录按钮可模拟<strong>登录失败</strong>弹窗（数据不丢、可重试）。
+      </p>
+    </section>
+
+    <section class="flow-card p-6 sm:p-8 space-y-4">
+      <h2 class="text-lg font-semibold text-slate-900">Wi-Fi 设备配网</h2>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        对应页面：<code class="rounded bg-slate-100 px-1 text-xs">add-device.html</code>、
+        <code class="text-xs">WiFi-connect.html</code>、
+        <code class="text-xs">Add-WiFi-connect.html</code>、
+        <code class="text-xs">WiFi-reminder.html</code>（按你现有原型链路跳转）。
+      </p>
+      <div class="overflow-x-auto rounded-xl bg-white/60 p-4 border border-slate-100">
+        <pre class="mermaid">
+flowchart TD
+  A[新设备首次激活] --> B[App 识别 SN · Wi-Fi 机型]
+  B --> C[引导: 连接你的 Noddy]
+  C --> D[选择 Wi-Fi]
+  D --> E{能读到 SSID?}
+  E -->|能| F[输入密码]
+  E -->|不能| G[手动输入 SSID + 密码]
+  F --> H{连接结果}
+  G --> H
+  H -->|成功| I[进入主界面]
+  H -->|失败| J[检查密码/路由器 · 重试]
+  J --> K[单机模式入口]
+  K --> L[暂不连接 · 单机使用]
+  L --> M[受限 · 无云同步 / 无语音识别 / 无远程控制]
+        </pre>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs text-slate-400 pt-4">
+      Mermaid 若未渲染，请检查网络是否可访问 cdn.jsdelivr.net
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      flowchart: { curve: "basis", padding: 12 },
+    });
+  </script>
+</body>
+</html>
