@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Noddy Care Manual</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: linear-gradient(180deg, #fdf2f8 0%, #fff 55%, #f8fafc 100%);
+      --card: rgba(255, 255, 255, 0.96);
+      --text: #1f2937;
+      --sub: #64748b;
+      --accent: #e75480;
+      --line: #e2e8f0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 14px 12px calc(18px + env(safe-area-inset-bottom));
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(253, 242, 248, 0.86);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #fbcfe8;
+      border-radius: 14px;
+      padding: 10px 10px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .title { font-size: 18px; font-weight: 800; }
+    .back {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #475569;
+      border-radius: 999px;
+      font-size: 13px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .hero {
+      background: var(--card);
+      border: 1px solid #fbcfe8;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(244, 114, 182, 0.12);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .hero p { color: var(--sub); font-size: 14px; line-height: 1.65; margin-top: 6px; }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .section h2 { font-size: 16px; line-height: 1.5; margin-bottom: 6px; }
+    .section p { font-size: 14px; line-height: 1.7; color: #334155; }
+    .section ul { margin-top: 6px; margin-left: 18px; }
+    .section li { font-size: 14px; line-height: 1.7; color: #334155; margin-bottom: 4px; }
+    .noddy-line {
+      margin-top: 8px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .doctor {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+    }
+    .doctor h2 { margin-bottom: 8px; }
+    .doctor .item { font-size: 14px; line-height: 1.7; color: #334155; margin-bottom: 3px; }
+    .cta-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-main {
+      color: #fff;
+      background: linear-gradient(135deg, #fb7185, #f97316);
+    }
+    .btn-ghost {
+      color: #475569;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+    .tip {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--sub);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <button class="back" id="backBtn" type="button" onclick="goBack()">返回</button>
+      <div class="title" id="pageTitle">📘 Noddy 照护手册</div>
+      <div id="previewTag" style="font-size:11px;color:#64748b;">H5 预览</div>
+    </div>
+
+    <section class="hero">
+      <strong id="heroTitle">你的 Noddy 偶尔也会犯点小迷糊</strong>
+      <p id="heroDesc">下面是它最常见的几种“症状”和“护理方法”。如果还解决不了，主人可以直接给 Noddy 找医生。</p>
+    </section>
+    <div id="sceneList"></div>
+
+    <section class="section doctor">
+      <h2 id="doctorTitle">🏥 给 Noddy 找医生</h2>
+      <div class="item"><strong id="doctorPhoneLabel">客服电话：</strong>4000-666-370</div>
+      <div class="item" id="doctorTime">（医生出诊时间：周一至周五 9:00 - 18:00）</div>
+      <div class="item" style="margin-top:6px;"><strong id="doctorMailLabel">客服邮箱：</strong>noddysupport@guanyingis.com</div>
+      <div class="item" id="doctorMailDesc">（把 Noddy 的“病情”写下来，医生 24 小时内回复）</div>
+      <div class="item" style="margin-top:6px;" id="doctorOnlineLabel"><strong>在线问诊：</strong>App 内 -> “我的” -> “联系医生”</div>
+      <div class="item" id="doctorOnlineDesc">（推荐优先使用，可把日志一起发给医生）</div>
+
+      <div class="cta-row">
+        <button class="btn btn-main" id="clinicBtn" type="button" onclick="showClinicHint()">🏥 Noddy体检（示意）</button>
+        <button class="btn btn-ghost" id="copyMailBtn" type="button" onclick="copySupportMail()">复制客服邮箱</button>
+      </div>
+      <div class="tip" id="doctorTip">请不要担心，Noddy 的“医生”都很温柔，会尽快帮它恢复健康 ❤️</div>
+    </section>
+  </div>
+
+  <script>
+    const I18N = {
+      zh: {
+        title: "📘 Noddy 照护手册",
+        back: "返回",
+        preview: "H5 预览",
+        heroTitle: "你的 Noddy 偶尔也会犯点小迷糊",
+        heroDesc: "下面是它最常见的几种“症状”和“护理方法”。如果还解决不了，主人可以直接给 Noddy 找医生。",
+        scenes: [
+          {
+            title: "🧸 添加设备时扫描不到 Noddy？",
+            reason: "有点小害羞，躲在了蓝牙信号找不到的角落，或者还没进入“等你来玩”的状态。",
+            steps: ["确认 Noddy 已长按进入配对模式（灯轻闪）。", "手机靠近它，尽量保持 10 米内。", "在 App 里点“再扫一次”。", "还找不到就退出添加页重新进入。"],
+            line: "“刚才我没认出你，现在准备好啦～”"
+          },
+          {
+            title: "💔 手机连接 Noddy 显示“连接失败”",
+            reason: "Noddy 可能在发呆，或者刚才的“握手”没握好。",
+            steps: ["让 Noddy 重新进入配对模式（灯闪）。", "在 App 上点“再试一次”。", "连续失败两次，退出连接页再进一次。"],
+            line: "“刚才走神了一下，我们再握一次手好不好？”"
+          },
+          {
+            title: "🌐 配置网络总是失败？",
+            reason: "Noddy 目前只认识 2.4GHz 的 Wi-Fi（5GHz 还听不懂），或者密码记错了。",
+            steps: ["确认家里 Wi-Fi 是 2.4GHz。", "重新输入一次 Wi-Fi 密码。", "反复失败可先“离线先玩”。"],
+            line: "“我还在学认你家网络，再告诉我一遍好不好？”"
+          },
+          {
+            title: "🔋 Noddy 充不上电？",
+            reason: "可能是底座没睡醒，或没有坐在正中间。",
+            steps: ["确认底座指示灯常亮。", "把 Noddy 放在底座正中间，放稳。", "建议 10W 及以上充电器。"],
+            line: "“刚才没坐稳，现在好好充电啦～”"
+          }
+        ],
+        reasonLabel: "它可能怎么了：",
+        doctorTitle: "🏥 给 Noddy 找医生",
+        doctorPhoneLabel: "客服电话：",
+        doctorTime: "（医生出诊时间：周一至周五 9:00 - 18:00）",
+        doctorMailLabel: "客服邮箱：",
+        doctorMailDesc: "（把 Noddy 的“病情”写下来，医生 24 小时内回复）",
+        doctorOnlineLabel: "在线问诊：App 内 -> “我的” -> “联系医生”",
+        doctorOnlineDesc: "（推荐优先使用，可把日志一起发给医生）",
+        clinicBtn: "🏥 Noddy体检（示意）",
+        copyMailBtn: "复制客服邮箱",
+        doctorTip: "请不要担心，Noddy 的“医生”都很温柔，会尽快帮它恢复健康 ❤️",
+        clinicHint: "这里可接：打包最近10条日志 -> 隐私确认 -> 上传医生团队",
+        copied: "已复制："
+      },
+      en: {
+        title: "📘 Noddy Care Manual",
+        back: "Back",
+        preview: "H5 Preview",
+        heroTitle: "Noddy may have little hiccups sometimes",
+        heroDesc: "Here are the most common \"symptoms\" and \"care methods\". If the issue remains, contact Noddy doctors.",
+        scenes: [
+          {
+            title: "🧸 Can't find Noddy while scanning?",
+            reason: "Noddy may be shy, out of BLE range, or not in pairing mode yet.",
+            steps: ["Long-press Noddy to enter pairing mode (light blinks).", "Keep your phone near Noddy (within 10m).", "Tap \"Scan again\" in the app.", "If still not found, exit and re-enter the add-device page."],
+            line: "\"I didn't recognize you just now. I'm ready now~\""
+          },
+          {
+            title: "💔 \"Connection failed\" when pairing phone and Noddy",
+            reason: "Noddy may be distracted, or the previous handshake failed.",
+            steps: ["Put Noddy back into pairing mode.", "Tap \"Try again\" in the app.", "If it fails twice, re-enter the connection page."],
+            line: "\"I got distracted. Can we shake hands again?\""
+          },
+          {
+            title: "🌐 Wi-Fi setup keeps failing?",
+            reason: "Noddy supports 2.4GHz Wi-Fi only, or the password may be incorrect.",
+            steps: ["Make sure your Wi-Fi is 2.4GHz.", "Re-enter the Wi-Fi password.", "If repeated failures happen, use offline mode first."],
+            line: "\"I'm still learning your network. Tell me again?\""
+          },
+          {
+            title: "🔋 Noddy won't charge?",
+            reason: "The dock may not be powered properly, or Noddy is not centered.",
+            steps: ["Confirm the dock indicator is on.", "Place Noddy at the center and keep it stable.", "Use a 10W+ charger."],
+            line: "\"I wasn't seated well. Charging now~\""
+          }
+        ],
+        reasonLabel: "Possible cause:",
+        doctorTitle: "🏥 Noddy Doctor Contact",
+        doctorPhoneLabel: "Hotline:",
+        doctorTime: "(Doctor service hours: Mon-Fri 9:00 - 18:00)",
+        doctorMailLabel: "Support Email:",
+        doctorMailDesc: "(Describe Noddy's condition and doctors will reply within 24 hours.)",
+        doctorOnlineLabel: "Online Consultation: App -> \"Me\" -> \"Contact Doctor\"",
+        doctorOnlineDesc: "(Recommended: upload Noddy logs along with your request.)",
+        clinicBtn: "🏥 Noddy Checkup (Demo)",
+        copyMailBtn: "Copy Support Email",
+        doctorTip: "No worries. Noddy doctors are kind and will help Noddy recover soon ❤️",
+        clinicHint: "Integration point: package 10 latest error logs -> privacy consent -> upload to doctor team.",
+        copied: "Copied: "
+      },
+      ko: {
+        title: "📘 Noddy 케어 매뉴얼",
+        back: "뒤로",
+        preview: "H5 미리보기",
+        heroTitle: "Noddy도 가끔 작은 실수를 해요",
+        heroDesc: "자주 보이는 \"증상\"과 \"케어 방법\"을 정리했어요. 해결이 안 되면 Noddy 주치의에게 바로 연락해 주세요.",
+        scenes: [
+          {
+            title: "🧸 기기 추가 시 Noddy가 검색되지 않아요",
+            reason: "Noddy가 BLE 범위 밖에 있거나 아직 페어링 모드가 아닐 수 있어요.",
+            steps: ["Noddy를 길게 눌러 페어링 모드로 전환해 주세요(표시등 점멸).", "휴대폰을 Noddy 가까이(10m 이내) 두세요.", "앱에서 \"다시 스캔\"을 눌러주세요.", "계속 안 보이면 추가 페이지를 나갔다 다시 들어오세요."],
+            line: "\"방금은 못 알아봤어. 이제 준비됐어~\""
+          },
+          {
+            title: "💔 휴대폰 연결 시 \"연결 실패\"가 떠요",
+            reason: "Noddy가 잠깐 멍했거나, 이전 핸드셰이크가 실패했을 수 있어요.",
+            steps: ["Noddy를 다시 페어링 모드로 전환해 주세요.", "앱에서 \"다시 시도\"를 눌러주세요.", "두 번 이상 실패하면 연결 페이지를 다시 열어주세요."],
+            line: "\"잠깐 딴생각했어. 다시 손잡자!\""
+          },
+          {
+            title: "🌐 Wi-Fi 설정이 계속 실패해요",
+            reason: "Noddy는 2.4GHz Wi-Fi만 지원하며, 비밀번호가 다를 수 있어요.",
+            steps: ["집 Wi-Fi가 2.4GHz인지 확인하세요.", "Wi-Fi 비밀번호를 다시 입력하세요.", "계속 실패하면 우선 오프라인 모드로 사용하세요."],
+            line: "\"네트워크를 배우는 중이야. 다시 알려줄래?\""
+          },
+          {
+            title: "🔋 Noddy가 충전되지 않아요",
+            reason: "충전 도크 전원 상태가 불안정하거나, Noddy 위치가 어긋났을 수 있어요.",
+            steps: ["도크 표시등이 켜져 있는지 확인하세요.", "Noddy를 중앙에 안정적으로 올려놓으세요.", "10W 이상 충전기를 권장해요."],
+            line: "\"자리가 어긋났어. 이제 잘 충전할게~\""
+          }
+        ],
+        reasonLabel: "가능한 원인:",
+        doctorTitle: "🏥 Noddy 주치의 연결",
+        doctorPhoneLabel: "고객센터:",
+        doctorTime: "(진료 시간: 월-금 9:00 - 18:00)",
+        doctorMailLabel: "이메일:",
+        doctorMailDesc: "(Noddy 증상을 남겨주시면 24시간 내 회신드려요.)",
+        doctorOnlineLabel: "온라인 진료: 앱 -> \"내 정보\" -> \"의사에게 문의\"",
+        doctorOnlineDesc: "(권장: 로그를 함께 보내면 더 빠르게 확인할 수 있어요.)",
+        clinicBtn: "🏥 Noddy 검진 (데모)",
+        copyMailBtn: "이메일 복사",
+        doctorTip: "걱정하지 마세요. Noddy 의료팀이 빠르게 도와드릴게요 ❤️",
+        clinicHint: "연동 지점: 최근 10개 오류 로그 묶음 -> 개인정보 동의 -> 의료팀 업로드",
+        copied: "복사됨: "
+      }
+    };
+
+    function detectLang() {
+      const saved = localStorage.getItem("noddy_lang");
+      if (saved === "zh" || saved === "en" || saved === "ko") return saved;
+      const nav = (navigator.language || "").toLowerCase();
+      if (nav.indexOf("ko") === 0) return "ko";
+      if (nav.indexOf("zh") === 0) return "zh";
+      return "en";
+    }
+
+    let currentLang = "en";
+    function t(key) {
+      const table = I18N[currentLang] || I18N.zh;
+      return table[key];
+    }
+
+    function renderScenes() {
+      const root = document.getElementById("sceneList");
+      if (!root) return;
+      root.innerHTML = (t("scenes") || []).map(function (s) {
+        return '<section class="section">' +
+          '<h2>' + s.title + '</h2>' +
+          '<p><strong>' + t("reasonLabel") + '</strong>' + s.reason + '</p>' +
+          '<ul>' + s.steps.map(function (it) { return '<li>' + it + '</li>'; }).join("") + '</ul>' +
+          '<div class="noddy-line">' + s.line + '</div>' +
+        '</section>';
+      }).join("");
+    }
+
+    function applyI18n() {
+      document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+      document.title = t("title").replace(/^📘\s*/, "");
+      document.getElementById("backBtn").textContent = t("back");
+      document.getElementById("pageTitle").textContent = t("title");
+      document.getElementById("previewTag").textContent = t("preview");
+      document.getElementById("heroTitle").textContent = t("heroTitle");
+      document.getElementById("heroDesc").textContent = t("heroDesc");
+      document.getElementById("doctorTitle").textContent = t("doctorTitle");
+      document.getElementById("doctorPhoneLabel").textContent = t("doctorPhoneLabel");
+      document.getElementById("doctorTime").textContent = t("doctorTime");
+      document.getElementById("doctorMailLabel").textContent = t("doctorMailLabel");
+      document.getElementById("doctorMailDesc").textContent = t("doctorMailDesc");
+      document.getElementById("doctorOnlineLabel").innerHTML = "<strong>" + t("doctorOnlineLabel").split(":")[0] + ":</strong>" + t("doctorOnlineLabel").split(":").slice(1).join(":");
+      document.getElementById("doctorOnlineDesc").textContent = t("doctorOnlineDesc");
+      document.getElementById("clinicBtn").textContent = t("clinicBtn");
+      document.getElementById("copyMailBtn").textContent = t("copyMailBtn");
+      document.getElementById("doctorTip").textContent = t("doctorTip");
+      renderScenes();
+    }
+
+    function goBack() {
+      if (history.length > 1) history.back();
+      else location.href = "home.html";
+    }
+    function showClinicHint() {
+      alert(t("clinicHint"));
+    }
+    function copySupportMail() {
+      const text = "noddysupport@guanyingis.com";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          alert(t("copied") + text);
+        }).catch(function () {
+          alert(text);
+        });
+      } else {
+        alert(text);
+      }
+    }
+    applyI18n();
+  </script>
+</body>
+</html>

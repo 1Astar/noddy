@@ -2604,7 +2604,9 @@
     function openHelpCenter() {
       recordInteraction('home_openHelpCenter');
       closeUserPage();
-      var url = './noddy-care-manual.html?v=v0427&t=' + Date.now();
+      var lang = localStorage.getItem('noddy_lang') || 'zh';
+      if (lang !== 'zh' && lang !== 'en' && lang !== 'ko') lang = 'zh';
+      var url = './noddy-care-manual-' + lang + '.html?v=v0427&t=' + Date.now();
       window.open(url, '_blank');
     }
     window.openHelpCenter = openHelpCenter;
